@@ -2,6 +2,7 @@ import { t, pick } from '../lib/i18n.js';
 import { normalize } from '../lib/analyze.js';
 import AdditiveList from './AdditiveList.jsx';
 import ProductHeader from './ProductHeader.jsx';
+import { IngredientsText, ShareButton, AddProductLinks } from './ResultExtras.jsx';
 
 const VERDICT_ICON = { bad: '✕', warn: '!', ok: '✓', unknown: '?' };
 
@@ -106,7 +107,7 @@ export function NovaCard({ lang, processing, nutriscore }) {
 
 export function AvoidHits({ lang, hits }) {
   return (
-    <section className="card">
+    <section className="card" id="avoid-hits" tabIndex={-1}>
       <h3 className="card-title">{t(lang, 'avoidTitle')}</h3>
       {hits.length === 0 ? (
         <p className="muted">{t(lang, 'avoidNone')}</p>
@@ -129,10 +130,13 @@ export function AvoidHits({ lang, hits }) {
   );
 }
 
-export default function Result({ lang, result, typeAuto, product, barcode, fromPhoto, onBack }) {
+export default function Result({
+  lang, result, text, typeAuto, product, barcode, fromPhoto, onBack, backLabel = 'back', notify,
+}) {
   const food = isFood(result);
   return (
     <div className="result">
+      <h1 className="sr-only page-title" tabIndex={-1}>{product?.name || t(lang, 'verdict_' + result.verdict)}</h1>
       <ProductHeader lang={lang} product={product} barcode={barcode} />
       <TypeBadge lang={lang} type={result.productType} auto={typeAuto} source={product?.source} />
       {fromPhoto && (
@@ -146,8 +150,13 @@ export default function Result({ lang, result, typeAuto, product, barcode, fromP
       {food && <NovaCard lang={lang} processing={result.processing} nutriscore={result.nutriscore} />}
       <AvoidHits lang={lang} hits={result.avoidHits} />
       <AdditiveList lang={lang} additives={result.items} grouped={!food} />
+      <IngredientsText lang={lang} text={text} result={result} />
+      {barcode && !product && <AddProductLinks lang={lang} code={barcode} type={result.productType} />}
+      <div className="actions result-actions">
+        <ShareButton lang={lang} result={result} product={product} barcode={barcode} text={text} notify={notify} />
+      </div>
       <button type="button" className="btn primary block" onClick={onBack}>
-        {t(lang, 'back')}
+        {t(lang, backLabel)}
       </button>
     </div>
   );

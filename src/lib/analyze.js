@@ -3,7 +3,7 @@
  * and in Node (tests).
  */
 import { ADDITIVES, ADDITIVES_BY_CODE } from '../data/additives.js';
-import { AVOID_PRESETS, defaultAvoidState } from '../data/avoidPresets.js';
+import { AVOID_PRESETS, defaultAvoidState, normalizeCustomEntry } from '../data/avoidPresets.js';
 import { NONFOOD_INGREDIENTS, NONFOOD_BY_CODE } from '../data/nonFoodIngredients.js';
 import { PRODUCT_TYPE_BY_ID } from '../data/productCategories.js';
 
@@ -398,7 +398,7 @@ function resolveAvoidState(avoidState) {
   if (!avoidState) return def;
   return {
     presets: { ...def.presets, ...(avoidState.presets || {}) },
-    custom: Array.isArray(avoidState.custom) ? avoidState.custom.filter((s) => s && s.trim()) : [],
+    custom: Array.isArray(avoidState.custom) ? avoidState.custom.map(normalizeCustomEntry).filter(Boolean) : [],
   };
 }
 
@@ -422,9 +422,12 @@ export function findAvoidHits(text, avoidState, found = [], productType = 'food'
     }
     if (matches.length) hits.push({ id: preset.id, label: preset.label, matches });
   }
-  for (const term of state.custom) {
-    const matches = matchTerms(text, [term.trim()]);
-    if (matches.length) hits.push({ id: 'custom:' + term.trim(), label: { en: term.trim(), ro: term.trim() }, matches });
+  // Custom entries: alternative spellings ("soia / soy"), limited to their product types.
+  for (const entry of state.custom) {
+    if (!entry.types.includes(productType)) continue;
+    const matches = matchTerms(text, entry.terms);
+    const label = entry.terms.join(' / ');
+    if (matches.length) hits.push({ id: 'custom:' + entry.id, label: { en: label, ro: label }, matches, custom: true });
   }
   return hits;
 }

@@ -227,7 +227,7 @@ describe('avoid-list matching', () => {
 
   test('custom terms are matched with word boundaries', () => {
     const hits = findAvoidHits('lapte praf, arahide', { presets: {}, custom: ['arahide', 'lapte'] });
-    assert.deepEqual(hits.map((h) => h.id), ['custom:arahide', 'custom:lapte']);
+    assert.deepEqual(hits.map((h) => h.id), ['custom:c-arahide', 'custom:c-lapte']); // older plain-string entries still work
     assert.deepEqual(findAvoidHits('laptele', { presets: {}, custom: ['lapte'] }), []);
   });
 });

@@ -164,7 +164,25 @@ export function presetsForType(type = 'food') {
 
 export const AVOID_PRESETS_BY_ID = Object.fromEntries(AVOID_PRESETS.map((p) => [p.id, p]));
 
-/** Default avoid state: { presets: { [id]: boolean }, custom: string[] } */
+const ALL_TYPES = ['food', 'cosmetic', 'household'];
+
+/**
+ * Custom avoid entry: { id, terms: string[], types: string[] }.
+ * "soia / soy" → terms ['soia', 'soy']. Plain strings (older format) are
+ * accepted and apply to every product type. Returns null if nothing usable.
+ */
+export function normalizeCustomEntry(entry) {
+  const raw = typeof entry === 'string' ? { terms: entry } : entry;
+  if (!raw || typeof raw !== 'object') return null;
+  const list = Array.isArray(raw.terms) ? raw.terms : String(raw.terms ?? raw.label ?? '').split('/');
+  const terms = [...new Set(list.map((t) => String(t).replace(/\s+/g, ' ').trim()).filter(Boolean))].slice(0, 12);
+  if (!terms.length) return null;
+  const types = Array.isArray(raw.types) ? ALL_TYPES.filter((t) => raw.types.includes(t)) : [...ALL_TYPES];
+  const id = typeof raw.id === 'string' && raw.id ? raw.id : `c-${terms[0].toLowerCase().replace(/[^a-z0-9]+/gi, '-')}`;
+  return { id, terms, types: types.length ? types : [...ALL_TYPES] };
+}
+
+/** Default avoid state: { presets: { [id]: boolean }, custom: CustomEntry[] } */
 export function defaultAvoidState() {
   return {
     presets: Object.fromEntries(AVOID_PRESETS.map((p) => [p.id, p.defaultOn])),

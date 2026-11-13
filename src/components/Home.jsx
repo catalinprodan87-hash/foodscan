@@ -7,12 +7,12 @@ import PhotoButton from './PhotoButton.jsx';
 
 /** Home: scan (main action) → manual barcode / photo → paste ingredients. */
 export default function Home({
-  lang, type, typeAuto, onType, onScan, onCode, onPhoto, text, onText, onAnalyze, avoid, onAvoid,
+  lang, type, typeAuto, onType, onScan, onCode, onPhoto, text, onText, onAnalyze, avoid, onAvoid, onEditList,
 }) {
   return (
     <>
       <section className="card scan-card">
-        <h2 className="card-title">{t(lang, 'homeTitle')}</h2>
+        <h1 className="card-title page-title">{t(lang, 'homeTitle')}</h1>
         <p className="muted small">{t(lang, 'homeHint')}</p>
         <TypeSelector lang={lang} value={type} auto={typeAuto} onChange={onType} />
         <button type="button" className="btn primary scan-btn" onClick={onScan}>
@@ -30,7 +30,7 @@ export default function Home({
         <BarcodeEntry lang={lang} onCode={onCode} />
       </section>
       <IngredientInput lang={lang} value={text} onChange={onText} onAnalyze={onAnalyze} type={type} />
-      <AvoidSettings lang={lang} state={avoid} onChange={onAvoid} type={type} />
+      <AvoidSettings lang={lang} state={avoid} onChange={onAvoid} type={type} onEditList={onEditList} />
     </>
   );
 }

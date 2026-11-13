@@ -1,15 +1,23 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { readFileSync } from 'node:fs';
+
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
 export default defineConfig({
   // Relative base so the build works from any sub-path (GitHub Pages: /<repo>/).
   base: './',
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
+  },
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      // 'prompt': a new version waits until the user taps "Reîncarcă" (no reload mid-scan).
+      registerType: 'prompt',
+      injectRegister: false, // registered in src/lib/pwa.js
       includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
       manifest: {
         name: 'IngrediScan',
@@ -30,6 +38,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
+        clientsClaim: true, // the first install controls the page at once (OCR caching)
         // The OCR engine (~9 MB) is not precached: it downloads on first use.
         globIgnores: ['ocr/**'],
         runtimeCaching: [

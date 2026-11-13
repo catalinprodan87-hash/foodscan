@@ -2,7 +2,7 @@
 
 Installable web app (PWA) that checks supermarket product ingredients and flags risky additives and ingredients you want to avoid, for **food**, **cosmetics** and **household cleaning products**. Interface in **Romanian** and **English**.
 
-> **Phase 3 of 4 – reading ingredients from a photo.** Scan or type a barcode, photograph the ingredients list (on-device OCR), or paste it — for food, cosmetics and household cleaners.
+> **v1.0 (phase 4 of 4).** Scan or type a barcode, photograph the ingredients list (on-device OCR), or paste it — for food, cosmetics and household cleaners. Scan history, an editable avoid list, install & update prompts.
 
 **Live:** https://catalinprodan87-hash.github.io/foodscan/
 
@@ -48,6 +48,15 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Review screen:** photo thumbnail, editable text, "Analizează" / "Fă altă poză"; a tip (closer, flat label, good light, no glare) when confidence is under 55 % or the text is very short. The result is labelled "citit din fotografie".
 - **Product type:** the barcode lookup's type, else the user's choice, else detected from the text (`buildRequest()` in `src/lib/request.js`).
 
+### History, avoid list, install & polish (phase 4)
+
+- **Istoric** (`src/lib/history.js`): every analysis is saved on the phone (IndexedDB, localStorage fallback): barcode, name, brand, image URL, product type, source (barcode / photo / paste), ingredients text, database fields (NOVA, Nutri-Score, additive tags, link), verdict, date. Last 200 kept; the same barcode (or the same text and type) replaces the older entry. Search by name / brand / barcode, filter by type and verdict. Opening an entry re-runs `analyze()` with the **current** avoid list, and the list's verdict icons follow it too. Swipe left or long-press to delete (with undo); "Șterge tot" asks first.
+- **Lista mea** (`src/lib/avoidList.js`): presets grouped by product type with the types each applies to; custom entries with alternative spellings ("soia / soy") limited to chosen product types; edit / delete; "would flag N from your history" previews; export / import as JSON (`ingrediscan-avoid-list`, version 1). Older saved lists (plain strings) are upgraded automatically.
+- **Install & updates:** "Instalează aplicația" button from `beforeinstallprompt` (hidden once installed); a one-time Share → Add to Home Screen hint on iPhone; service worker in **prompt** mode – a new deploy shows "Versiune nouă disponibilă — Reîncarcă" instead of reloading mid-scan (checked hourly while open).
+- **Result:** ingredients text with flagged words highlighted by level (tap → jumps to and opens the explanation); "Distribuie" via the Web Share API, falling back to copying a text summary; "Adaugă produsul în Open … Facts" for barcodes the databases don't know.
+- **Polish:** first-run slides (what it does, disclaimer, camera note), "Despre" page (sources, regulations cited, database review dates in `src/data/meta.js`, version), dark mode following the system with WCAG AA contrast checked by a test, offline banner, error boundary with "Reîncarcă", skip link, focus moved to each new screen's heading, labelled controls.
+- **First load:** about 114 KB gzipped (HTML 0.5 + CSS 5.7 + JS 107: React ≈ 45, ingredient databases ≈ 33, translations ≈ 10, engine ≈ 9). Scanner (118 KB), OCR (≈ 8 MB, first photo only), History / List / About / first-run screens (≈ 2 KB each) load on demand.
+
 ### Barcode lookup sources
 
 `src/data/productCategories.js` keeps one Open \*Facts source per product type. All three use the same API format, `GET {source}/api/v2/product/{barcode}.json?fields=…`:
@@ -73,6 +82,14 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 │   ├── styles.css             # Plain CSS, teal theme, light/dark
 │   ├── components/
 │   │   ├── Header.jsx         # Logo + RO/EN switch
+│   │   ├── TabBar.jsx         # Scanează / Istoric / Lista mea / Despre
+│   │   ├── HistoryView.jsx    # History list, search, filters, swipe / long-press delete
+│   │   ├── AvoidListView.jsx  # Presets per type, custom entries, export / import
+│   │   ├── AboutView.jsx      # Sources, regulations, review dates, disclaimer
+│   │   ├── Onboarding.jsx     # First-run slides
+│   │   ├── Banners.jsx        # Update, offline, install (Android / iPhone), toast
+│   │   ├── ResultExtras.jsx   # Highlighted ingredients, share, add-product links
+│   │   ├── ErrorBoundary.jsx
 │   │   ├── Home.jsx           # Scan button (main action), manual barcode, photo, paste
 │   │   ├── TypeSelector.jsx   # Alimente / Cosmetice / Curățenie selector (+ back to auto)
 │   │   ├── BarcodeEntry.jsx   # Manual barcode + read from a photo
@@ -90,6 +107,7 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 │   ├── data/
 │   │   ├── additives.js       # E-number database (food)
 │   │   ├── nonFoodIngredients.js # Cosmetic + household ingredient database
+│   │   ├── meta.js            # Data sources, regulations, database review dates
 │   │   ├── productCategories.js  # Product types, categories, Open *Facts sources
 │   │   └── avoidPresets.js    # Avoid-list presets (RO + EN terms, codes, types)
 │   └── lib/
@@ -101,6 +119,10 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 │       ├── ocrText.js         # Ingredients section extraction + OCR text cleaning
 │       ├── imagePrep.js       # EXIF, crop, downscale, grayscale, contrast
 │       ├── request.js         # What to analyse (paste / photo / barcode), product type
+│       ├── history.js         # Scan history (IndexedDB / localStorage)
+│       ├── avoidList.js       # Custom entries, export / import, previews
+│       ├── share.js           # Share summary, add-product links, highlighting
+│       ├── install.js, installPrompt.js, pwa.js, hooks.js  # install / update / online
 │       ├── i18n.js            # Strings, t(), detectLang()
 │       └── storage.js         # localStorage helpers (language, avoid list)
 ├── tests/
@@ -108,7 +130,8 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 │   ├── nonfood.test.js        # non-food database checks
 │   ├── producttype.test.js    # productType routing, auto-detection, non-food presets
 │   ├── lookup.test.js         # lookup routing (mocked fetch), field mapping, barcodes, camera errors
-│   └── ocr.test.js            # label text extraction, merge into barcode results, mocked tesseract, preprocessing
+│   ├── ocr.test.js            # label text extraction, merge into barcode results, mocked tesseract, preprocessing
+│   └── phase4.test.js         # history, avoid list import/export & per-type entries, highlighting, share, install, contrast
 └── .github/workflows/deploy.yml  # Build + deploy to GitHub Pages on push to main
 ```
 

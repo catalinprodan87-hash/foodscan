@@ -1,5 +1,5 @@
 /** Small, failure-tolerant wrapper around localStorage. */
-import { defaultAvoidState, AVOID_PRESETS } from '../data/avoidPresets.js';
+import { sanitizeAvoidState } from './avoidList.js';
 import { LANGS } from './i18n.js';
 
 const PREFIX = 'ingrediscan:';
@@ -39,19 +39,20 @@ export function setLang(lang) {
   if (LANGS.includes(lang)) save('lang', lang);
 }
 
-/** Saved avoid state merged with defaults (new presets get their default value). */
+/** Saved avoid state, cleaned and merged with defaults (older formats upgraded). */
 export function getAvoidState() {
-  const def = defaultAvoidState();
-  const saved = load('avoid', null);
-  if (!saved || typeof saved !== 'object') return def;
-  const presets = { ...def.presets };
-  for (const p of AVOID_PRESETS) {
-    if (typeof saved.presets?.[p.id] === 'boolean') presets[p.id] = saved.presets[p.id];
-  }
-  const custom = Array.isArray(saved.custom) ? saved.custom.filter((s) => typeof s === 'string') : [];
-  return { presets, custom };
+  return sanitizeAvoidState(load('avoid', null));
 }
 
 export function setAvoidState(state) {
   save('avoid', state);
+}
+
+/** One-time flags: first-run slides seen, iPhone install hint dismissed. */
+export function getFlag(name) {
+  return load('flag:' + name, false) === true;
+}
+
+export function setFlag(name, value = true) {
+  save('flag:' + name, !!value);
 }

@@ -2,7 +2,7 @@ import { presetsForType } from '../data/avoidPresets.js';
 import { t, pick } from '../lib/i18n.js';
 
 /** Avoid-list toggles; only the presets relevant to the current product type are shown. */
-export default function AvoidSettings({ lang, state, onChange, type = 'food' }) {
+export default function AvoidSettings({ lang, state, onChange, type = 'food', onEditList }) {
   const presets = presetsForType(type);
   const toggle = (id) => {
     onChange({ ...state, presets: { ...state.presets, [id]: !state.presets[id] } });
@@ -29,6 +29,9 @@ export default function AvoidSettings({ lang, state, onChange, type = 'food' }) 
           </li>
         ))}
       </ul>
+      {onEditList && (
+        <button type="button" className="link-btn" onClick={onEditList}>{t(lang, 'editList')} →</button>
+      )}
     </details>
   );
 }

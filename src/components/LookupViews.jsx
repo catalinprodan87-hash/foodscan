@@ -4,6 +4,7 @@ import ProductHeader from './ProductHeader.jsx';
 import { NovaCard } from './Result.jsx';
 import AdditiveList from './AdditiveList.jsx';
 import PhotoButton from './PhotoButton.jsx';
+import { AddProductLinks } from './ResultExtras.jsx';
 
 export function LookupLoading({ lang, code, onCancel }) {
   return (
@@ -43,7 +44,7 @@ export function PastePrompt({ lang, onAnalyze, onPhoto, placeholderKey = 'inputP
   );
 }
 
-export function NotFound({ lang, code, onAnalyze, onPhoto, onBack }) {
+export function NotFound({ lang, code, type = 'food', onAnalyze, onPhoto, onBack }) {
   return (
     <div className="result">
       <section className="card notice">
@@ -52,6 +53,7 @@ export function NotFound({ lang, code, onAnalyze, onPhoto, onBack }) {
         <PhotoButton lang={lang} onPhoto={onPhoto} className="btn primary block" />
         <PastePrompt lang={lang} onAnalyze={onAnalyze} />
       </section>
+      <AddProductLinks lang={lang} code={code} type={type} />
       <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, 'back')}</button>
     </div>
   );

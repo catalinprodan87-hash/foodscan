@@ -1,5 +1,6 @@
 import { t, pick } from '../lib/i18n.js';
 import { NONFOOD_CATEGORIES } from '../data/nonFoodIngredients.js';
+import { itemDomId } from '../lib/share.js';
 
 const LEVEL_RANK = { high: 0, medium: 1, low: 2, unknown: 3, none: 4 };
 
@@ -10,7 +11,7 @@ function RiskPill({ lang, level }) {
 function AdditiveItem({ lang, item, showCode }) {
   const name = item.name ? pick(item.name, lang) : t(lang, 'unknownAdditive');
   return (
-    <li className={`additive additive-${item.level}`}>
+    <li className={`additive additive-${item.level}`} id={itemDomId(item.code)}>
       <details>
         <summary>
           {showCode && <span className="code">{item.code}</span>}
