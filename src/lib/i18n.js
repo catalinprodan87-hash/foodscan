@@ -67,6 +67,47 @@ const STRINGS = {
 
     disclaimer: 'For information only, not medical advice. All additives sold in the EU are approved and considered safe at permitted levels; ratings here show which ones deserve extra attention.',
     footerSources: 'Sources: EFSA, EU Regulation 1333/2008, IARC, US FDA.',
+
+    // product types
+    productType: 'Product type',
+    type_food: 'Food',
+    type_cosmetic: 'Cosmetics',
+    type_household: 'Cleaning',
+    typeAuto: 'detected automatically',
+    typeChosen: 'chosen by you',
+    inputPlaceholder_cosmetic: 'e.g. Aqua, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Glycerin, Parfum, Methylisothiazolinone, Limonene…',
+    inputPlaceholder_household: 'e.g. 5-15% anionic surfactants, <5% non-ionic surfactants, phosphonates, enzymes, perfumes, Benzisothiazolinone…',
+
+    // non-food results
+    itemsTitle: 'Ingredients found',
+    itemsNone: 'No ingredients from our database were found.',
+    reason_high_nonfood: '{count} high-concern ingredient(s)',
+    reason_medium_nonfood: '{count} ingredient(s) worth limiting',
+    verdict_warn_nonfood: 'Use with care',
+    verdictSub_bad_nonfood: 'Contains ingredients that are banned, restricted or strong allergens.',
+    verdictSub_warn_nonfood: 'Some ingredients deserve a closer look, especially for sensitive skin or allergies.',
+    verdictSub_ok_nonfood: 'No high- or medium-concern ingredients or items from your avoid list were found.',
+    safety_neverMix_title: 'Never mix',
+    safety_neverMix: 'This product contains chlorine bleach ({chlorine}) together with {partners}. Chlorine and acids release chlorine gas; chlorine and ammonia release chloramine gas. Both are toxic. Never combine it with other cleaners, and ventilate the room.',
+
+    group_preservative: 'Preservatives',
+    group_fragrance: 'Fragrance & fragrance allergens',
+    'group_uv-filter': 'UV filters',
+    group_surfactant: 'Surfactants & cleansers',
+    group_silicone: 'Silicones',
+    group_colorant: 'Colorants',
+    'group_hair-dye': 'Hair-dye ingredients',
+    group_antimicrobial: 'Antimicrobials',
+    group_solvent: 'Solvents',
+    group_bleach: 'Bleaches',
+    group_caustic: 'Caustic / alkaline agents',
+    group_acid: 'Acids',
+    group_polymer: 'Synthetic polymers',
+    'group_skin-active': 'Skin-active ingredients',
+    group_other: 'Other ingredients',
+
+    disclaimer_nonfood: 'For information only, not medical advice. Cosmetics sold in the EU must comply with Regulation (EC) 1223/2009 and detergents with Regulation (EC) 648/2004; ratings here show which ingredients deserve extra attention, e.g. for allergies or sensitive skin.',
+    footerSources_nonfood: 'Sources: EU Cosmetics Regulation 1223/2009, Detergents Regulation 648/2004, REACH, CLP, SCCS, IARC.',
   },
   ro: {
     appName: 'IngrediScan',
@@ -132,6 +173,47 @@ const STRINGS = {
 
     disclaimer: 'Doar în scop informativ, nu reprezintă sfat medical. Toți aditivii comercializați în UE sunt aprobați și considerați siguri la nivelurile permise; evaluările de aici arată care merită o atenție sporită.',
     footerSources: 'Surse: EFSA, Regulamentul UE 1333/2008, IARC, FDA (SUA).',
+
+    // tipuri de produs
+    productType: 'Tip produs',
+    type_food: 'Alimente',
+    type_cosmetic: 'Cosmetice',
+    type_household: 'Curățenie',
+    typeAuto: 'detectat automat',
+    typeChosen: 'ales de tine',
+    inputPlaceholder_cosmetic: 'ex. Aqua, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Glycerin, Parfum, Methylisothiazolinone, Limonene…',
+    inputPlaceholder_household: 'ex. 5-15% agenți de suprafață anionici, <5% agenți de suprafață neionici, fosfonați, enzime, parfumuri, Benzisothiazolinone…',
+
+    // rezultate non-alimentare
+    itemsTitle: 'Ingrediente identificate',
+    itemsNone: 'Nu am găsit ingrediente din baza noastră de date.',
+    reason_high_nonfood: '{count} ingredient(e) cu risc ridicat',
+    reason_medium_nonfood: '{count} ingredient(e) de limitat',
+    verdict_warn_nonfood: 'Folosește cu grijă',
+    verdictSub_bad_nonfood: 'Conține ingrediente interzise, restricționate sau alergeni puternici.',
+    verdictSub_warn_nonfood: 'Unele ingrediente merită o privire mai atentă, mai ales pentru pielea sensibilă sau alergii.',
+    verdictSub_ok_nonfood: 'Nu am găsit ingrediente cu risc ridicat sau mediu ori din lista ta de evitat.',
+    safety_neverMix_title: 'Nu amesteca niciodată',
+    safety_neverMix: 'Produsul conține înălbitor pe bază de clor ({chlorine}) împreună cu {partners}. Clorul cu acizii eliberează clor gazos, iar clorul cu amoniacul eliberează cloramine. Ambele sunt toxice. Nu-l combina cu alte produse de curățat și aerisește încăperea.',
+
+    group_preservative: 'Conservanți',
+    group_fragrance: 'Parfum și alergeni din parfum',
+    'group_uv-filter': 'Filtre UV',
+    group_surfactant: 'Agenți de spălare (surfactanți)',
+    group_silicone: 'Siliconi',
+    group_colorant: 'Coloranți',
+    'group_hair-dye': 'Ingrediente pentru vopsea de păr',
+    group_antimicrobial: 'Antimicrobiene',
+    group_solvent: 'Solvenți',
+    group_bleach: 'Înălbitori',
+    group_caustic: 'Agenți caustici / alcalini',
+    group_acid: 'Acizi',
+    group_polymer: 'Polimeri sintetici',
+    'group_skin-active': 'Ingrediente active pentru piele',
+    group_other: 'Alte ingrediente',
+
+    disclaimer_nonfood: 'Doar în scop informativ, nu reprezintă sfat medical. Cosmeticele vândute în UE trebuie să respecte Regulamentul (CE) 1223/2009, iar detergenții Regulamentul (CE) 648/2004; evaluările de aici arată ce ingrediente merită atenție sporită, de ex. în caz de alergii sau piele sensibilă.',
+    footerSources_nonfood: 'Surse: Regulamentul UE privind cosmeticele 1223/2009, Regulamentul privind detergenții 648/2004, REACH, CLP, SCCS, IARC.',
   },
 };
 

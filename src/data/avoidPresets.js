@@ -1,3 +1,5 @@
+import { NONFOOD_INGREDIENTS } from './nonFoodIngredients.js';
+
 /**
  * Avoid-list presets. Each preset is matched against the normalised
  * ingredients text (lowercase, no diacritics) with whole-word boundaries.
@@ -8,11 +10,15 @@
  *            also matches "amidon de porumb modificat").
  *   codes  – optional E-numbers that also count as a hit (e.g. modified
  *            starches E14xx for the "modified starch" preset).
+ *   types  – product types the preset applies to (food | cosmetic | household).
+ *            The UI only shows, and analyze() only checks, presets for the
+ *            current product type.
  *   defaultOn – whether the preset is enabled for new users.
  */
 export const AVOID_PRESETS = [
   {
     id: 'palm',
+    types: ['food'],
     defaultOn: true,
     label: { en: 'Palm oil', ro: 'Ulei de palmier' },
     terms: [
@@ -25,6 +31,7 @@ export const AVOID_PRESETS = [
   },
   {
     id: 'gfs',
+    types: ['food'],
     defaultOn: true,
     label: { en: 'Glucose-fructose syrup', ro: 'Sirop de glucoză-fructoză' },
     terms: [
@@ -36,6 +43,7 @@ export const AVOID_PRESETS = [
   },
   {
     id: 'hydrogenated',
+    types: ['food'],
     defaultOn: true,
     label: { en: 'Hydrogenated fats', ro: 'Grăsimi hidrogenate' },
     terms: [
@@ -45,6 +53,7 @@ export const AVOID_PRESETS = [
   },
   {
     id: 'sugar',
+    types: ['food'],
     defaultOn: false,
     label: { en: 'Added sugars', ro: 'Zaharuri adăugate' },
     terms: [
@@ -57,6 +66,7 @@ export const AVOID_PRESETS = [
   },
   {
     id: 'flavourings',
+    types: ['food'],
     defaultOn: false,
     label: { en: 'Flavourings', ro: 'Arome' },
     terms: [
@@ -66,12 +76,14 @@ export const AVOID_PRESETS = [
   },
   {
     id: 'maltodextrin',
+    types: ['food'],
     defaultOn: false,
     label: { en: 'Maltodextrin', ro: 'Maltodextrină' },
     terms: ['maltodextrina', 'maltodextrine', 'maltodextrin', 'maltodextrins'],
   },
   {
     id: 'modstarch',
+    types: ['food'],
     defaultOn: false,
     label: { en: 'Modified starch', ro: 'Amidon modificat' },
     terms: [
@@ -80,7 +92,75 @@ export const AVOID_PRESETS = [
     ],
     codes: ['E1404', 'E1410', 'E1412', 'E1413', 'E1414', 'E1420', 'E1422', 'E1440', 'E1442', 'E1450', 'E1451', 'E1452'],
   },
+
+  // ───────────────── Non-food presets (cosmetics & household) ─────────────────
+  // Matched by item code from nonFoodIngredients.js, all off by default.
+  {
+    id: 'fragrance',
+    types: ['cosmetic', 'household'],
+    defaultOn: false,
+    label: { en: 'Fragrance / Parfum', ro: 'Parfum / arome parfumate' },
+    terms: [],
+    codes: nonFoodCodes((x) => x.code === 'PARFUM' || x.category === 'fragrance'),
+  },
+  {
+    id: 'sulfates',
+    types: ['cosmetic', 'household'],
+    defaultOn: false,
+    label: { en: 'Sulfates (SLS, SLES, ALS)', ro: 'Sulfați (SLS, SLES, ALS)' },
+    terms: [],
+    codes: ['SLS', 'SLES', 'ALS'],
+  },
+  {
+    id: 'parabens',
+    types: ['cosmetic'],
+    defaultOn: false,
+    label: { en: 'Parabens', ro: 'Parabeni' },
+    terms: [],
+    codes: nonFoodCodes((x) => x.code.endsWith('PARABEN')),
+  },
+  {
+    id: 'silicones',
+    types: ['cosmetic', 'household'],
+    defaultOn: false,
+    label: { en: 'Silicones (D4, D5, D6, dimethicone)', ro: 'Siliconi (D4, D5, D6, dimeticonă)' },
+    terms: [],
+    codes: ['D4', 'D5', 'D6', 'DIMETHICONE'],
+  },
+  {
+    id: 'formaldehyde',
+    types: ['cosmetic', 'household'],
+    defaultOn: false,
+    label: { en: 'Formaldehyde releasers', ro: 'Eliberatori de formaldehidă' },
+    terms: [],
+    codes: ['FORMALDEHYDE', 'DMDM-H', 'IMID-U', 'DIAZ-U', 'SHMG', 'BRONOPOL', 'QUAT-15'],
+  },
+  {
+    id: 'isothiazolinones',
+    types: ['cosmetic', 'household'],
+    defaultOn: false,
+    label: { en: 'Isothiazolinones (MIT, MCI/MI, BIT, OIT)', ro: 'Izotiazolinone (MIT, MCI/MI, BIT, OIT)' },
+    terms: [],
+    codes: ['MIT', 'MCI/MI', 'BIT', 'OIT'],
+  },
+  {
+    id: 'microplastics',
+    types: ['cosmetic', 'household'],
+    defaultOn: false,
+    label: { en: 'Microplastics & PFAS', ro: 'Microplastice și PFAS' },
+    terms: [],
+    codes: ['PE', 'PFAS'],
+  },
 ];
+
+function nonFoodCodes(filter) {
+  return NONFOOD_INGREDIENTS.filter(filter).map((x) => x.code);
+}
+
+/** Presets that apply to a product type ('food' | 'cosmetic' | 'household'). */
+export function presetsForType(type = 'food') {
+  return AVOID_PRESETS.filter((p) => p.types.includes(type));
+}
 
 export const AVOID_PRESETS_BY_ID = Object.fromEntries(AVOID_PRESETS.map((p) => [p.id, p]));
 

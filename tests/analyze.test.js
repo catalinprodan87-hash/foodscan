@@ -198,10 +198,10 @@ describe('avoid-list matching', () => {
     for (const id of ['sugar', 'flavourings', 'maltodextrin', 'modstarch']) assert.equal(def.presets[id], false);
   });
 
-  test('every preset has RO and EN labels and terms', () => {
+  test('every preset has RO and EN labels and terms or codes', () => {
     for (const p of AVOID_PRESETS) {
       assert.ok(p.label.en && p.label.ro, p.id);
-      assert.ok(p.terms.length > 1, p.id);
+      assert.ok(p.terms.length > 1 || p.codes?.length > 0, p.id);
     }
   });
 

@@ -4,22 +4,49 @@ import AdditiveList from './AdditiveList.jsx';
 
 const VERDICT_ICON = { bad: '✕', warn: '!', ok: '✓', unknown: '?' };
 
-function reasonText(lang, r) {
+const isFood = (result) => result.productType === 'food';
+
+function reasonText(lang, r, food) {
   if (r.type === 'nutriscore') return t(lang, 'reason_nutriscore', { grade: r.grade.toUpperCase() });
-  return t(lang, 'reason_' + r.type, { count: r.count });
+  const suffix = !food && (r.type === 'high' || r.type === 'medium') ? '_nonfood' : '';
+  return t(lang, 'reason_' + r.type + suffix, { count: r.count });
+}
+
+export function TypeBadge({ lang, type, auto }) {
+  return (
+    <p className={`type-badge type-${type}`}>
+      <span className="type-badge-label">{t(lang, 'type_' + type)}</span>
+      <span className="muted small">{t(lang, auto ? 'typeAuto' : 'typeChosen')}</span>
+    </p>
+  );
+}
+
+export function SafetyTips({ lang, tips }) {
+  if (!tips?.length) return null;
+  return tips.map((tip) => (
+    <section key={tip.type} className="safety-tip" role="alert">
+      <h3>⚠ {t(lang, 'safety_' + tip.type + '_title')}</h3>
+      <p>
+        {t(lang, 'safety_' + tip.type, { chlorine: tip.chlorine.join(', '), partners: tip.partners.join(', ') })}
+      </p>
+    </section>
+  ));
 }
 
 export function VerdictBanner({ lang, result }) {
   const v = result.verdict;
+  const food = isFood(result);
+  const sub = !food && v !== 'unknown' ? `verdictSub_${v}_nonfood` : 'verdictSub_' + v;
+  const title = !food && v === 'warn' ? 'verdict_warn_nonfood' : 'verdict_' + v;
   return (
     <section className={`verdict verdict-${v}`} aria-live="polite">
       <div className="verdict-icon" aria-hidden="true">{VERDICT_ICON[v]}</div>
       <div>
-        <h2>{t(lang, 'verdict_' + v)}</h2>
-        <p>{t(lang, 'verdictSub_' + v)}</p>
+        <h2>{t(lang, title)}</h2>
+        <p>{t(lang, sub)}</p>
         {result.reasons.length > 0 && (
           <ul className="reasons">
-            {result.reasons.map((r) => <li key={r.type}>{reasonText(lang, r)}</li>)}
+            {result.reasons.map((r) => <li key={r.type}>{reasonText(lang, r, food)}</li>)}
           </ul>
         )}
       </div>
@@ -78,13 +105,16 @@ export function AvoidHits({ lang, hits }) {
   );
 }
 
-export default function Result({ lang, result, onBack }) {
+export default function Result({ lang, result, typeAuto, onBack }) {
+  const food = isFood(result);
   return (
     <div className="result">
+      <TypeBadge lang={lang} type={result.productType} auto={typeAuto} />
       <VerdictBanner lang={lang} result={result} />
-      <NovaCard lang={lang} processing={result.processing} />
+      <SafetyTips lang={lang} tips={result.safetyTips} />
+      {food && <NovaCard lang={lang} processing={result.processing} />}
       <AvoidHits lang={lang} hits={result.avoidHits} />
-      <AdditiveList lang={lang} additives={result.additives} />
+      <AdditiveList lang={lang} additives={result.items} grouped={!food} />
       <button type="button" className="btn primary block" onClick={onBack}>
         {t(lang, 'back')}
       </button>

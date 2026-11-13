@@ -4,6 +4,10 @@
  */
 import { ADDITIVES, ADDITIVES_BY_CODE } from '../data/additives.js';
 import { AVOID_PRESETS, defaultAvoidState } from '../data/avoidPresets.js';
+import { NONFOOD_INGREDIENTS, NONFOOD_BY_CODE } from '../data/nonFoodIngredients.js';
+import { PRODUCT_TYPE_BY_ID } from '../data/productCategories.js';
+
+export const PRODUCT_TYPES = ['food', 'cosmetic', 'household'];
 
 // ───────────────────────────── Normalisation ─────────────────────────────
 
@@ -175,16 +179,18 @@ export function resolveOffTag(tag) {
 
 // ──────────────────────────── Name matching ──────────────────────────────
 
+/** Compiles every alias of every entry into { code, alias, caps, re }. */
+function buildAliasIndex(entries) {
+  const index = [];
+  for (const entry of entries) {
+    for (const alias of entry.aliases) index.push({ code: entry.code, alias, ...compileTerm(alias) });
+  }
+  return index;
+}
+
 let aliasIndex = null;
 function getAliasIndex() {
-  if (!aliasIndex) {
-    aliasIndex = [];
-    for (const add of ADDITIVES) {
-      for (const alias of add.aliases) {
-        aliasIndex.push({ code: add.code, alias, ...compileTerm(alias) });
-      }
-    }
-  }
+  if (!aliasIndex) aliasIndex = buildAliasIndex(ADDITIVES);
   return aliasIndex;
 }
 
@@ -206,17 +212,135 @@ function pickLongest(cands) {
  * @returns {{code: string, text: string, index: number}[]}
  */
 export function findAdditiveNames(text) {
+  return matchAliasIndex(text, getAliasIndex());
+}
+
+/** Shared matcher: all aliases, longest non-overlapping match wins. */
+function matchAliasIndex(text, index) {
   if (!text) return [];
   const norm = normalize(text);
   const cased = stripDiacritics(text);
   const cands = [];
-  for (const entry of getAliasIndex()) {
+  for (const entry of index) {
     const hay = entry.caps ? cased : norm;
     for (const m of execAll(entry.re, hay)) {
       cands.push({ code: entry.code, start: m.index, end: m.index + m[0].length });
     }
   }
   return pickLongest(cands).map((c) => ({ code: c.code, text: String(text).slice(c.start, c.end), index: c.start }));
+}
+
+// ───────────────────────── Non-food (cosmetic / household) ───────────────
+
+/** Database domains for a non-food product type, taken from productCategories.js. */
+export function domainsForType(type) {
+  const db = PRODUCT_TYPE_BY_ID[type]?.db || [];
+  return db.filter((d) => d.startsWith('nonfood:')).map((d) => d.slice('nonfood:'.length));
+}
+
+const nonFoodIndexCache = new Map();
+function getNonFoodIndex(type) {
+  let index = nonFoodIndexCache.get(type);
+  if (!index) {
+    const domains = domainsForType(type);
+    index = buildAliasIndex(NONFOOD_INGREDIENTS.filter((x) => domains.includes(x.domain)));
+    nonFoodIndexCache.set(type, index);
+  }
+  return index;
+}
+
+/**
+ * Finds cosmetic or household ingredients by INCI / common name, with the same
+ * longest-match-wins rule as findAdditiveNames().
+ * cosmetic → domains cosmetic + both; household → household + both.
+ * @returns {{code: string, text: string, index: number}[]}
+ */
+export function findNonFoodItems(text, type) {
+  if (type !== 'cosmetic' && type !== 'household') return [];
+  return matchAliasIndex(text, getNonFoodIndex(type));
+}
+
+// ─────────────────────────── Product type detection ──────────────────────
+
+/*
+ * Signals with weights. Strong signals (2) are almost never seen on food
+ * labels; weak ones (1) need company.
+ */
+const COSMETIC_SIGNALS = [
+  [2, ['aqua', 'parfum', 'INCI', 'aqua/water', 'water/aqua']],
+  [1, ['glycerin', 'cetearyl alcohol', 'cetyl alcohol', 'butylene glycol', 'propylene glycol',
+    'phenoxyethanol', 'tocopheryl acetate', 'sodium laureth sulfate', 'sodium lauryl sulfate',
+    'cocamidopropyl betaine', 'dimethicone', 'limonene', 'linalool', 'panthenol', 'allantoin',
+    'caprylic/capric triglyceride', 'ethylhexylglycerin', 'disodium edta', 'tetrasodium edta',
+    'butyrospermum parkii', 'cyclopentasiloxane', 'polysorbate 20', 'carbomer']],
+];
+const HOUSEHOLD_SIGNALS = [
+  [2, ['agenti de suprafata', 'agent de suprafata', 'agenti tensioactivi', 'fosfonati', 'inalbitori',
+    'inalbitor', 'hipoclorit', 'agenti de albire optica', 'surfactants', 'surfactant',
+    'phosphonates', 'bleaching agents', 'optical brighteners', 'hypochlorite', 'zeoliti', 'zeolites',
+    'policarboxilati', 'polycarboxylates']],
+];
+/* EU Detergents Regulation 648/2004 percentage bands: "<5%", "5-15%", "15-30%", "30% sau mai mult". */
+const DETERGENT_BAND_RE = /(?:<|≤|sub)\s?5\s?%|(?<![0-9])(?:5\s?-\s?15|15\s?-\s?30)\s?%|30\s?%\s?(?:sau mai mult|or more)/i;
+/* "CI 77891", "C.I. 19140" – INCI colour index numbers. */
+const COLOUR_INDEX_RE = /(?<![A-Za-z0-9])C\.?\s?I\.?\s?[1-7]\d{4}(?![0-9])/;
+
+function signalScore(text, groups) {
+  let score = 0;
+  const hits = [];
+  for (const [weight, terms] of groups) {
+    const found = matchTerms(text, terms);
+    if (found.length) {
+      score += weight * found.length;
+      hits.push(...found);
+    }
+  }
+  return { score, hits };
+}
+
+/**
+ * Guesses the product type from the ingredients text:
+ * INCI signals (Aqua, Parfum, Glycerin, CI 7xxxx…) → 'cosmetic';
+ * detergent signals (agenți de suprafață, fosfonați, înălbitori, hipoclorit,
+ * Reg. 648/2004 % bands) → 'household'; otherwise 'food'.
+ */
+export function detectProductType(text) {
+  if (!text || !text.trim()) return 'food';
+  const cos = signalScore(text, COSMETIC_SIGNALS);
+  if (COLOUR_INDEX_RE.test(text)) cos.score += 2;
+  const hh = signalScore(text, HOUSEHOLD_SIGNALS);
+  if (DETERGENT_BAND_RE.test(text)) hh.score += 1;
+  // E-numbers are a strong food signal.
+  const food = findECodes(text).length * 2;
+
+  if (hh.score >= 2 && hh.score >= cos.score && hh.score > food) return 'household';
+  if (cos.score >= 2 && cos.score > food) return 'cosmetic';
+  return 'food';
+}
+
+// ───────────────────────── Household safety tips ─────────────────────────
+
+const CHLORINE_CODES = ['HYPOCHLORITE', 'DCCNA'];
+const AMMONIA_CODES = ['AMMONIA'];
+/* Acids in the database have category 'acid'; these common ones are not in it. */
+const EXTRA_ACID_TERMS = [
+  'acid citric', 'citric acid', 'acid lactic', 'lactic acid', 'acid acetic', 'acetic acid',
+  'otet', 'vinegar', 'acid oxalic', 'oxalic acid', 'acid glicolic', 'glycolic acid',
+];
+
+/**
+ * "Never mix" tip when a household product contains chlorine bleach together
+ * with an acid or ammonia (toxic chlorine / chloramine gas).
+ */
+function householdSafetyTips(text, items) {
+  const chlorine = items.filter((x) => CHLORINE_CODES.includes(x.code)).map((x) => x.matches[0]);
+  if (!chlorine.length) return [];
+  const partners = items
+    .filter((x) => x.category === 'acid' || AMMONIA_CODES.includes(x.code))
+    .map((x) => x.matches[0]);
+  partners.push(...matchTerms(text, EXTRA_ACID_TERMS));
+  if (!partners.length) return [];
+  return [{ type: 'neverMix', chlorine, partners: [...new Set(partners)] }];
 }
 
 // ─────────────────────────────── Avoid list ──────────────────────────────
@@ -274,17 +398,20 @@ function resolveAvoidState(avoidState) {
 /**
  * @param {string} text
  * @param {object} avoidState { presets: {id: bool}, custom: string[] }
- * @param {string[]} additiveCodes codes already found (for presets with `codes`)
+ * @param {(string|{code: string, matches?: string[]})[]} found codes or items
+ *        already found (for presets with `codes`)
+ * @param {string} [productType] only presets for this type are checked
  * @returns {{id: string, label: {en, ro}, matches: string[]}[]}
  */
-export function findAvoidHits(text, avoidState, additiveCodes = []) {
+export function findAvoidHits(text, avoidState, found = [], productType = 'food') {
   const state = resolveAvoidState(avoidState);
+  const byCode = new Map(found.map((f) => (typeof f === 'string' ? [f, f] : [f.code, f.matches?.[0] || f.code])));
   const hits = [];
   for (const preset of AVOID_PRESETS) {
-    if (!state.presets[preset.id]) continue;
+    if (!preset.types.includes(productType) || !state.presets[preset.id]) continue;
     const matches = matchTerms(text, preset.terms);
     for (const code of preset.codes || []) {
-      if (additiveCodes.includes(code)) matches.push(code);
+      if (byCode.has(code) && !matches.includes(byCode.get(code))) matches.push(byCode.get(code));
     }
     if (matches.length) hits.push({ id: preset.id, label: preset.label, matches });
   }
@@ -383,12 +510,75 @@ function codeSortKey(code) {
   return m ? Number(m[1]) * 10 + (m[2] ? m[2].charCodeAt(0) - 96 : 0) : 99999;
 }
 
+function countLevels(items) {
+  const counts = { high: 0, medium: 0, low: 0, none: 0, unknown: 0, total: items.length };
+  for (const x of items) counts[x.level]++;
+  return counts;
+}
+
 /**
- * @param {{text?: string, additiveTags?: string[], nova?: number|null, nutriscore?: string|null}} input
+ * Cosmetic / household analysis: INCI / label-name matching only, no
+ * E-numbers, NOVA or Nutri-Score.
+ * Verdict: any high → bad; any medium or avoid-list hit → warn; else ok.
+ */
+function analyzeNonFood(text, productType, avoidState) {
+  const items = [];
+  const byCode = new Map();
+  for (const m of findNonFoodItems(text, productType)) {
+    let item = byCode.get(m.code);
+    if (!item) {
+      const db = NONFOOD_BY_CODE[m.code];
+      item = {
+        code: m.code, category: db.category, level: db.level, name: db.name, why: db.why,
+        domain: db.domain, known: true, matchedBy: ['name'], matches: [], index: m.index,
+      };
+      byCode.set(m.code, item);
+      items.push(item);
+    }
+    if (!item.matches.includes(m.text)) item.matches.push(m.text);
+  }
+  items.sort((x, y) => LEVEL_RANK[x.level] - LEVEL_RANK[y.level] || x.index - y.index);
+
+  const avoidHits = findAvoidHits(text, avoidState, items, productType);
+  const counts = countLevels(items);
+
+  const reasons = [];
+  if (counts.high) reasons.push({ type: 'high', count: counts.high });
+  if (avoidHits.length) reasons.push({ type: 'avoid', count: avoidHits.length });
+  if (counts.medium) reasons.push({ type: 'medium', count: counts.medium });
+
+  let verdict;
+  if (!text.trim()) verdict = 'unknown';
+  else if (counts.high) verdict = 'bad';
+  else if (counts.medium || avoidHits.length) verdict = 'warn';
+  else verdict = 'ok';
+
+  return {
+    productType,
+    verdict,
+    reasons,
+    items,
+    additives: [],
+    avoidHits,
+    processing: null,
+    nutriscore: null,
+    counts,
+    safetyTips: productType === 'household' ? householdSafetyTips(text, items) : [],
+  };
+}
+
+/**
+ * @param {{text?: string, productType?: 'food'|'cosmetic'|'household', additiveTags?: string[],
+ *          nova?: number|null, nutriscore?: string|null}} input
  * @param {object} [avoidState] { presets: {id: bool}, custom: string[] }
+ * @returns result with the same shape for every product type; `items` holds
+ *          the matched entries (for food it is the same array as `additives`).
  */
 export function analyze(input = {}, avoidState) {
   const text = input.text ? String(input.text) : '';
+  const productType = PRODUCT_TYPES.includes(input.productType) ? input.productType : 'food';
+  if (productType !== 'food') return analyzeNonFood(text, productType, avoidState);
+
   const tags = Array.isArray(input.additiveTags) ? input.additiveTags : [];
 
   // 1. Collect additives from E-codes, names and OFF tags.
@@ -418,7 +608,7 @@ export function analyze(input = {}, avoidState) {
   );
 
   // 2. Avoid list.
-  const avoidHits = findAvoidHits(text, avoidState, additives.map((x) => x.code));
+  const avoidHits = findAvoidHits(text, avoidState, additives.map((x) => x.code), 'food');
 
   // 3. Processing level.
   const dbNova = Number(input.nova);
@@ -431,8 +621,7 @@ export function analyze(input = {}, avoidState) {
   }
 
   // 4. Counts.
-  const counts = { high: 0, medium: 0, low: 0, none: 0, unknown: 0, total: additives.length };
-  for (const x of additives) counts[x.level]++;
+  const counts = countLevels(additives);
 
   // 5. Verdict.
   const nutriscore = typeof input.nutriscore === 'string' && /^[a-e]$/i.test(input.nutriscore.trim())
@@ -453,5 +642,7 @@ export function analyze(input = {}, avoidState) {
   else if (counts.medium || processing.nova === 4 || nutriscore === 'd' || nutriscore === 'e') verdict = 'warn';
   else verdict = 'ok';
 
-  return { verdict, reasons, additives, avoidHits, processing, nutriscore, counts };
+  return {
+    productType, verdict, reasons, items: additives, additives, avoidHits, processing, nutriscore, counts, safetyTips: [],
+  };
 }
