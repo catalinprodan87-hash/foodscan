@@ -1,0 +1,36 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
+
+export default defineConfig({
+  // Relative base so the build works from any sub-path (GitHub Pages: /<repo>/).
+  base: './',
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
+      manifest: {
+        name: 'IngrediScan',
+        short_name: 'IngrediScan',
+        description: 'Flags risky additives and ingredients in supermarket products (RO/EN).',
+        lang: 'ro',
+        start_url: './',
+        scope: './',
+        display: 'standalone',
+        orientation: 'portrait',
+        background_color: '#f0fdfa',
+        theme_color: '#0f766e',
+        icons: [
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
+      },
+    }),
+  ],
+});
