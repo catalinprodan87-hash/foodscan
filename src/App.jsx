@@ -6,17 +6,21 @@ import Disclaimer from './components/Disclaimer.jsx';
 import { LookupLoading, NotFound, NoIngredients, LookupFailed } from './components/LookupViews.jsx';
 import { analyze, detectProductType } from './lib/analyze.js';
 import { lookupProduct, analyzeInput } from './lib/lookup.js';
+import { buildRequest } from './lib/request.js';
 import { detectLang } from './lib/i18n.js';
 import { getLang, setLang as saveLang, getAvoidState, setAvoidState } from './lib/storage.js';
 
 // The scanner (and the zxing decoder) is only downloaded when it is opened.
 const ScannerOverlay = lazy(() => import('./components/ScannerOverlay.jsx'));
+// Photo → OCR flow (tesseract itself is a further dynamic import inside it).
+const PhotoFlow = lazy(() => import('./components/PhotoFlow.jsx'));
 
 /*
  * Screens:
  *   home                          – scan / manual barcode / paste
  *   lookup: loading | not_found | error | no_ingredients
- *   result                        – analysis (pasted text or looked-up product)
+ *   photo                         – crop → on-device OCR → review (optionally for a barcode)
+ *   result                        – analysis (pasted text, photo or looked-up product)
  * The scanner is an overlay on top of home.
  */
 export default function App() {
@@ -26,8 +30,10 @@ export default function App() {
   const [chosenType, setChosenType] = useState(null); // null = auto
   const [scanning, setScanning] = useState(false);
   const [lookup, setLookup] = useState(null); // { status, code, product?, kind? }
-  // What is being analysed: { text, type, auto, product?, barcode? }
+  // What is being analysed: see buildRequest() in lib/request.js
   const [submitted, setSubmitted] = useState(null);
+  // Photo being read: { file, product, barcode }
+  const [photo, setPhoto] = useState(null);
   const abortRef = useRef(null);
 
   useEffect(() => {
@@ -57,6 +63,7 @@ export default function App() {
     abortRef.current?.abort();
     setLookup(null);
     setSubmitted(null);
+    setPhoto(null);
   }, []);
 
   const runLookup = useCallback(async (code) => {
@@ -90,13 +97,30 @@ export default function App() {
 
   const closeScanner = useCallback(() => setScanning(false), []);
 
+  // Barcode context to attach pasted / photographed ingredients to.
+  const lookupContext = () => ({
+    product: lookup?.status === 'no_ingredients' ? lookup.product : null,
+    barcode: lookup?.code || null,
+  });
+
   // Pasted ingredients, optionally attached to a looked-up / not-found barcode.
   const analyzeText = (value) => {
-    const product = lookup?.status === 'no_ingredients' ? lookup.product : null;
-    const barcode = lookup?.code || null;
-    const pastedType = product ? product.productType : chosenType ?? detectProductType(value);
     setLookup(null);
-    setSubmitted({ text: value, type: pastedType, auto: !product && chosenType == null, product, barcode });
+    setSubmitted(buildRequest({ text: value, source: 'paste', chosenType, ...lookupContext() }));
+    scrollTop();
+  };
+
+  // Photo of the ingredients: keeps the barcode context of the current screen.
+  const startPhoto = (file) => {
+    setPhoto((prev) => (prev ? { ...prev, file } : { file, ...lookupContext() }));
+    setLookup(null);
+    setSubmitted(null);
+    scrollTop();
+  };
+  const analyzePhotoText = (value, confidence) => {
+    const { product, barcode } = photo;
+    setPhoto(null);
+    setSubmitted(buildRequest({ text: value, source: 'photo', chosenType, product, barcode, confidence }));
     scrollTop();
   };
 
@@ -114,38 +138,52 @@ export default function App() {
   };
 
   let screen;
-  if (lookup?.status === 'loading') {
+  if (photo) {
+    screen = (
+      <Suspense fallback={<section className="card ocr-progress" aria-busy="true"><div className="spinner" aria-hidden="true" /></section>}>
+        <PhotoFlow
+          lang={lang} file={photo.file} product={photo.product} barcode={photo.barcode}
+          onAnalyze={analyzePhotoText} onRetake={startPhoto} onCancel={goHome}
+        />
+      </Suspense>
+    );
+  } else if (lookup?.status === 'loading') {
     screen = <LookupLoading lang={lang} code={lookup.code} onCancel={goHome} />;
   } else if (lookup?.status === 'not_found') {
-    screen = <NotFound lang={lang} code={lookup.code} onAnalyze={analyzeText} onBack={goHome} />;
+    screen = <NotFound lang={lang} code={lookup.code} onAnalyze={analyzeText} onPhoto={startPhoto} onBack={goHome} />;
   } else if (lookup?.status === 'no_ingredients') {
-    screen = <NoIngredients lang={lang} product={lookup.product} partial={partial} onAnalyze={analyzeText} onBack={goHome} />;
+    screen = (
+      <NoIngredients
+        lang={lang} product={lookup.product} partial={partial}
+        onAnalyze={analyzeText} onPhoto={startPhoto} onBack={goHome}
+      />
+    );
   } else if (lookup?.status === 'error') {
     screen = (
       <LookupFailed
         lang={lang} code={lookup.code} kind={lookup.kind}
-        onRetry={() => runLookup(lookup.code)} onAnalyze={analyzeText} onBack={goHome}
+        onRetry={() => runLookup(lookup.code)} onAnalyze={analyzeText} onPhoto={startPhoto} onBack={goHome}
       />
     );
   } else if (result) {
     screen = (
       <Result
         lang={lang} result={result} typeAuto={submitted.auto}
-        product={submitted.product} barcode={submitted.barcode} onBack={goHome}
+        product={submitted.product} barcode={submitted.barcode} fromPhoto={submitted.fromPhoto} onBack={goHome}
       />
     );
   } else {
     screen = (
       <Home
         lang={lang} type={type} typeAuto={chosenType == null} onType={setChosenType}
-        onScan={() => setScanning(true)} onCode={onCode}
+        onScan={() => setScanning(true)} onCode={onCode} onPhoto={startPhoto}
         text={text} onText={changeText} onAnalyze={analyzeText}
         avoid={avoid} onAvoid={changeAvoid}
       />
     );
   }
 
-  const footerType = result?.productType || lookup?.product?.productType || type;
+  const footerType = result?.productType || lookup?.product?.productType || photo?.product?.productType || type;
 
   return (
     <div className="app">

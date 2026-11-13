@@ -3,10 +3,11 @@ import TypeSelector from './TypeSelector.jsx';
 import BarcodeEntry from './BarcodeEntry.jsx';
 import IngredientInput from './IngredientInput.jsx';
 import AvoidSettings from './AvoidSettings.jsx';
+import PhotoButton from './PhotoButton.jsx';
 
 /** Home: scan (main action) → manual barcode / photo → paste ingredients. */
 export default function Home({
-  lang, type, typeAuto, onType, onScan, onCode, text, onText, onAnalyze, avoid, onAvoid,
+  lang, type, typeAuto, onType, onScan, onCode, onPhoto, text, onText, onAnalyze, avoid, onAvoid,
 }) {
   return (
     <>
@@ -23,6 +24,8 @@ export default function Home({
           </span>
           {t(lang, 'scanButton')}
         </button>
+        <PhotoButton lang={lang} onPhoto={onPhoto} className="btn photo-main-btn" />
+        <p className="muted small privacy-note">🔒 {t(lang, 'photoPrivacy')}</p>
         <div className="divider"><span>{t(lang, 'or')}</span></div>
         <BarcodeEntry lang={lang} onCode={onCode} />
       </section>

@@ -9,6 +9,7 @@
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { BarcodeFormat, DecodeHintType } from '@zxing/library';
 import { SCAN_FORMATS, CAMERA_CONSTRAINTS, vibrate } from './camera.js';
+import { loadImage } from './imagePrep.js';
 
 const MAX_PHOTO_SIDE = 1600;
 
@@ -59,23 +60,6 @@ export function startCameraScan(videoEl, onDetect, onError) {
       stopControls();
     },
   };
-}
-
-async function loadImage(file) {
-  if (typeof createImageBitmap === 'function') {
-    try {
-      return await createImageBitmap(file, { imageOrientation: 'from-image' });
-    } catch { /* fall back to <img> */ }
-  }
-  const url = URL.createObjectURL(file);
-  try {
-    const img = new Image();
-    img.src = url;
-    await img.decode();
-    return img;
-  } finally {
-    URL.revokeObjectURL(url);
-  }
 }
 
 /** Draws the image scaled down to MAX_PHOTO_SIDE and rotated by `angle` (0 or 90). */

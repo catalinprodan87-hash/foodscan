@@ -30,7 +30,19 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
+        // The OCR engine (~9 MB) is not precached: it downloads on first use.
+        globIgnores: ['ocr/**'],
         runtimeCaching: [
+          {
+            // Self-hosted OCR engine + language data: download once, then offline.
+            urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.includes('/ocr/') && !url.pathname.endsWith('manifest.json'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'ocr-engine',
+              expiration: { maxEntries: 20, maxAgeSeconds: 90 * 24 * 60 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
           {
             // Product lookups from Open Food / Beauty / Products Facts:
             // fresh data when online, last known answer when offline.

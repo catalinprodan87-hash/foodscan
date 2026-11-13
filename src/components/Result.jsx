@@ -129,12 +129,18 @@ export function AvoidHits({ lang, hits }) {
   );
 }
 
-export default function Result({ lang, result, typeAuto, product, barcode, onBack }) {
+export default function Result({ lang, result, typeAuto, product, barcode, fromPhoto, onBack }) {
   const food = isFood(result);
   return (
     <div className="result">
       <ProductHeader lang={lang} product={product} barcode={barcode} />
       <TypeBadge lang={lang} type={result.productType} auto={typeAuto} source={product?.source} />
+      {fromPhoto && (
+        <p className="photo-label" title={t(lang, 'readFromPhotoHint')}>
+          <span className="photo-chip">📷 {t(lang, 'readFromPhoto')}</span>
+          <span className="muted small">{t(lang, 'readFromPhotoHint')}</span>
+        </p>
+      )}
       <VerdictBanner lang={lang} result={result} />
       <SafetyTips lang={lang} tips={result.safetyTips} />
       {food && <NovaCard lang={lang} processing={result.processing} nutriscore={result.nutriscore} />}

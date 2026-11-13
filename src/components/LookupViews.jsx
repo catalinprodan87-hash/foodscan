@@ -3,6 +3,7 @@ import { t } from '../lib/i18n.js';
 import ProductHeader from './ProductHeader.jsx';
 import { NovaCard } from './Result.jsx';
 import AdditiveList from './AdditiveList.jsx';
+import PhotoButton from './PhotoButton.jsx';
 
 export function LookupLoading({ lang, code, onCancel }) {
   return (
@@ -17,7 +18,7 @@ export function LookupLoading({ lang, code, onCancel }) {
 }
 
 /** "Paste the ingredients" prompt used when a lookup has no ingredients list. */
-export function PastePrompt({ lang, onAnalyze, placeholderKey = 'inputPlaceholder' }) {
+export function PastePrompt({ lang, onAnalyze, onPhoto, placeholderKey = 'inputPlaceholder' }) {
   const [text, setText] = useState('');
   return (
     <form
@@ -37,18 +38,18 @@ export function PastePrompt({ lang, onAnalyze, placeholderKey = 'inputPlaceholde
         spellCheck={false}
         autoCapitalize="off"
       />
-      <p className="muted small">{t(lang, 'photoOcrSoon')}</p>
       <button type="submit" className="btn primary" disabled={!text.trim()}>{t(lang, 'analyze')}</button>
     </form>
   );
 }
 
-export function NotFound({ lang, code, onAnalyze, onBack }) {
+export function NotFound({ lang, code, onAnalyze, onPhoto, onBack }) {
   return (
     <div className="result">
       <section className="card notice">
         <h2 className="card-title">🔍 {t(lang, 'notFoundTitle')}</h2>
         <p>{t(lang, 'notFoundText', { code })}</p>
+        <PhotoButton lang={lang} onPhoto={onPhoto} className="btn primary block" />
         <PastePrompt lang={lang} onAnalyze={onAnalyze} />
       </section>
       <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, 'back')}</button>
@@ -57,7 +58,7 @@ export function NotFound({ lang, code, onAnalyze, onBack }) {
 }
 
 /** Product found but without ingredients: show what is available + paste prompt. */
-export function NoIngredients({ lang, product, partial, onAnalyze, onBack }) {
+export function NoIngredients({ lang, product, partial, onAnalyze, onPhoto, onBack }) {
   const food = product.productType === 'food';
   const placeholderKey = food ? 'inputPlaceholder' : 'inputPlaceholder_' + product.productType;
   return (
@@ -66,6 +67,7 @@ export function NoIngredients({ lang, product, partial, onAnalyze, onBack }) {
       <section className="card notice">
         <h2 className="card-title">📝 {t(lang, 'noIngredientsTitle')}</h2>
         <p>{t(lang, 'noIngredientsText', { source: product.source })}</p>
+        <PhotoButton lang={lang} onPhoto={onPhoto} className="btn primary block" />
         <PastePrompt lang={lang} onAnalyze={onAnalyze} placeholderKey={placeholderKey} />
       </section>
       {food && partial && (product.nova || product.nutriscore) && (
@@ -79,7 +81,7 @@ export function NoIngredients({ lang, product, partial, onAnalyze, onBack }) {
   );
 }
 
-export function LookupFailed({ lang, code, kind, onRetry, onAnalyze, onBack }) {
+export function LookupFailed({ lang, code, kind, onRetry, onAnalyze, onPhoto, onBack }) {
   return (
     <div className="result">
       <section className="card notice notice-error" role="alert">
@@ -89,6 +91,7 @@ export function LookupFailed({ lang, code, kind, onRetry, onAnalyze, onBack }) {
         <button type="button" className="btn primary" onClick={onRetry}>{t(lang, 'retry')}</button>
       </section>
       <section className="card">
+        <PhotoButton lang={lang} onPhoto={onPhoto} className="btn ghost block" />
         <PastePrompt lang={lang} onAnalyze={onAnalyze} />
       </section>
       <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, 'back')}</button>

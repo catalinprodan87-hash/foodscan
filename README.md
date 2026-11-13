@@ -2,7 +2,7 @@
 
 Installable web app (PWA) that checks supermarket product ingredients and flags risky additives and ingredients you want to avoid, for **food**, **cosmetics** and **household cleaning products**. Interface in **Romanian** and **English**.
 
-> **Phase 2 of 4 – barcode scanning and product lookup.** Scan or type a barcode, or paste an ingredients list, for food, cosmetics and household cleaners. Reading ingredients from a photo (OCR) comes in phase 3.
+> **Phase 3 of 4 – reading ingredients from a photo.** Scan or type a barcode, photograph the ingredients list (on-device OCR), or paste it — for food, cosmetics and household cleaners.
 
 **Live:** https://catalinprodan87-hash.github.io/foodscan/
 
@@ -38,6 +38,16 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Offline:** Open \*Facts API responses are cached by the service worker (NetworkFirst, 14 days, 300 entries).
 - **Known library issue:** `@zxing/browser` 0.2.1's `TRY_HARDER` rotation pass is broken (`HTMLCanvasElementLuminanceSource.rotate` keeps the old width/height), so it is not used; photos are rotated by the app instead.
 
+### Photo of the ingredients – on-device OCR (phase 3)
+
+- **Entry points:** "Fotografiază ingredientele" on the home screen (`capture=environment`), and on the barcode screens "Produs negăsit" / "Lipsește lista de ingrediente" / lookup error, where the text is attached to that barcode (name, image and database scores are kept).
+- **Preprocessing** (`src/lib/imagePrep.js`): EXIF orientation applied on decode, optional crop (draggable, resizable box – or skip), long side downscaled to 2000 px, grayscale and a 2–98 % contrast stretch.
+- **OCR** (`src/lib/ocr.js`): tesseract.js 5 in a Web Worker, languages `ron` + `eng`, LSTM engine; page layout "single block" for a cropped box, automatic otherwise. tesseract.js is a dynamic import, loaded only when a photo is taken. **The photo never leaves the phone.**
+- **Self-hosted engine:** `scripts/copy-ocr-assets.mjs` (runs before `dev` / `build`) copies the worker, both LSTM WASM cores (SIMD and plain) and the `ron`/`eng` language data (`4.0.0_best_int`) from npm into `public/ocr/` (git-ignored). No third-party CDN. A device downloads about 8 MB once (one core + two languages) with a real progress bar ("Descarc cititorul de text (doar prima dată)…"); the service worker keeps it (CacheFirst, 90 days) so later photos work offline. The OCR files are excluded from the precache.
+- **Text extraction** (`src/lib/ocrText.js`): starts at `Ingrediente:` / `Compoziție:` (preferred), `Ingredients:`, `INCI:`, or `Conține:` (detergents); stops before "Poate conține", storage / usage / producer text, the nutrition table (`Valori nutriționale`, `kJ`/`kcal` lines), hazard codes (H319, P102, EUH208), and other languages' blocks (`HU:`, `Összetevők`, Cyrillic text …). Joins broken lines, undoes end-of-line hyphenation (keeping compounds such as `glucoză-fructoză`), fixes OCR errors in E-codes.
+- **Review screen:** photo thumbnail, editable text, "Analizează" / "Fă altă poză"; a tip (closer, flat label, good light, no glare) when confidence is under 55 % or the text is very short. The result is labelled "citit din fotografie".
+- **Product type:** the barcode lookup's type, else the user's choice, else detected from the text (`buildRequest()` in `src/lib/request.js`).
+
 ### Barcode lookup sources
 
 `src/data/productCategories.js` keeps one Open \*Facts source per product type. All three use the same API format, `GET {source}/api/v2/product/{barcode}.json?fields=…`:
@@ -55,6 +65,8 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 ├── index.html                 # HTML entry
 ├── vite.config.js             # Vite + React + vite-plugin-pwa (base: './')
 ├── public/icons/              # App icons (SVG + PNG for the manifest)
+├── public/ocr/                # Generated: self-hosted OCR engine + language data (git-ignored)
+├── scripts/copy-ocr-assets.mjs
 ├── src/
 │   ├── main.jsx               # React entry
 │   ├── App.jsx                # Screens: input ↔ result
@@ -67,6 +79,9 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 │   │   ├── ScannerOverlay.jsx # Full-screen camera scanner (lazy-loaded)
 │   │   ├── ProductHeader.jsx  # Image, name, brand, barcode, Open … Facts link
 │   │   ├── LookupViews.jsx    # Loading, not found, no ingredients, network error
+│   │   ├── PhotoButton.jsx    # "Fotografiază ingredientele" (camera file input)
+│   │   ├── PhotoFlow.jsx      # Crop → OCR progress → review (lazy-loaded)
+│   │   ├── CropBox.jsx        # Draggable / resizable crop rectangle
 │   │   ├── IngredientInput.jsx
 │   │   ├── AvoidSettings.jsx  # Toggle avoid-list presets (per product type)
 │   │   ├── Result.jsx         # Type badge, verdict, safety tip, NOVA card, avoid hits
@@ -82,13 +97,18 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 │       ├── lookup.js          # Open *Facts lookup, field mapping, barcode helpers
 │       ├── camera.js          # Scan formats, camera constraints, error classification
 │       ├── scanner.js         # zxing camera + photo decoding (lazy-loaded)
+│       ├── ocr.js             # tesseract.js worker, self-hosted assets, download progress
+│       ├── ocrText.js         # Ingredients section extraction + OCR text cleaning
+│       ├── imagePrep.js       # EXIF, crop, downscale, grayscale, contrast
+│       ├── request.js         # What to analyse (paste / photo / barcode), product type
 │       ├── i18n.js            # Strings, t(), detectLang()
 │       └── storage.js         # localStorage helpers (language, avoid list)
 ├── tests/
 │   ├── analyze.test.js        # food engine, i18n, database checks
 │   ├── nonfood.test.js        # non-food database checks
 │   ├── producttype.test.js    # productType routing, auto-detection, non-food presets
-│   └── lookup.test.js         # lookup routing (mocked fetch), field mapping, barcodes, camera errors
+│   ├── lookup.test.js         # lookup routing (mocked fetch), field mapping, barcodes, camera errors
+│   └── ocr.test.js            # label text extraction, merge into barcode results, mocked tesseract, preprocessing
 └── .github/workflows/deploy.yml  # Build + deploy to GitHub Pages on push to main
 ```
 
