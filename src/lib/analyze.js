@@ -329,18 +329,25 @@ const EXTRA_ACID_TERMS = [
 ];
 
 /**
- * "Never mix" tip when a household product contains chlorine bleach together
- * with an acid or ammonia (toxic chlorine / chloramine gas).
+ * Household mixing tips.
+ * - 'neverMix' (strong): chlorine bleach together with an acid or ammonia in
+ *   the same product (toxic chlorine / chloramine gas).
+ * - 'mixCaution': chlorine bleach or ammonia on its own → never mix with other
+ *   cleaners. `kind` is 'chlorine' (warns about acids and ammonia) or
+ *   'ammonia' (warns about chlorine bleach).
  */
 function householdSafetyTips(text, items) {
-  const chlorine = items.filter((x) => CHLORINE_CODES.includes(x.code)).map((x) => x.matches[0]);
-  if (!chlorine.length) return [];
-  const partners = items
-    .filter((x) => x.category === 'acid' || AMMONIA_CODES.includes(x.code))
-    .map((x) => x.matches[0]);
-  partners.push(...matchTerms(text, EXTRA_ACID_TERMS));
-  if (!partners.length) return [];
-  return [{ type: 'neverMix', chlorine, partners: [...new Set(partners)] }];
+  const first = (x) => x.matches[0];
+  const chlorine = items.filter((x) => CHLORINE_CODES.includes(x.code)).map(first);
+  const ammonia = items.filter((x) => AMMONIA_CODES.includes(x.code)).map(first);
+  if (chlorine.length) {
+    const partners = items.filter((x) => x.category === 'acid').map(first);
+    partners.push(...matchTerms(text, EXTRA_ACID_TERMS), ...ammonia);
+    if (partners.length) return [{ type: 'neverMix', chlorine, partners: [...new Set(partners)] }];
+    return [{ type: 'mixCaution', kind: 'chlorine', substances: chlorine }];
+  }
+  if (ammonia.length) return [{ type: 'mixCaution', kind: 'ammonia', substances: ammonia }];
+  return [];
 }
 
 // ─────────────────────────────── Avoid list ──────────────────────────────

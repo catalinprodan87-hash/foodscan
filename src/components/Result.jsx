@@ -1,6 +1,7 @@
 import { t, pick } from '../lib/i18n.js';
 import { normalize } from '../lib/analyze.js';
 import AdditiveList from './AdditiveList.jsx';
+import ProductHeader from './ProductHeader.jsx';
 
 const VERDICT_ICON = { bad: '✕', warn: '!', ok: '✓', unknown: '?' };
 
@@ -12,25 +13,47 @@ function reasonText(lang, r, food) {
   return t(lang, 'reason_' + r.type + suffix, { count: r.count });
 }
 
-export function TypeBadge({ lang, type, auto }) {
+export function TypeBadge({ lang, type, auto, source }) {
+  const note = source ? t(lang, 'fromSource', { source }) : t(lang, auto ? 'typeAuto' : 'typeChosen');
   return (
     <p className={`type-badge type-${type}`}>
       <span className="type-badge-label">{t(lang, 'type_' + type)}</span>
-      <span className="muted small">{t(lang, auto ? 'typeAuto' : 'typeChosen')}</span>
+      <span className="muted small">{note}</span>
     </p>
+  );
+}
+
+const NUTRI_GRADES = ['a', 'b', 'c', 'd', 'e'];
+
+export function NutriScore({ lang, grade }) {
+  return (
+    <div className="nutriscore" role="img" aria-label={`${t(lang, 'nutriscore')} ${grade.toUpperCase()}`}>
+      <span className="nutriscore-label">{t(lang, 'nutriscore')}</span>
+      <span className="nutriscore-scale" aria-hidden="true">
+        {NUTRI_GRADES.map((g) => (
+          <span key={g} className={`ns ns-${g}${g === grade ? ' current' : ''}`}>{g.toUpperCase()}</span>
+        ))}
+      </span>
+    </div>
   );
 }
 
 export function SafetyTips({ lang, tips }) {
   if (!tips?.length) return null;
-  return tips.map((tip) => (
-    <section key={tip.type} className="safety-tip" role="alert">
-      <h3>⚠ {t(lang, 'safety_' + tip.type + '_title')}</h3>
-      <p>
-        {t(lang, 'safety_' + tip.type, { chlorine: tip.chlorine.join(', '), partners: tip.partners.join(', ') })}
-      </p>
-    </section>
-  ));
+  return tips.map((tip) => {
+    const key = tip.type === 'mixCaution' ? `safety_mixCaution_${tip.kind}` : 'safety_' + tip.type;
+    const params = {
+      chlorine: tip.chlorine?.join(', '),
+      partners: tip.partners?.join(', '),
+      substances: tip.substances?.join(', '),
+    };
+    return (
+      <section key={tip.type} className={`safety-tip safety-${tip.type}`} role="alert">
+        <h3>⚠ {t(lang, 'safety_' + tip.type + '_title')}</h3>
+        <p>{t(lang, key, params)}</p>
+      </section>
+    );
+  });
 }
 
 export function VerdictBanner({ lang, result }) {
@@ -54,7 +77,7 @@ export function VerdictBanner({ lang, result }) {
   );
 }
 
-export function NovaCard({ lang, processing }) {
+export function NovaCard({ lang, processing, nutriscore }) {
   const n = processing.nova;
   return (
     <section className="card nova-card">
@@ -76,6 +99,7 @@ export function NovaCard({ lang, processing }) {
           {processing.markers.map((m) => <span key={m} className="chip">{m}</span>)}
         </p>
       )}
+      {nutriscore && <NutriScore lang={lang} grade={nutriscore} />}
     </section>
   );
 }
@@ -105,14 +129,15 @@ export function AvoidHits({ lang, hits }) {
   );
 }
 
-export default function Result({ lang, result, typeAuto, onBack }) {
+export default function Result({ lang, result, typeAuto, product, barcode, onBack }) {
   const food = isFood(result);
   return (
     <div className="result">
-      <TypeBadge lang={lang} type={result.productType} auto={typeAuto} />
+      <ProductHeader lang={lang} product={product} barcode={barcode} />
+      <TypeBadge lang={lang} type={result.productType} auto={typeAuto} source={product?.source} />
       <VerdictBanner lang={lang} result={result} />
       <SafetyTips lang={lang} tips={result.safetyTips} />
-      {food && <NovaCard lang={lang} processing={result.processing} />}
+      {food && <NovaCard lang={lang} processing={result.processing} nutriscore={result.nutriscore} />}
       <AvoidHits lang={lang} hits={result.avoidHits} />
       <AdditiveList lang={lang} additives={result.items} grouped={!food} />
       <button type="button" className="btn primary block" onClick={onBack}>

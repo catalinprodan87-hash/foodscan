@@ -30,6 +30,19 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
+        runtimeCaching: [
+          {
+            // Product lookups from Open Food / Beauty / Products Facts:
+            // fresh data when online, last known answer when offline.
+            urlPattern: /^https:\/\/world\.open(food|beauty|products)facts\.org\/api\/v2\/product\//,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'openfacts-api',
+              expiration: { maxEntries: 300, maxAgeSeconds: 14 * 24 * 60 * 60 },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+        ],
       },
     }),
   ],

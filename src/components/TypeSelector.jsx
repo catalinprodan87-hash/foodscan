@@ -5,7 +5,8 @@ const ICONS = { food: '🍎', cosmetic: '🧴', household: '🧽' };
 
 /**
  * 3-way product type selector (Alimente / Cosmetice / Curățenie).
- * `value` is the effective type; `auto` tells whether it was detected from the text.
+ * `value` is the effective type; `auto` tells whether it was detected (no
+ * explicit choice). onChange(null) returns to auto-detection.
  */
 export default function TypeSelector({ lang, value, auto, onChange }) {
   return (
@@ -16,8 +17,8 @@ export default function TypeSelector({ lang, value, auto, onChange }) {
             key={type}
             type="button"
             role="radio"
-            aria-checked={type === value}
-            className={type === value ? 'active' : ''}
+            aria-checked={!auto && type === value}
+            className={type === value ? (auto ? 'suggested' : 'active') : ''}
             onClick={() => onChange(type)}
           >
             <span aria-hidden="true">{ICONS[type]}</span> {t(lang, 'type_' + type)}
@@ -26,6 +27,14 @@ export default function TypeSelector({ lang, value, auto, onChange }) {
       </div>
       <p className="muted small type-hint">
         {t(lang, 'productType')}: {t(lang, 'type_' + value)} · {t(lang, auto ? 'typeAuto' : 'typeChosen')}
+        {!auto && (
+          <>
+            {' · '}
+            <button type="button" className="link-btn" onClick={() => onChange(null)}>
+              {t(lang, 'typeAutoReset')}
+            </button>
+          </>
+        )}
       </p>
     </div>
   );

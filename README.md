@@ -2,8 +2,7 @@
 
 Installable web app (PWA) that checks supermarket product ingredients and flags risky additives and ingredients you want to avoid, for **food**, **cosmetics** and **household cleaning products**. Interface in **Romanian** and **English**.
 
-> **Phase 1 of 4 – foundation.** Paste an ingredients list and get a verdict. Camera, barcode scanning and OCR come in later phases.
-> Phase 1 has been extended from food-only to three product types: food, cosmetics and household cleaners.
+> **Phase 2 of 4 – barcode scanning and product lookup.** Scan or type a barcode, or paste an ingredients list, for food, cosmetics and household cleaners. Reading ingredients from a photo (OCR) comes in phase 3.
 
 **Live:** https://catalinprodan87-hash.github.io/foodscan/
 
@@ -27,12 +26,21 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 
 - **Auto-detection** (`detectProductType()`): INCI signals (`Aqua`, `Parfum`, `Glycerin`, `CI 7xxxx`…) → cosmetic; detergent signals (`agenți de suprafață`, `fosfonați`, `înălbitori`, `hipoclorit`, Reg. 648/2004 % bands) → household; otherwise food. E-numbers count as a food signal. The user can always override with the 3-way selector on the input screen.
 - **Non-food verdict:** any high-concern ingredient → bad; any medium-concern ingredient or avoid-list hit → warn; otherwise ok. Non-food results hide the NOVA card and group ingredients by category (preservatives, fragrance allergens, UV filters…).
-- **Never-mix tip:** a household product containing chlorine bleach (hypochlorite, dichloroisocyanurate) together with an acid (incl. citric acid, vinegar) or ammonia shows a fixed safety warning.
+- **Never-mix tips:** any household product with chlorine bleach (hypochlorite, dichloroisocyanurate) or ammonia shows "never mix with other cleaners" (for chlorine: especially acids such as descalers, toilet cleaners, vinegar, or ammonia; for ammonia: especially chlorine bleach). If chlorine and an acid or ammonia are in the same product, a stronger red warning is shown instead.
 - **Non-food avoid presets** (all off by default, matched by ingredient code): Fragrance / Parfum, Sulfates (SLS, SLES, ALS), Parabens, Silicones (D4, D5, D6, dimethicone), Formaldehyde releasers, Isothiazolinones (MIT, MCI/MI, BIT, OIT), Microplastics & PFAS. Only presets for the current product type are shown and checked.
 
-### Barcode lookup sources (planned)
+### Barcode scanning and lookup (phase 2)
 
-`src/data/productCategories.js` keeps one Open \*Facts source per product type for the barcode-lookup phase. All three use the same API format, `GET {source}/api/v2/product/{barcode}.json`:
+- **Scanner** (`src/lib/scanner.js`, lazy-loaded with the overlay): `@zxing/browser` + `@zxing/library`, EAN-13 / EAN-8 / UPC-A / UPC-E only, back camera (`facingMode: environment`), full-screen overlay with a scan frame, vibration on detection. The camera stops as soon as a code is read, when the overlay closes (✕, Escape) and when the page goes to the background. UPC-E is expanded to UPC-A before lookup.
+- **Fallbacks:** camera denied / missing / busy / insecure page → RO/EN message with manual entry and "read from a photo" (`decodeImageFile`: tries the photo as-is and rotated 90°, downscaled to 1600 px). Typed codes are checked (8/12/13/14 digits + check digit).
+- **Lookup** (`src/lib/lookup.js`): the chosen product type's database is queried first; with auto or no match, the others follow in the order OFF → OBF → OPF. The database that finds the product (or the product's own `product_type`) sets the product type. Each request has an 8 s `AbortController` timeout; nothing found + any failed request → "error" with a retry button, otherwise "not found".
+- **Results:** product name, brand, quantity, image and barcode, a "View on Open … Facts" link, and the analysis (food also uses `additives_tags`, `nova_group`, `nutriscore_grade`). Not found or no ingredients → prompt to paste the ingredients; the barcode is kept with the analysis.
+- **Offline:** Open \*Facts API responses are cached by the service worker (NetworkFirst, 14 days, 300 entries).
+- **Known library issue:** `@zxing/browser` 0.2.1's `TRY_HARDER` rotation pass is broken (`HTMLCanvasElementLuminanceSource.rotate` keeps the old width/height), so it is not used; photos are rotated by the app instead.
+
+### Barcode lookup sources
+
+`src/data/productCategories.js` keeps one Open \*Facts source per product type. All three use the same API format, `GET {source}/api/v2/product/{barcode}.json?fields=…`:
 
 | Type | Source |
 |---|---|
@@ -53,7 +61,12 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 │   ├── styles.css             # Plain CSS, teal theme, light/dark
 │   ├── components/
 │   │   ├── Header.jsx         # Logo + RO/EN switch
-│   │   ├── TypeSelector.jsx   # Alimente / Cosmetice / Curățenie selector
+│   │   ├── Home.jsx           # Scan button (main action), manual barcode, photo, paste
+│   │   ├── TypeSelector.jsx   # Alimente / Cosmetice / Curățenie selector (+ back to auto)
+│   │   ├── BarcodeEntry.jsx   # Manual barcode + read from a photo
+│   │   ├── ScannerOverlay.jsx # Full-screen camera scanner (lazy-loaded)
+│   │   ├── ProductHeader.jsx  # Image, name, brand, barcode, Open … Facts link
+│   │   ├── LookupViews.jsx    # Loading, not found, no ingredients, network error
 │   │   ├── IngredientInput.jsx
 │   │   ├── AvoidSettings.jsx  # Toggle avoid-list presets (per product type)
 │   │   ├── Result.jsx         # Type badge, verdict, safety tip, NOVA card, avoid hits
@@ -66,12 +79,16 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 │   │   └── avoidPresets.js    # Avoid-list presets (RO + EN terms, codes, types)
 │   └── lib/
 │       ├── analyze.js         # Analysis engine (pure, runs in Node too)
+│       ├── lookup.js          # Open *Facts lookup, field mapping, barcode helpers
+│       ├── camera.js          # Scan formats, camera constraints, error classification
+│       ├── scanner.js         # zxing camera + photo decoding (lazy-loaded)
 │       ├── i18n.js            # Strings, t(), detectLang()
 │       └── storage.js         # localStorage helpers (language, avoid list)
 ├── tests/
 │   ├── analyze.test.js        # food engine, i18n, database checks
 │   ├── nonfood.test.js        # non-food database checks
-│   └── producttype.test.js    # productType routing, auto-detection, non-food presets
+│   ├── producttype.test.js    # productType routing, auto-detection, non-food presets
+│   └── lookup.test.js         # lookup routing (mocked fetch), field mapping, barcodes, camera errors
 └── .github/workflows/deploy.yml  # Build + deploy to GitHub Pages on push to main
 ```
 
@@ -104,7 +121,7 @@ const result = analyze(
 // result.avoidHits    [{ id, label: {en, ro}, matches: [...] }]
 // result.processing   food: { nova: 1-4 | null, source: 'database' | 'estimate' | null, markers: [...] }; non-food: null
 // result.counts       { high, medium, low, none, unknown, total }
-// result.safetyTips   household: [{ type: 'neverMix', chlorine: [...], partners: [...] }]; otherwise []
+// result.safetyTips   household: [{ type: 'neverMix', chlorine, partners }] or [{ type: 'mixCaution', kind: 'chlorine'|'ammonia', substances }]; otherwise []
 ```
 
 Food verdict rules: any high-risk additive or avoid-list hit → **bad**; otherwise any medium additive, NOVA 4 or Nutri-Score D/E → **warn**; otherwise **ok**; no input → **unknown**. Non-food rules are under [Product types](#product-types).

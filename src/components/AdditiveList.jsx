@@ -51,8 +51,8 @@ function groupByCategory(items) {
  * Food: flat list of E-numbers with code column.
  * Cosmetic / household (`grouped`): items grouped by category, no code column.
  */
-export default function AdditiveList({ lang, additives, grouped = false }) {
-  const title = grouped ? t(lang, 'itemsTitle') : t(lang, 'additivesTitle');
+export default function AdditiveList({ lang, additives, grouped = false, title: titleOverride }) {
+  const title = titleOverride || (grouped ? t(lang, 'itemsTitle') : t(lang, 'additivesTitle'));
   const empty = grouped ? t(lang, 'itemsNone') : t(lang, 'additivesNone');
 
   return (

@@ -121,9 +121,29 @@ describe('household safety tip', () => {
     assert.equal(analyze({ text: 'dicloroizocianurat de sodiu, acid citric', productType: 'household' }).safetyTips.length, 1);
   });
 
-  test('chlorine alone, acid alone, or cosmetics → no tip', () => {
-    assert.deepEqual(analyze({ text: BLEACH, productType: 'household' }).safetyTips, []);
+  test('chlorine bleach alone → general "never mix" caution', () => {
+    const r = analyze({ text: BLEACH, productType: 'household' });
+    assert.equal(r.safetyTips.length, 1);
+    assert.equal(r.safetyTips[0].type, 'mixCaution');
+    assert.equal(r.safetyTips[0].kind, 'chlorine');
+    assert.ok(r.safetyTips[0].substances.length > 0);
+    const tabs = analyze({ text: 'sodium dichloroisocyanurate', productType: 'household' });
+    assert.deepEqual(tabs.safetyTips, [{ type: 'mixCaution', kind: 'chlorine', substances: ['sodium dichloroisocyanurate'] }]);
+  });
+
+  test('ammonia alone → caution about chlorine bleach', () => {
+    const r = analyze({ text: 'apă, amoniac, agenți de suprafață neionici', productType: 'household' });
+    assert.deepEqual(r.safetyTips, [{ type: 'mixCaution', kind: 'ammonia', substances: ['amoniac'] }]);
+  });
+
+  test('chlorine + ammonia in the same product → strong never-mix tip', () => {
+    const r = analyze({ text: 'hipoclorit de sodiu, amoniac', productType: 'household' });
+    assert.deepEqual(r.safetyTips, [{ type: 'neverMix', chlorine: ['hipoclorit de sodiu'], partners: ['amoniac'] }]);
+  });
+
+  test('acid alone, other cleaners, or cosmetics → no tip', () => {
     assert.deepEqual(analyze({ text: 'acid clorhidric', productType: 'household' }).safetyTips, []);
+    assert.deepEqual(analyze({ text: DETERGENT, productType: 'household' }).safetyTips, []);
     assert.deepEqual(analyze({ text: 'sodium hypochlorite, citric acid', productType: 'cosmetic' }).safetyTips, []);
   });
 });

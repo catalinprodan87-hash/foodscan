@@ -1,5 +1,4 @@
 import { t } from '../lib/i18n.js';
-import TypeSelector from './TypeSelector.jsx';
 
 const EXAMPLES = {
   food: {
@@ -16,7 +15,7 @@ const EXAMPLES = {
   },
 };
 
-export default function IngredientInput({ lang, value, onChange, onAnalyze, type, typeAuto, onType }) {
+export default function IngredientInput({ lang, value, onChange, onAnalyze, type }) {
   const submit = (e) => {
     e.preventDefault();
     if (value.trim()) onAnalyze(value);
@@ -28,7 +27,6 @@ export default function IngredientInput({ lang, value, onChange, onAnalyze, type
     <form className="card input-card" onSubmit={submit}>
       <label htmlFor="ingredients" className="card-title">{t(lang, 'inputTitle')}</label>
       <p className="muted">{t(lang, 'inputHint')}</p>
-      <TypeSelector lang={lang} value={type} auto={typeAuto} onChange={onType} />
       <textarea
         id="ingredients"
         value={value}
