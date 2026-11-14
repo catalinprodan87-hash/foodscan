@@ -27,7 +27,7 @@ const COMMON_FIELDS = [
   'brands', 'quantity', 'image_front_small_url',
   'ingredients_text_ro', 'ingredients_text', 'ingredients_text_en',
 ];
-const FOOD_FIELDS = ['additives_tags', 'nova_group', 'nutriscore_grade'];
+const FOOD_FIELDS = ['additives_tags', 'nova_group', 'nutriscore_grade', 'nutrient_levels', 'nutriments'];
 
 /** Open *Facts `product_type` values → app product types. */
 const OFF_PRODUCT_TYPES = { food: 'food', petfood: 'food', beauty: 'cosmetic', product: 'household' };
@@ -99,6 +99,34 @@ export function normalizeBarcode(input, format) {
 
 const first = (...values) => values.find((v) => typeof v === 'string' && v.trim())?.trim() ?? '';
 
+const NUTRIENTS = [
+  ['fat', 'fat', 'fat_100g'],
+  ['saturatedFat', 'saturated-fat', 'saturated-fat_100g'],
+  ['sugars', 'sugars', 'sugars_100g'],
+  ['salt', 'salt', 'salt_100g'],
+];
+
+/**
+ * The facts behind a Nutri-Score: Open Food Facts' low / moderate / high
+ * levels and amounts per 100 g for fat, saturated fat, sugars and salt, plus
+ * energy. Null when the database has none of them.
+ * @returns {{kcal: number|null, items: {key, level: string|null, per100: number|null}[]}|null}
+ */
+export function mapNutrition(p) {
+  const levels = p?.nutrient_levels || {};
+  const n = p?.nutriments || {};
+  const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+  const items = NUTRIENTS
+    .map(([key, levelKey, amountKey]) => ({
+      key,
+      level: ['low', 'moderate', 'high'].includes(levels[levelKey]) ? levels[levelKey] : null,
+      per100: num(n[amountKey]),
+    }))
+    .filter((x) => x.level || x.per100 != null);
+  const kcal = num(n['energy-kcal_100g']);
+  return items.length || kcal != null ? { kcal, items } : null;
+}
+
 /** Maps an Open *Facts product to the app's product object. */
 export function mapProduct(raw, type, code) {
   const p = raw || {};
@@ -116,6 +144,7 @@ export function mapProduct(raw, type, code) {
     url: productPageUrl(type, first(p.code, code)),
   };
   if (type === 'food') {
+    product.nutrition = mapNutrition(p);
     product.additiveTags = Array.isArray(p.additives_tags) ? p.additives_tags : [];
     const nova = Number(p.nova_group);
     product.nova = nova >= 1 && nova <= 4 ? nova : null;

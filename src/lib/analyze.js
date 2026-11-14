@@ -6,6 +6,7 @@ import { ADDITIVES, ADDITIVES_BY_CODE } from '../data/additives.js';
 import { AVOID_PRESETS, defaultAvoidState, normalizeCustomEntry } from '../data/avoidPresets.js';
 import { NONFOOD_INGREDIENTS, NONFOOD_BY_CODE } from '../data/nonFoodIngredients.js';
 import { PRODUCT_TYPE_BY_ID } from '../data/productCategories.js';
+import { restrictionsFor } from '../data/restrictions.js';
 
 export const PRODUCT_TYPES = ['food', 'cosmetic', 'household'];
 
@@ -493,22 +494,28 @@ function countIngredients(text) {
  */
 export function estimateNova(text, additives = []) {
   const hasText = !!(text && text.trim());
-  if (!hasText && !additives.length) return { nova: null, markers: [] };
+  const none = { nova: null, markers: [], rule: null, triggers: [] };
+  if (!hasText && !additives.length) return none;
 
   const markers = [];
   for (const add of additives) {
     if (COSMETIC_CATEGORIES.includes(add.category)) markers.push(add.code);
   }
   if (hasText) markers.push(...matchTerms(text, NOVA4_MARKERS));
-  if (markers.length) return { nova: 4, markers };
+  // rule: why this group was chosen; triggers: the ingredients behind it
+  if (markers.length) return { nova: 4, markers, rule: 'markers', triggers: markers };
 
-  if (additives.length) return { nova: 3, markers: [] };
-  if (!hasText) return { nova: null, markers: [] };
+  if (additives.length) return { nova: 3, markers: [], rule: 'additives', triggers: additives.map((x) => x.code) };
+  if (!hasText) return none;
 
   const culinary = matchTerms(text, CULINARY_TERMS);
   const n = countIngredients(text);
-  if (culinary.length) return { nova: n > 1 ? 3 : 2, markers: [] };
-  return { nova: 1, markers: [] };
+  if (culinary.length) {
+    return n > 1
+      ? { nova: 3, markers: [], rule: 'culinary_mixed', triggers: culinary }
+      : { nova: 2, markers: [], rule: 'culinary_single', triggers: culinary };
+  }
+  return { nova: 1, markers: [], rule: 'plain', triggers: [] };
 }
 
 // ───────────────────────────────── analyze ───────────────────────────────
@@ -541,6 +548,7 @@ function analyzeNonFood(text, productType, avoidState) {
       item = {
         code: m.code, category: db.category, level: db.level, name: db.name, why: db.why,
         domain: db.domain, known: true, matchedBy: ['name'], matches: [], index: m.index,
+        restrictions: restrictionsFor(m.code),
       };
       byCode.set(m.code, item);
       items.push(item);
@@ -552,15 +560,18 @@ function analyzeNonFood(text, productType, avoidState) {
   const avoidHits = findAvoidHits(text, avoidState, items, productType);
   const counts = countLevels(items);
 
+  const restrictedElsewhere = items.filter((x) => x.restrictions.length).length;
+
   const reasons = [];
   if (counts.high) reasons.push({ type: 'high', count: counts.high });
   if (avoidHits.length) reasons.push({ type: 'avoid', count: avoidHits.length });
   if (counts.medium) reasons.push({ type: 'medium', count: counts.medium });
+  if (restrictedElsewhere) reasons.push({ type: 'restricted', count: restrictedElsewhere });
 
   let verdict;
   if (!text.trim()) verdict = 'unknown';
   else if (counts.high) verdict = 'bad';
-  else if (counts.medium || avoidHits.length) verdict = 'warn';
+  else if (counts.medium || avoidHits.length || restrictedElsewhere) verdict = 'warn';
   else verdict = 'ok';
 
   return {
@@ -571,8 +582,10 @@ function analyzeNonFood(text, productType, avoidState) {
     additives: [],
     avoidHits,
     processing: null,
+    novaWhy: null,
     nutriscore: null,
     counts,
+    restrictedElsewhere,
     safetyTips: productType === 'household' ? householdSafetyTips(text, items) : [],
   };
 }
@@ -598,8 +611,8 @@ export function analyze(input = {}, avoidState) {
     if (!item) {
       const db = ADDITIVES_BY_CODE[code];
       item = db
-        ? { code, category: db.category, level: db.level, name: db.name, why: db.why, known: true, matchedBy: [], matches: [] }
-        : { code, category: 'other', level: 'unknown', name: null, why: null, known: false, matchedBy: [], matches: [] };
+        ? { code, category: db.category, level: db.level, name: db.name, why: db.why, known: true, matchedBy: [], matches: [], restrictions: restrictionsFor(code) }
+        : { code, category: 'other', level: 'unknown', name: null, why: null, known: false, matchedBy: [], matches: [], restrictions: [] };
       found.set(code, item);
     }
     if (!item.matchedBy.includes(how)) item.matchedBy.push(how);
@@ -622,12 +635,18 @@ export function analyze(input = {}, avoidState) {
 
   // 3. Processing level.
   const dbNova = Number(input.nova);
+  const est = estimateNova(text, additives);
   let processing;
+  // novaWhy: the rule and ingredients behind the NOVA group, for the explanation.
+  let novaWhy;
   if (dbNova >= 1 && dbNova <= 4) {
     processing = { nova: dbNova, source: 'database', markers: [] };
+    // The database value is shown as is; if the ingredients we can see point
+    // to a higher group, say so (e.g. database NOVA 1 but additives listed).
+    novaWhy = { rule: 'database', triggers: [], higherEstimate: est.nova > dbNova ? { nova: est.nova, rule: est.rule, triggers: est.triggers } : null };
   } else {
-    const est = estimateNova(text, additives);
     processing = { nova: est.nova, source: est.nova ? 'estimate' : null, markers: est.markers };
+    novaWhy = est.nova ? { rule: est.rule, triggers: est.triggers, higherEstimate: null } : null;
   }
 
   // 4. Counts.
@@ -639,20 +658,24 @@ export function analyze(input = {}, avoidState) {
     : null;
   const hasInput = !!text.trim() || tags.length > 0 || processing.source === 'database' || !!nutriscore;
 
+  const restrictedElsewhere = additives.filter((x) => x.restrictions.length).length;
+
   const reasons = [];
   if (counts.high) reasons.push({ type: 'high', count: counts.high });
   if (avoidHits.length) reasons.push({ type: 'avoid', count: avoidHits.length });
   if (counts.medium) reasons.push({ type: 'medium', count: counts.medium });
+  if (restrictedElsewhere) reasons.push({ type: 'restricted', count: restrictedElsewhere });
   if (processing.nova === 4) reasons.push({ type: 'nova4' });
   if (nutriscore === 'd' || nutriscore === 'e') reasons.push({ type: 'nutriscore', grade: nutriscore });
 
   let verdict;
   if (!hasInput) verdict = 'unknown';
   else if (counts.high || avoidHits.length) verdict = 'bad';
-  else if (counts.medium || processing.nova === 4 || nutriscore === 'd' || nutriscore === 'e') verdict = 'warn';
+  else if (counts.medium || restrictedElsewhere || processing.nova === 4 || nutriscore === 'd' || nutriscore === 'e') verdict = 'warn';
   else verdict = 'ok';
 
   return {
-    productType, verdict, reasons, items: additives, additives, avoidHits, processing, nutriscore, counts, safetyTips: [],
+    productType, verdict, reasons, items: additives, additives, avoidHits, processing, novaWhy, nutriscore, counts,
+    restrictedElsewhere, safetyTips: [],
   };
 }

@@ -4,6 +4,7 @@
  */
 import { t, pick } from './i18n.js';
 import { sourceFor, SOURCE_NAMES } from './lookup.js';
+import { REGIONS } from '../data/restrictions.js';
 
 /**
  * Open *Facts "add a product" page for a barcode (the site's search-or-add
@@ -43,6 +44,11 @@ export function shareSummary(result, { lang = 'ro', product = null, barcode = nu
   if (flagged.length) {
     const list = flagged.map((x) => `${food ? x.code + ' ' : ''}${pick(x.name, lang)} (${t(lang, 'level_' + x.level)})`);
     lines.push(`${t(lang, food ? 'additivesTitle' : 'itemsTitle')}: ${list.join(', ')}`);
+  }
+  const restricted = result.items.filter((x) => x.restrictions?.length);
+  if (restricted.length) {
+    const list = restricted.map((x) => `${food ? x.code + ' ' : ''}${pick(x.name, lang)} (${[...new Set(x.restrictions.map((r) => pick(REGIONS[r.region], lang)))].join(', ')})`);
+    lines.push(`${t(lang, 'restrictedFlag')}: ${list.join('; ')}`);
   }
   if (result.avoidHits.length) {
     lines.push(`${t(lang, 'avoidTitle')}: ${result.avoidHits.map((h) => pick(h.label, lang)).join(', ')}`);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { t } from '../lib/i18n.js';
 import ProductHeader from './ProductHeader.jsx';
-import { NovaCard } from './Result.jsx';
+import { NovaCard, NutriCard } from './Result.jsx';
 import AdditiveList from './AdditiveList.jsx';
 import PhotoButton from './PhotoButton.jsx';
 import { AddProductLinks } from './ResultExtras.jsx';
@@ -79,9 +79,8 @@ export function NoIngredients({ lang, product, partial, onAnalyze, onPhoto, onBa
         </p>
         <PastePrompt lang={lang} onAnalyze={onAnalyze} placeholderKey={placeholderKey} />
       </section>
-      {food && partial && (product.nova || product.nutriscore) && (
-        <NovaCard lang={lang} processing={partial.processing} nutriscore={partial.nutriscore} />
-      )}
+      {food && partial && product.nova && <NovaCard lang={lang} processing={partial.processing} why={partial.novaWhy} />}
+      {food && partial && <NutriCard lang={lang} grade={partial.nutriscore} nutrition={product.nutrition} />}
       {food && partial && partial.additives.length > 0 && (
         <AdditiveList lang={lang} additives={partial.additives} title={t(lang, 'tagsAdditives')} />
       )}

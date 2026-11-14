@@ -259,8 +259,8 @@ textarea:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; bo
   font-weight: 800;
 }
 .nova-1 { background: #15803d; }
-.nova-2 { background: #a16207; }
-.nova-3 { background: #c2410c; }
+.nova-2 { background: #0f766e; }
+.nova-3 { background: #475569; }
 .nova-4 { background: #b91c1c; }
 .nova-x { background: #64748b; }
 .markers { margin-top: 10px; }
@@ -774,3 +774,41 @@ main:focus { outline: none; }
 .dot.active { width: 22px; border-radius: 999px; background: var(--teal); }
 .error-boundary { margin-top: 24px; }
 
+
+/* ───────────── v1.2: score explanations, restrictions outside the EU ───────────── */
+/* NOVA 2 and 3 use neutral colours: they describe processing, not risk. */
+.nova-scale { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 12px; }
+.nova-step {
+  display: grid; place-items: center; height: 26px; border-radius: 6px;
+  color: #fff; font-weight: 800; font-size: 0.8rem; opacity: 0.3;
+}
+.nova-step.current { opacity: 1; height: 32px; margin-top: -3px; font-size: 1rem; box-shadow: var(--shadow); }
+.score-why { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); }
+.score-why p { margin: 0; }
+.score-note { margin-top: 8px !important; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 0.9rem; }
+.nova-card > .muted.small, .nutri-card > .muted.small { margin: 10px 0 0; }
+.score-details { margin-top: 10px; }
+.score-details summary { cursor: pointer; color: var(--teal); font-weight: 600; font-size: 0.9rem; min-height: 32px; }
+@media (prefers-color-scheme: dark) { .score-details summary { color: #5eead4; } }
+.score-details summary:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.nova-groups { margin: 6px 0 0; padding-left: 22px; font-size: 0.9rem; }
+.nova-groups li { margin: 6px 0; padding: 2px 6px; border-radius: 6px; }
+.nova-groups li.current { background: var(--teal-soft); }
+.nutri-card .nutriscore { margin-top: 6px; }
+.nutrient-list { list-style: none; margin: 6px 0 4px; padding: 0; }
+.nutrient-list li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 5px 0; }
+.nutrient-list li + li { border-top: 1px solid var(--border); }
+
+.restricted-flag { color: var(--medium); font-weight: 700; }
+.restricted-box {
+  margin: 10px 0; padding: 10px 12px; border-radius: 10px;
+  background: var(--medium-bg); border-left: 4px solid var(--medium); color: var(--text);
+}
+.restricted-box p { margin: 0 0 4px; }
+.restricted-box ul { margin: 0; padding-left: 18px; }
+.restricted-box li { margin: 6px 0; }
+.rstatus {
+  display: inline-block; padding: 0 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 700;
+  background: var(--surface); color: var(--medium); border: 1px solid currentColor;
+}
+.rstatus-banned { color: var(--high); }

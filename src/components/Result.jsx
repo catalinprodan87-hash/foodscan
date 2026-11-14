@@ -9,7 +9,7 @@ const VERDICT_ICON = { bad: '✕', warn: '!', ok: '✓', unknown: '?' };
 const isFood = (result) => result.productType === 'food';
 
 function reasonText(lang, r, food) {
-  if (r.type === 'nutriscore') return t(lang, 'reason_nutriscore', { grade: r.grade.toUpperCase() });
+  if (r.type === 'nutriscore') return t(lang, 'reason_nutriscore_long', { grade: r.grade.toUpperCase() });
   const suffix = !food && (r.type === 'high' || r.type === 'medium') ? '_nonfood' : '';
   return t(lang, 'reason_' + r.type + suffix, { count: r.count });
 }
@@ -60,7 +60,10 @@ export function SafetyTips({ lang, tips }) {
 export function VerdictBanner({ lang, result }) {
   const v = result.verdict;
   const food = isFood(result);
-  const sub = !food && v !== 'unknown' ? `verdictSub_${v}_nonfood` : 'verdictSub_' + v;
+  // Caution only because of NOVA 4 / Nutri-Score: say that the ingredients are fine.
+  const profileOnly = food && v === 'warn' && result.reasons.every((r) => r.type === 'nova4' || r.type === 'nutriscore');
+  const sub = profileOnly ? 'verdictSub_warn_profile'
+    : !food && v !== 'unknown' ? `verdictSub_${v}_nonfood` : 'verdictSub_' + v;
   const title = !food && v === 'warn' ? 'verdict_warn_nonfood' : 'verdict_' + v;
   return (
     <section className={`verdict verdict-${v}`} aria-live="polite">
@@ -78,14 +81,17 @@ export function VerdictBanner({ lang, result }) {
   );
 }
 
-export function NovaCard({ lang, processing, nutriscore }) {
+const listOf = (items, max = 8) => (items.length > max ? `${items.slice(0, max).join(', ')}…` : items.join(', '));
+
+/** Processing level (NOVA 1–4) with the reason for this product. */
+export function NovaCard({ lang, processing, why }) {
   const n = processing.nova;
   return (
-    <section className="card nova-card">
+    <section className="card nova-card" aria-labelledby="nova-title">
       <div className="nova-row">
         <div className={`nova-badge nova-${n ?? 'x'}`} aria-hidden="true">{n ?? '?'}</div>
         <div>
-          <h3 className="card-title">{t(lang, 'processing')}: NOVA {n ?? '–'}</h3>
+          <h3 id="nova-title" className="card-title">{t(lang, 'processing')}: {n ? t(lang, 'novaOf', { n }) : 'NOVA –'}</h3>
           <p>{t(lang, 'nova_' + (n ?? 'null'))}</p>
           {processing.source && (
             <p className="muted small">
@@ -94,13 +100,65 @@ export function NovaCard({ lang, processing, nutriscore }) {
           )}
         </div>
       </div>
-      {processing.markers.length > 0 && (
-        <p className="small markers">
-          <span className="muted">{t(lang, 'novaMarkers')}</span>{' '}
-          {processing.markers.map((m) => <span key={m} className="chip">{m}</span>)}
-        </p>
+      {n && (
+        <div className="nova-scale" aria-hidden="true">
+          {[1, 2, 3, 4].map((g) => <span key={g} className={`nova-step nova-${g}${g === n ? ' current' : ''}`}>{g}</span>)}
+        </div>
       )}
-      {nutriscore && <NutriScore lang={lang} grade={nutriscore} />}
+      {n && why && (
+        <div className="score-why">
+          <p><strong>{t(lang, 'novaWhyTitle', { n })}</strong> {t(lang, 'novaWhy_' + why.rule, { list: listOf(why.triggers) })}</p>
+          {why.higherEstimate && (
+            <p className="score-note">
+              {t(lang, 'novaMismatch', { n: why.higherEstimate.nova, list: listOf(why.higherEstimate.triggers) })}
+            </p>
+          )}
+        </div>
+      )}
+      <p className="muted small">{t(lang, 'novaNotRisk')}</p>
+      <details className="score-details">
+        <summary>{t(lang, 'novaScaleTitle')}</summary>
+        <ol className="nova-groups">
+          {[1, 2, 3, 4].map((g) => (
+            <li key={g} className={g === n ? 'current' : ''}>
+              <strong>{t(lang, 'nova_' + g)}.</strong> {t(lang, `nova_${g}_desc`)}
+            </li>
+          ))}
+        </ol>
+      </details>
+    </section>
+  );
+}
+
+const NLEVEL_CLASS = { high: 'high', moderate: 'medium', low: 'none' };
+const fmt = (v, lang) => v.toLocaleString(lang === 'ro' ? 'ro-RO' : 'en-GB', { maximumFractionDigits: 1 });
+
+/** Nutri-Score in its own card (it is unrelated to NOVA) with the facts behind the grade. */
+export function NutriCard({ lang, grade, nutrition }) {
+  if (!grade) return null;
+  const poor = grade === 'd' || grade === 'e';
+  const items = nutrition?.items || [];
+  return (
+    <section className="card nutri-card" aria-labelledby="nutri-title">
+      <h3 id="nutri-title" className="card-title">{t(lang, 'nutriTitle', { grade: grade.toUpperCase() })}</h3>
+      <NutriScore lang={lang} grade={grade} />
+      {items.length > 0 && (
+        <div className="score-why">
+          <p><strong>{t(lang, 'nutriWhy')}</strong></p>
+          <ul className="nutrient-list">
+            {items.map((x) => (
+              <li key={x.key}>
+                <span>{t(lang, 'nutrient_' + x.key)}{x.per100 != null && <span className="muted"> · {fmt(x.per100, lang)} g</span>}</span>
+                {x.level && <span className={`pill pill-${NLEVEL_CLASS[x.level]}`}>{t(lang, 'nlevel_' + x.level)}</span>}
+              </li>
+            ))}
+          </ul>
+          {nutrition.kcal != null && <p className="muted small">{t(lang, 'nutrientKcal', { value: fmt(nutrition.kcal, lang) })}</p>}
+        </div>
+      )}
+      <p className="muted small">{t(lang, 'nutriAbout')}</p>
+      {poor && <p className="muted small">{t(lang, 'nutriVerdictNote')}</p>}
+      <p className="muted small">{t(lang, 'nutriSource')}</p>
     </section>
   );
 }
@@ -147,7 +205,8 @@ export default function Result({
       )}
       <VerdictBanner lang={lang} result={result} />
       <SafetyTips lang={lang} tips={result.safetyTips} />
-      {food && <NovaCard lang={lang} processing={result.processing} nutriscore={result.nutriscore} />}
+      {food && <NovaCard lang={lang} processing={result.processing} why={result.novaWhy} />}
+      {food && <NutriCard lang={lang} grade={result.nutriscore} nutrition={product?.nutrition} />}
       <AvoidHits lang={lang} hits={result.avoidHits} />
       <AdditiveList lang={lang} additives={result.items} grouped={!food} />
       <IngredientsText lang={lang} text={text} result={result} />

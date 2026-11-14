@@ -53,6 +53,7 @@ export function makeEntry(request, result, now = new Date()) {
         additiveTags: p.additiveTags || [],
         nova: p.nova ?? null,
         nutriscore: p.nutriscore ?? null,
+        nutrition: p.nutrition ?? null,
       }
       : null,
     confidence: request.fromPhoto ? request.confidence ?? null : null,
@@ -79,6 +80,7 @@ export function entryRequest(entry) {
       additiveTags: entry.db.additiveTags,
       nova: entry.db.nova,
       nutriscore: entry.db.nutriscore,
+      nutrition: entry.db.nutrition ?? null,
     }
     : null;
   return {

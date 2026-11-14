@@ -52,6 +52,14 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
+### Scores explained, restrictions outside the EU (v1.2)
+
+- **NOVA and Nutri-Score are separate cards.** They are unrelated scores (processing level vs nutritional quality); showing the Nutri-Score strip inside the NOVA card read as "NOVA 3 = E".
+- **NOVA card:** "NOVA 3 of 4", a 1–4 scale, and *why* this product got its group, naming the ingredients behind it (`result.novaWhy = { rule, triggers, higherEstimate }`; rules: `plain`, `culinary_single`, `culinary_mixed`, `additives`, `markers`, `database`). If the database says a lower group than the ingredients read suggest (e.g. NOVA 1 with E224 listed), a note says so. NOVA 2 and 3 use neutral colours: they describe processing, not risk; only NOVA 4 affects the verdict.
+- **Nutri-Score card:** the grade plus the facts behind it from Open Food Facts (`nutrient_levels`, `nutriments`): fat, saturated fat, sugars, salt per 100 g with low / moderate / high, and energy. When a caution comes only from Nutri-Score D/E or NOVA 4, the banner says the ingredients themselves are fine.
+- **Restrictions outside the EU** (`src/data/restrictions.js`): for ingredients allowed in the EU but banned, not approved, partly banned, under an official warning or being phased out elsewhere (US federal, California, Hawaii, Canada, Japan), with the rule behind each. Examples: cyclamate E952 (US ban 1970), amaranth E123 (US ban 1976), erythrosine E127 (FDA 2025), BHA E320 and 4-MEI caramels (California Prop 65), six dyes in California school food, triclosan (FDA 2016), oxybenzone (Hawaii). Items carry `restrictions`, show a 🌍 flag with the reasons, and raise the verdict to at least "warn" (`reason: restricted`).
+- **Not authorised in the EU but used elsewhere** (may appear on imports), rated high: potassium bromate E924, brominated vegetable oil E443, azodicarbonamide E927a, propylparaben E216.
+
 ### Products without ingredients in Open Food Facts
 
 Checked on real data: the Kaufland tomato paste 5949069402286 is in Open Food Facts with name, brand and photo, but no ingredients in any language and no photo of the ingredients panel. Of 100 recently updated Romanian products, 40 had ingredients and 60 had neither text nor an ingredients photo; none had the list only in another language. So the app makes the photo the main action on that screen, keeps the product's name, image and scores in the result, and offers "Copy the ingredients" + "Complete it on Open Food Facts" (the product's edit page) so the next person gets a result straight from the barcode.
@@ -117,6 +125,7 @@ Checked on real data: the Kaufland tomato paste 5949069402286 is in Open Food Fa
 │   │   ├── additives.js       # E-number database (food)
 │   │   ├── nonFoodIngredients.js # Cosmetic + household ingredient database
 │   │   ├── meta.js            # Data sources, regulations, database review dates
+│   │   ├── restrictions.js    # Restrictions outside the EU (US, California, Hawaii, Canada, Japan)
 │   │   ├── productCategories.js  # Product types, categories, Open *Facts sources
 │   │   └── avoidPresets.js    # Avoid-list presets (RO + EN terms, codes, types)
 │   └── lib/
@@ -143,7 +152,8 @@ Checked on real data: the Kaufland tomato paste 5949069402286 is in Open Food Fa
 │   ├── lookup.test.js         # lookup routing (mocked fetch), field mapping, barcodes, camera errors
 │   ├── ocr.test.js            # label text extraction, merge into barcode results, mocked OCR worker, PaddleOCR maths, word correction
 │   ├── phase4.test.js         # history, avoid list import/export & per-type entries, highlighting, share, install, contrast
-│   └── scan.test.js           # camera choice, misread protection, barcode format names
+│   ├── scan.test.js           # camera choice, misread protection, barcode format names
+│   └── scores.test.js         # NOVA explanations, Nutri-Score facts, restrictions outside the EU
 └── .github/workflows/deploy.yml  # Build + deploy to GitHub Pages on push to main
 ```
 
@@ -171,7 +181,7 @@ const result = analyze(
 // result.productType  'food' | 'cosmetic' | 'household'
 // result.verdict      'bad' | 'warn' | 'ok' | 'unknown'
 // result.items        matched entries (food: same array as result.additives)
-// result.reasons      [{ type: 'high' | 'avoid' | 'medium' | 'nova4' | 'nutriscore', count?, grade? }]
+// result.reasons      [{ type: 'high' | 'avoid' | 'medium' | 'restricted' | 'nova4' | 'nutriscore', count?, grade? }]
 // result.additives    food only, sorted high → medium → low → unknown → none ([] for non-food)
 // result.avoidHits    [{ id, label: {en, ro}, matches: [...] }]
 // result.processing   food: { nova: 1-4 | null, source: 'database' | 'estimate' | null, markers: [...] }; non-food: null

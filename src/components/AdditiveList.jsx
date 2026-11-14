@@ -1,6 +1,7 @@
 import { t, pick } from '../lib/i18n.js';
 import { NONFOOD_CATEGORIES } from '../data/nonFoodIngredients.js';
 import { itemDomId } from '../lib/share.js';
+import { REGIONS } from '../data/restrictions.js';
 
 const LEVEL_RANK = { high: 0, medium: 1, low: 2, unknown: 3, none: 4 };
 
@@ -10,6 +11,7 @@ function RiskPill({ lang, level }) {
 
 function AdditiveItem({ lang, item, showCode }) {
   const name = item.name ? pick(item.name, lang) : t(lang, 'unknownAdditive');
+  const restricted = item.restrictions?.length > 0;
   return (
     <li className={`additive additive-${item.level}`} id={itemDomId(item.code)}>
       <details>
@@ -18,12 +20,28 @@ function AdditiveItem({ lang, item, showCode }) {
           <span className="additive-name">
             {name}
             {showCode && <span className="muted small block">{t(lang, 'cat_' + item.category)}</span>}
+            {restricted && <span className="restricted-flag small block">🌍 {t(lang, 'restrictedFlag')}</span>}
           </span>
           <RiskPill lang={lang} level={item.level} />
           <span className="chevron" aria-hidden="true" />
         </summary>
         <div className="additive-body">
           {item.why && <p>{pick(item.why, lang)}</p>}
+          {restricted && (
+            <div className="restricted-box">
+              <p><strong>🌍 {t(lang, 'restrictedTitle')}</strong></p>
+              <ul>
+                {item.restrictions.map((x) => (
+                  <li key={x.region + x.status}>
+                    <strong>{pick(REGIONS[x.region], lang)}</strong>{' '}
+                    <span className={`rstatus rstatus-${x.status}`}>{t(lang, 'rstatus_' + x.status)}</span>
+                    <span className="block">{pick(x, lang)}</span>
+                  </li>
+                ))}
+              </ul>
+              {item.level !== 'high' && <p className="muted small">{t(lang, 'restrictedNote')}</p>}
+            </div>
+          )}
           {item.matches.length > 0 && (
             <p className="muted small">
               {t(lang, 'foundAs')}: {item.matches.map((m) => `“${m}”`).join(', ')}

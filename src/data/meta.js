@@ -2,8 +2,9 @@
 
 /** When the ingredient databases were last reviewed against the cited sources. */
 export const DATABASES_REVIEWED = {
-  additives: '2026-11-13',
+  additives: '2026-11-14',
   nonFood: '2026-11-13',
+  restrictions: '2026-11-14',
 };
 
 export const PRODUCT_SOURCES = [
@@ -32,5 +33,8 @@ export const REFERENCES = [
   { id: 'efsa', en: 'EFSA – European Food Safety Authority opinions', ro: 'EFSA – avizele Autorității Europene pentru Siguranța Alimentară', url: 'https://www.efsa.europa.eu' },
   { id: 'sccs', en: 'SCCS – Scientific Committee on Consumer Safety', ro: 'SCCS – Comitetul științific pentru siguranța consumatorilor', url: 'https://health.ec.europa.eu/scientific-committees/scientific-committee-consumer-safety-sccs_en' },
   { id: 'iarc', en: 'IARC – International Agency for Research on Cancer', ro: 'IARC – Agenția Internațională pentru Cercetarea Cancerului', url: 'https://monographs.iarc.who.int' },
+  { id: 'ca-ab418', en: 'California Food Safety Act (AB 418, 2023) and School Food Safety Act (AB 2316, 2024)', ro: 'California Food Safety Act (AB 418, 2023) și School Food Safety Act (AB 2316, 2024)', url: 'https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202320240AB418' },
+  { id: 'prop65', en: 'California Proposition 65 list (OEHHA)', ro: 'Lista Propunerii 65 din California (OEHHA)', url: 'https://oehha.ca.gov/proposition-65/proposition-65-list' },
+  { id: 'ntp', en: 'US National Toxicology Program – Report on Carcinogens', ro: 'Programul Național de Toxicologie al SUA – Raportul privind substanțele cancerigene', url: 'https://ntp.niehs.nih.gov/whatwestudy/assessments/cancer/roc' },
   { id: 'fda', en: 'US FDA – Food and Drug Administration', ro: 'FDA (SUA) – Administrația pentru Alimente și Medicamente', url: 'https://www.fda.gov/food' },
 ];
