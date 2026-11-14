@@ -292,7 +292,7 @@ describe('analyze()', () => {
     const r = analyze({ text: sample });
     assert.deepEqual(r.counts, { high: 1, medium: 2, low: 0, none: 2, unknown: 0, total: 5 });
     assert.equal(r.verdict, 'bad');
-    assert.deepEqual(r.reasons.map((x) => x.type), ['high', 'avoid', 'medium', 'restricted', 'nova4']);
+    assert.deepEqual(r.reasons.map((x) => x.type), ['high', 'avoid', 'medium', 'nova4']);
     assert.deepEqual(r.avoidHits.map((h) => h.id), ['palm']);
     assert.equal(r.processing.nova, 4);
     assert.equal(r.processing.source, 'estimate');

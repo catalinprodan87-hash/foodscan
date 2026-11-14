@@ -1,12 +1,18 @@
 import { t, pick } from '../lib/i18n.js';
 import { NONFOOD_CATEGORIES } from '../data/nonFoodIngredients.js';
 import { itemDomId } from '../lib/share.js';
-import { REGIONS } from '../data/restrictions.js';
+import { REGIONS, regionShort } from '../data/restrictions.js';
 
 const LEVEL_RANK = { high: 0, medium: 1, low: 2, unknown: 3, none: 4 };
 
-function RiskPill({ lang, level }) {
-  return <span className={`pill pill-${level}`}>{t(lang, 'level_' + level)}</span>;
+/** Risk pill; when a country outside the EU sets the (worse) rating, its name follows. */
+function RiskPill({ lang, level, source }) {
+  const elsewhere = source && source !== 'EU';
+  return (
+    <span className={`pill pill-${level}`}>
+      {t(lang, 'level_' + level)}{elsewhere && <span className="pill-source"><span className="sr-only"> · </span>{regionShort(source, lang)}</span>}
+    </span>
+  );
 }
 
 function AdditiveItem({ lang, item, showCode }) {
@@ -22,7 +28,7 @@ function AdditiveItem({ lang, item, showCode }) {
             {showCode && <span className="muted small block">{t(lang, 'cat_' + item.category)}</span>}
             {restricted && <span className="restricted-flag small block">🌍 {t(lang, 'restrictedFlag')}</span>}
           </span>
-          <RiskPill lang={lang} level={item.level} />
+          <RiskPill lang={lang} level={item.level} source={item.levelSource} />
           <span className="chevron" aria-hidden="true" />
         </summary>
         <div className="additive-body">
@@ -34,12 +40,17 @@ function AdditiveItem({ lang, item, showCode }) {
                 {item.restrictions.map((x) => (
                   <li key={x.region + x.status}>
                     <strong>{pick(REGIONS[x.region], lang)}</strong>{' '}
-                    <span className={`rstatus rstatus-${x.status}`}>{t(lang, 'rstatus_' + x.status)}</span>
+                    <span className={`rstatus rstatus-${x.status}`}>{t(lang, 'rstatus_' + x.status)}</span>{' '}
+                    <span className={`pill pill-${x.level}`}>{t(lang, 'level_' + x.level)}</span>
                     <span className="block">{pick(x, lang)}</span>
                   </li>
                 ))}
               </ul>
-              {item.level !== 'high' && <p className="muted small">{t(lang, 'restrictedNote')}</p>}
+              <p className="muted small">
+                {item.levelSource !== 'EU'
+                  ? t(lang, 'ratingFrom', { region: pick(REGIONS[item.levelSource], lang), eu: t(lang, 'level_' + item.euLevel) })
+                  : t(lang, 'ratingEu')}
+              </p>
             </div>
           )}
           {item.matches.length > 0 && (

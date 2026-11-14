@@ -53,7 +53,7 @@ export default defineConfig({
       },
       workbox: {
         // Includes the 0.9 MB barcode decoder (scan/zxing_reader.wasm) so scanning works offline.
-        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest,wasm}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest,wasm,woff2}'],
         clientsClaim: true, // the first install controls the page at once (OCR caching)
         // The OCR engine (~9 MB) is not precached: it downloads on first use.
         globIgnores: ['ocr/**'],

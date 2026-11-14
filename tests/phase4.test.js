@@ -361,8 +361,30 @@ describe('colour contrast (WCAG AA, 4.5:1 for text)', () => {
   const varIn = (src, name) => new RegExp(`--${name}:\\s*(#[0-9a-fA-F]{6})`).exec(src)?.[1];
   const bgOf = (cls) => new RegExp(`\\.${cls}\\s*\\{[^}]*background:\\s*(#[0-9a-fA-F]{6})`).exec(css)?.[1];
 
-  test('verdict banners and NOVA badges: white text', () => {
-    for (const cls of ['verdict-bad', 'verdict-warn', 'verdict-ok', 'verdict-unknown', 'nova-1', 'nova-2', 'nova-3', 'nova-4']) {
+  test('verdict boxes: title and text on the tint, white on the icon (light and dark)', () => {
+    const rules = [...css.matchAll(/\.verdict-(bad|warn|ok|unknown)\s*\{([^}]*)\}/g)];
+    assert.equal(rules.length, 8, 'light + dark rules for 4 verdicts');
+    const light = {};
+    for (const [, v, body] of rules) {
+      const get = (k) => new RegExp(`--v-${k}:\\s*(#[0-9a-fA-F]{6})`).exec(body)?.[1];
+      const icon = get('icon') || light[v];
+      if (get('icon')) light[v] = get('icon');
+      for (const k of ['title', 'text']) {
+        assert.ok(ratio(get(k), get('bg')) >= 4.5, `${v} ${k}: ${get(k)} on ${get('bg')}`);
+      }
+      assert.ok(ratio('#ffffff', icon) >= 4.5, `${v} icon ${icon}`);
+    }
+  });
+
+  test('score colours as text on white cards', () => {
+    for (const cls of ['nova-1-text', 'nova-2-text', 'nova-3-text', 'nova-4-text', 'ns-text-a', 'ns-text-b', 'ns-text-c', 'ns-text-d', 'ns-text-e']) {
+      const fg = new RegExp(`\\.${cls}\\s*\\{\\s*color:\\s*(#[0-9a-fA-F]{6})`).exec(css)?.[1];
+      assert.ok(fg && ratio(fg, '#ffffff') >= 4.5, `${cls} ${fg}`);
+    }
+  });
+
+  test('NOVA badges: white text', () => {
+    for (const cls of ['nova-1', 'nova-2', 'nova-3', 'nova-4']) {
       const bg = bgOf(cls);
       assert.ok(bg, cls);
       assert.ok(ratio('#ffffff', bg) >= 4.5, `${cls} ${bg}: ${ratio('#ffffff', bg).toFixed(2)}`);

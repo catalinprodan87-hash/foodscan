@@ -11,6 +11,11 @@
  *             restricted    partial ban (e.g. school food, one product type)
  *             warning       official carcinogen listing / mandatory warning
  *             phase_out     official plan to remove it
+ *   level   – the risk level this rule implies, on the app's scale
+ *             (high | medium | low). Default by status: banned → high,
+ *             restricted / phase_out / warning → medium, not_approved → low
+ *             (often nobody applied). The app shows the WORST level across
+ *             the EU and every country, with its source.
  *   en / ro – one factual sentence with the rule or body behind it
  *
  * Kept deliberately conservative: only restrictions I could state with a
@@ -19,14 +24,16 @@
  */
 
 export const REGIONS = {
-  US: { en: 'United States', ro: 'SUA' },
-  'US-CA': { en: 'California (US)', ro: 'California (SUA)' },
-  'US-HI': { en: 'Hawaii (US)', ro: 'Hawaii (SUA)' },
+  EU: { en: 'EU', ro: 'UE' },
+  US: { en: 'United States', ro: 'SUA', short: { en: 'US', ro: 'SUA' } },
+  'US-CA': { en: 'California (US)', ro: 'California (SUA)', short: { en: 'California', ro: 'California' } },
+  'US-HI': { en: 'Hawaii (US)', ro: 'Hawaii (SUA)', short: { en: 'Hawaii', ro: 'Hawaii' } },
   CA: { en: 'Canada', ro: 'Canada' },
   JP: { en: 'Japan', ro: 'Japonia' },
 };
 
-const r = (region, status, en, ro) => ({ region, status, en, ro });
+export const STATUS_LEVEL = { banned: 'high', restricted: 'medium', phase_out: 'medium', warning: 'medium', not_approved: 'low' };
+const r = (region, status, en, ro, level = STATUS_LEVEL[status]) => ({ region, status, level, en, ro });
 
 // ───────────────────────────── shared entries ─────────────────────────────
 
@@ -53,7 +60,8 @@ const FDA_ANTISEPTIC = r('US', 'banned',
   'Din 2017, FDA nu îl mai permite în săpunurile și gelurile antiseptice pentru consumatori (regula finală din 2016): producătorii nu au demonstrat că este sigur la utilizare zilnică sau mai eficient decât săpunul obișnuit.');
 const HAWAII_REEF = r('US-HI', 'banned',
   'Hawaii has banned the sale of sunscreens containing it since 1 January 2021 (Act 104), to protect coral reefs.',
-  'Hawaii interzice din 1 ianuarie 2021 vânzarea produselor de protecție solară care îl conțin (Act 104), pentru protejarea recifelor de corali.');
+  'Hawaii interzice din 1 ianuarie 2021 vânzarea produselor de protecție solară care îl conțin (Act 104), pentru protejarea recifelor de corali.',
+  'medium'); // a sale ban for environmental reasons, not a health finding
 
 // ─────────────────────────────── by code ──────────────────────────────────
 
@@ -98,7 +106,7 @@ export const RESTRICTIONS = {
   E320: [
     r('US', 'warning',
       'The US National Toxicology Program lists it as "reasonably anticipated to be a human carcinogen".',
-      'Programul Național de Toxicologie al SUA îl listează drept „anticipat în mod rezonabil ca fiind cancerigen pentru om”.'),
+      'Programul Național de Toxicologie al SUA îl listează drept „anticipat în mod rezonabil ca fiind cancerigen pentru om”.', 'high'),
     r('US-CA', 'warning',
       'On California’s Proposition 65 list of chemicals known to cause cancer since 1990.',
       'Pe lista Propunerii 65 din California a substanțelor cunoscute ca fiind cancerigene, din 1990.'),
@@ -116,6 +124,28 @@ export const RESTRICTIONS = {
   'BP-3': [HAWAII_REEF],
   OMC: [HAWAII_REEF],
 };
+
+const RANK = { high: 3, medium: 2, low: 1, none: 0 };
+
+/**
+ * The worst risk across the EU and other countries. On a tie the EU rating
+ * is kept as the source.
+ * @returns {{level: string, source: 'EU'|string, rule: object|null}}
+ */
+export function worstLevel(euLevel, restrictions = []) {
+  let best = { level: euLevel, source: 'EU', rule: null };
+  for (const x of restrictions) {
+    if ((RANK[x.level] ?? 0) > (RANK[best.level] ?? 0)) best = { level: x.level, source: x.region, rule: x };
+  }
+  return best;
+}
+
+/** Short region name for pills ("SUA", "California"). */
+export function regionShort(region, lang) {
+  const r = REGIONS[region];
+  if (!r) return region;
+  return (r.short && (r.short[lang] || r.short.en)) || r[lang] || r.en;
+}
 
 /** Restrictions outside the EU for a code (empty array if none). */
 export function restrictionsFor(code) {

@@ -52,12 +52,14 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
-### Scores explained, restrictions outside the EU (v1.2)
+### Scores explained, restrictions outside the EU (v1.2–1.3)
 
 - **NOVA and Nutri-Score are separate cards.** They are unrelated scores (processing level vs nutritional quality); showing the Nutri-Score strip inside the NOVA card read as "NOVA 3 = E".
 - **NOVA card:** "NOVA 3 of 4", a 1–4 scale, and *why* this product got its group, naming the ingredients behind it (`result.novaWhy = { rule, triggers, higherEstimate }`; rules: `plain`, `culinary_single`, `culinary_mixed`, `additives`, `markers`, `database`). If the database says a lower group than the ingredients read suggest (e.g. NOVA 1 with E224 listed), a note says so. NOVA 2 and 3 use neutral colours: they describe processing, not risk; only NOVA 4 affects the verdict.
 - **Nutri-Score card:** the grade plus the facts behind it from Open Food Facts (`nutrient_levels`, `nutriments`): fat, saturated fat, sugars, salt per 100 g with low / moderate / high, and energy. When a caution comes only from Nutri-Score D/E or NOVA 4, the banner says the ingredients themselves are fine.
-- **Restrictions outside the EU** (`src/data/restrictions.js`): for ingredients allowed in the EU but banned, not approved, partly banned, under an official warning or being phased out elsewhere (US federal, California, Hawaii, Canada, Japan), with the rule behind each. Examples: cyclamate E952 (US ban 1970), amaranth E123 (US ban 1976), erythrosine E127 (FDA 2025), BHA E320 and 4-MEI caramels (California Prop 65), six dyes in California school food, triclosan (FDA 2016), oxybenzone (Hawaii). Items carry `restrictions`, show a 🌍 flag with the reasons, and raise the verdict to at least "warn" (`reason: restricted`).
+- **Restrictions outside the EU** (`src/data/restrictions.js`): for ingredients allowed in the EU but banned, not approved, partly banned, under an official warning or being phased out elsewhere (US federal, California, Hawaii, Canada, Japan), with the rule behind each. Examples: cyclamate E952 (US ban 1970), amaranth E123 (US ban 1976), erythrosine E127 (FDA 2025), BHA E320 and 4-MEI caramels (California Prop 65), six dyes in California school food, triclosan (FDA 2016), oxybenzone (Hawaii). Items carry `restrictions` and show a 🌍 flag with the reasons.
+- **Worst risk wins (v1.3)**: each rule has a level on the app's scale (default by status: banned → high; restricted, phase-out, official warning → medium; not approved → low, since often nobody applied). An item's `level` is the worst of its EU level and every country's, with `levelSource` (`'EU'` or the region) and `euLevel` kept. Harmless in the EU but medium in Japan → "Medium · Japan"; medium in the EU but high in the US → "High · US"; medium in the EU and low elsewhere → "Medium" (EU). On a tie the EU rating is shown. The worst levels drive the counts and the verdict. Exceptions: the Hawaii sunscreen ban is set to medium (environmental reason, not a health finding); the US NTP carcinogen listing of BHA is set to high.
+- **Design (v1.3)**: light, calm layout: white cards, a tinted verdict box, NOVA and Nutri-Score as two tiles side by side with a short "why", and full explanations folded below. Headings use Space Grotesk, self-hosted via `@fontsource/space-grotesk`.
 - **Not authorised in the EU but used elsewhere** (may appear on imports), rated high: potassium bromate E924, brominated vegetable oil E443, azodicarbonamide E927a, propylparaben E216.
 
 ### Products without ingredients in Open Food Facts
@@ -181,7 +183,7 @@ const result = analyze(
 // result.productType  'food' | 'cosmetic' | 'household'
 // result.verdict      'bad' | 'warn' | 'ok' | 'unknown'
 // result.items        matched entries (food: same array as result.additives)
-// result.reasons      [{ type: 'high' | 'avoid' | 'medium' | 'restricted' | 'nova4' | 'nutriscore', count?, grade? }]
+// result.reasons      [{ type: 'high' | 'avoid' | 'medium' | 'nova4' | 'nutriscore', count?, grade? }]
 // result.additives    food only, sorted high → medium → low → unknown → none ([] for non-food)
 // result.avoidHits    [{ id, label: {en, ro}, matches: [...] }]
 // result.processing   food: { nova: 1-4 | null, source: 'database' | 'estimate' | null, markers: [...] }; non-food: null

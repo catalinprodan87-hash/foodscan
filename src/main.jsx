@@ -6,6 +6,8 @@ import { startPwa } from './lib/pwa.js';
 import './lib/installPrompt.js'; // listen for beforeinstallprompt before React mounts
 import { detectLang } from './lib/i18n.js';
 import { getLang } from './lib/storage.js';
+import '@fontsource/space-grotesk/600.css';
+import '@fontsource/space-grotesk/700.css';
 import './styles.css';
 
 startPwa();

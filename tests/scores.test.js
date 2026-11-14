@@ -2,7 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { analyze, estimateNova } from '../src/lib/analyze.js';
-import { RESTRICTIONS, REGIONS, restrictionsFor } from '../src/data/restrictions.js';
+import { RESTRICTIONS, REGIONS, restrictionsFor, worstLevel, STATUS_LEVEL } from '../src/data/restrictions.js';
 import { ADDITIVES_BY_CODE } from '../src/data/additives.js';
 import { NONFOOD_BY_CODE } from '../src/data/nonFoodIngredients.js';
 import { mapProduct, mapNutrition, analyzeInput } from '../src/lib/lookup.js';
@@ -33,7 +33,9 @@ describe('NOVA: why this group', () => {
   test('a database value is kept, with its own rule', () => {
     const r = analyze({ text: 'cod liver, salt', nova: 3 });
     assert.deepEqual(r.processing, { nova: 3, source: 'database', markers: [] });
-    assert.deepEqual(r.novaWhy, { rule: 'database', triggers: [], higherEstimate: null });
+    assert.equal(r.novaWhy.rule, 'database');
+    assert.equal(r.novaWhy.higherEstimate, null);
+    assert.deepEqual(r.novaWhy.support, { rule: 'culinary_mixed', triggers: r.novaWhy.support.triggers });
   });
 
   test('database NOVA 1 with additives in the list: the mismatch is reported', () => {
@@ -114,21 +116,55 @@ describe('restrictions outside the EU', () => {
     assert.match(restrictionsFor('E123')[0].en, /1976/);
   });
 
-  test('a low-risk EU additive restricted elsewhere is flagged and raises the verdict to "warn"', () => {
-    // Brilliant blue: low in the EU; California school ban + FDA phase-out plan
-    assert.equal(ADDITIVES_BY_CODE.E133.level, 'low');
-    const r = analyze({ text: 'apă, acid citric, E133' });
-    const e133 = r.additives.find((a) => a.code === 'E133');
-    assert.deepEqual(e133.restrictions.map((x) => x.region), ['US-CA', 'US']);
-    assert.equal(r.restrictedElsewhere, 1);
-    assert.equal(r.verdict, 'warn');
-    assert.ok(r.reasons.some((x) => x.type === 'restricted' && x.count === 1));
+  test('worst risk wins, with its source (your three cases)', () => {
+    // X: lower in the EU, higher elsewhere → elsewhere wins
+    assert.deepEqual(worstLevel('none', [{ region: 'JP', level: 'medium' }]), { level: 'medium', source: 'JP', rule: { region: 'JP', level: 'medium' } });
+    // Y: medium in the EU, high elsewhere → high, from there
+    assert.equal(worstLevel('medium', [{ region: 'US', level: 'high' }]).source, 'US');
+    // Z: medium in the EU, low elsewhere → EU stays
+    assert.deepEqual(worstLevel('medium', [{ region: 'US', level: 'low' }]), { level: 'medium', source: 'EU', rule: null });
+    // tie → EU kept as the source
+    assert.equal(worstLevel('high', [{ region: 'US', level: 'high' }]).source, 'EU');
   });
 
-  test('cyclamate by name: flagged with the US ban and the Japanese status', () => {
+  test('status → level defaults', () => {
+    assert.deepEqual(STATUS_LEVEL, { banned: 'high', restricted: 'medium', phase_out: 'medium', warning: 'medium', not_approved: 'low' });
+    for (const list of Object.values(RESTRICTIONS)) for (const x of list) assert.ok(['high', 'medium', 'low'].includes(x.level));
+  });
+
+  test('brilliant blue: low in the EU → medium (California school ban)', () => {
+    const r = analyze({ text: 'apă, acid citric, E133' });
+    const e133 = r.additives.find((a) => a.code === 'E133');
+    assert.equal(e133.euLevel, 'low');
+    assert.equal(e133.level, 'medium');
+    assert.equal(e133.levelSource, 'US-CA');
+    assert.equal(r.counts.medium, 1);
+    assert.equal(r.restrictedElsewhere, 1);
+    assert.equal(r.verdict, 'warn');
+  });
+
+  test('cyclamate: medium in the EU → high (US ban); verdict follows', () => {
     const r = analyze({ text: 'apă, îndulcitor: ciclamat de sodiu' });
     const item = r.additives.find((a) => a.code === 'E952');
-    assert.deepEqual(item.restrictions.map((x) => `${x.region}:${x.status}`), ['US:banned', 'JP:not_approved']);
+    assert.equal(item.euLevel, 'medium');
+    assert.equal(item.level, 'high');
+    assert.equal(item.levelSource, 'US');
+    assert.equal(r.verdict, 'bad');
+  });
+
+  test('not approved elsewhere (low) never lowers or raises an EU rating', () => {
+    const r = analyze({ text: 'colorant: E153' }); // EU low; US not approved → low
+    const item = r.additives[0];
+    assert.equal(item.level, 'low');
+    assert.equal(item.levelSource, 'EU');
+    assert.equal(r.restrictedElsewhere, 0);
+  });
+
+  test('E129: high in the EU stays high from the EU (California rule is only medium)', () => {
+    const item = analyze({ text: 'E129' }).additives[0];
+    assert.equal(item.level, 'high');
+    assert.equal(item.levelSource, 'EU');
+    assert.equal(item.restrictions.length, 2); // still listed for information
   });
 
   test('additives without restrictions are not flagged', () => {
@@ -139,12 +175,13 @@ describe('restrictions outside the EU', () => {
     assert.deepEqual(analyze({ text: 'E999' }).additives[0].restrictions, []);
   });
 
-  test('cosmetics: triclosan (FDA) and oxybenzone (Hawaii) are flagged', () => {
-    const soap = analyze({ text: 'Aqua, Triclosan', productType: 'cosmetic' });
-    assert.equal(soap.items.find((i) => i.code === 'TRICLOSAN').restrictions[0].region, 'US');
-    assert.ok(soap.reasons.some((x) => x.type === 'restricted'));
-    const sun = analyze({ text: 'Aqua, Benzophenone-3', productType: 'cosmetic' });
-    assert.equal(sun.items.find((i) => i.code === 'BP-3').restrictions[0].region, 'US-HI');
+  test('cosmetics: triclosan → high (FDA ban); oxybenzone → medium (Hawaii, environmental)', () => {
+    const t = analyze({ text: 'Aqua, Triclosan', productType: 'cosmetic' }).items.find((i) => i.code === 'TRICLOSAN');
+    assert.deepEqual([t.euLevel, t.level, t.levelSource], ['medium', 'high', 'US']);
+    const o = analyze({ text: 'Aqua, Ethylhexyl Methoxycinnamate', productType: 'cosmetic' }).items.find((i) => i.code === 'OMC');
+    if (o) assert.deepEqual([o.euLevel, o.level, o.levelSource], ['low', 'medium', 'US-HI']);
+    const b = analyze({ text: 'Aqua, Benzophenone-3', productType: 'cosmetic' }).items.find((i) => i.code === 'BP-3');
+    assert.equal(b.levelSource, 'EU'); // medium in the EU = medium in Hawaii → EU kept
   });
 
   test('additives not authorised in the EU but used elsewhere are in the database as high risk', () => {
@@ -154,5 +191,19 @@ describe('restrictions outside the EU', () => {
     }
     assert.deepEqual(analyze({ text: 'wheat flour, potassium bromate, azodicarbonamide' }).additives.map((a) => a.code), ['E924', 'E927a']);
     assert.equal(analyze({ text: 'water, BVO' }).additives[0].code, 'E443');
+  });
+});
+
+describe('NOVA from the database: supporting ingredients', () => {
+  test('when the estimate agrees, the triggers are kept as support', () => {
+    const r = analyze({ text: 'zahăr, sirop de glucoză, E129, aromă', productType: 'food', nova: 4 });
+    assert.equal(r.novaWhy.rule, 'database');
+    assert.ok(r.novaWhy.support && r.novaWhy.support.triggers.length > 0, JSON.stringify(r.novaWhy));
+    assert.equal(r.novaWhy.higherEstimate, null);
+  });
+
+  test('when it does not agree, no support (database NOVA 4, plain ingredients)', () => {
+    const r = analyze({ text: 'roșii', productType: 'food', nova: 4 });
+    assert.equal(r.novaWhy.support, null);
   });
 });

@@ -4,7 +4,7 @@
  */
 import { t, pick } from './i18n.js';
 import { sourceFor, SOURCE_NAMES } from './lookup.js';
-import { REGIONS } from '../data/restrictions.js';
+import { REGIONS, regionShort } from '../data/restrictions.js';
 
 /**
  * Open *Facts "add a product" page for a barcode (the site's search-or-add
@@ -42,7 +42,7 @@ export function shareSummary(result, { lang = 'ro', product = null, barcode = nu
   const lines = [`${name}: ${t(lang, verdictKey)}`];
   const flagged = result.items.filter((x) => FLAGGED.includes(x.level));
   if (flagged.length) {
-    const list = flagged.map((x) => `${food ? x.code + ' ' : ''}${pick(x.name, lang)} (${t(lang, 'level_' + x.level)})`);
+    const list = flagged.map((x) => `${food ? x.code + ' ' : ''}${pick(x.name, lang)} (${t(lang, 'level_' + x.level)}${x.levelSource && x.levelSource !== 'EU' ? ' · ' + regionShort(x.levelSource, lang) : ''})`);
     lines.push(`${t(lang, food ? 'additivesTitle' : 'itemsTitle')}: ${list.join(', ')}`);
   }
   const restricted = result.items.filter((x) => x.restrictions?.length);
