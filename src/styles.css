@@ -838,3 +838,9 @@ main:focus { outline: none; }
 }
 .pill-source { display: block; font-size: 0.68rem; font-weight: 600; text-align: center; }
 .pill:has(.pill-source) { border-radius: 10px; padding: 3px 10px; }
+
+/* v1.4: remembered ingredients */
+.saved-note { padding: 10px 14px; border-radius: 12px; background: var(--teal-soft); color: var(--text); font-size: 0.9rem; }
+.saved-note p { margin: 0; }
+.saved-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 8px; }
+.saved-actions .btn { width: auto; min-height: 36px; padding: 6px 12px; font-size: 0.85rem; }

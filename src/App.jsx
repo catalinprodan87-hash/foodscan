@@ -10,6 +10,7 @@ import { buildRequest } from './lib/request.js';
 import { detectLang, t } from './lib/i18n.js';
 import { getLang, setLang as saveLang, getAvoidState, setAvoidState, getFlag, setFlag } from './lib/storage.js';
 import { createHistoryStore, makeEntry, entryRequest, entryTitle } from './lib/history.js';
+import { createSavedStore, savedFromRequest, requestFromSaved } from './lib/savedIngredients.js';
 import TabBar from './components/TabBar.jsx';
 import { UpdateBanner, OfflineBanner, InstallCard, Toast } from './components/Banners.jsx';
 
@@ -54,6 +55,9 @@ export default function App() {
   const abortRef = useRef(null);
   const storeRef = useRef(null);
   const savedRef = useRef(null);
+  // Ingredients the user photographed / pasted for a barcode, remembered for the next scan.
+  const savedStoreRef = useRef(null);
+  if (!savedStoreRef.current) savedStoreRef.current = createSavedStore();
   const mainRef = useRef(null);
 
   useEffect(() => {
@@ -64,7 +68,14 @@ export default function App() {
   useEffect(() => {
     let alive = true;
     storeRef.current = createHistoryStore();
-    storeRef.current.then((store) => store.all()).then((list) => { if (alive) setHistory(list); }).catch(() => {});
+    storeRef.current.then((store) => store.all()).then((list) => {
+      // One-off: photos / pasted lists from before v1.4 are remembered too.
+      if (!getFlag('savedSeeded')) {
+        savedStoreRef.current.seed(list);
+        setFlag('savedSeeded');
+      }
+      if (alive) setHistory(list);
+    }).catch(() => {});
     return () => { alive = false; };
   }, []);
 
@@ -138,8 +149,25 @@ export default function App() {
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     setSubmitted(null);
-    setLookup({ status: 'loading', code });
     scrollTop();
+
+    // Ingredients remembered from an earlier photo / paste: show them at once
+    // (works offline), then refresh the product details in the background.
+    const saved = savedStoreRef.current.get(code);
+    if (saved) {
+      setLookup(null);
+      setSubmitted(requestFromSaved(saved));
+      try {
+        const res = await lookupProduct(code, { productType: saved.productType, signal: ctrl.signal });
+        if (ctrl.signal.aborted || res.status !== 'found') return;
+        const fresh = requestFromSaved(saved, res.product);
+        savedStoreRef.current.save({ ...saved, product: fresh.product });
+        setSubmitted((prev) => (prev?.saved && prev.barcode === code ? fresh : prev));
+      } catch { /* offline or aborted: the remembered details are enough */ }
+      return;
+    }
+
+    setLookup({ status: 'loading', code });
     let res;
     try {
       res = await lookupProduct(code, { productType: chosenType, signal: ctrl.signal });
@@ -173,7 +201,27 @@ export default function App() {
   // Pasted ingredients, optionally attached to a looked-up / not-found barcode.
   const analyzeText = (value) => {
     setLookup(null);
-    setSubmitted(buildRequest({ text: value, source: 'paste', chosenType, ...lookupContext() }));
+    setSubmitted(remember(buildRequest({ text: value, source: 'paste', chosenType, ...lookupContext() })));
+    scrollTop();
+  };
+
+  // Ingredients typed or photographed for a barcode are remembered for the next scan.
+  const remember = (req) => {
+    const saved = savedFromRequest(req);
+    if (!saved) return req;
+    savedStoreRef.current.save(saved);
+    return { ...req, saved: { date: saved.date, source: saved.source, fresh: true } };
+  };
+  const forgetSaved = (code) => {
+    savedStoreRef.current.remove(code);
+    notify(t(lang, 'savedForgotten'));
+    runLookup(code);
+  };
+  // New photo for a product whose ingredients were remembered (replaces them).
+  const retakeSaved = (file) => {
+    const p = submitted?.product;
+    setPhoto({ file, product: p ? { ...p, hasIngredients: false } : null, barcode: submitted?.barcode || null });
+    setSubmitted(null);
     scrollTop();
   };
 
@@ -187,7 +235,7 @@ export default function App() {
   const analyzePhotoText = (value, confidence) => {
     const { product, barcode } = photo;
     setPhoto(null);
-    setSubmitted(buildRequest({ text: value, source: 'photo', chosenType, product, barcode, confidence }));
+    setSubmitted(remember(buildRequest({ text: value, source: 'photo', chosenType, product, barcode, confidence })));
     scrollTop();
   };
 
@@ -272,6 +320,7 @@ export default function App() {
         lang={lang} result={result} typeAuto={submitted.auto} notify={notify}
         text={submitted.text?.trim() ? submitted.text : submitted.product?.ingredientsText || ''}
         product={submitted.product} barcode={submitted.barcode} fromPhoto={submitted.fromPhoto} onBack={goHome}
+        saved={submitted.saved} onRetake={retakeSaved} onForget={() => forgetSaved(submitted.barcode)}
       />
     );
   } else {

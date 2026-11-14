@@ -52,6 +52,10 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
+### Remembered ingredients (v1.4)
+
+When a scanned barcode has no ingredients in the databases (or is not found, or the lookup fails) and you photograph or paste them, they are remembered for that barcode (`src/lib/savedIngredients.js`, localStorage, up to 1,000 products). The next scan of the same barcode shows the result straight away, even offline; the product details (name, NOVA, Nutri-Score) are refreshed in the background when online. The result says where the ingredients came from and offers **New photo** (replaces them) and **Forget these ingredients**. Kept apart from the history, so deleting or clearing the history does not lose them; photos and pasted lists already in the history are picked up once on first start of v1.4.
+
 ### Scores explained, restrictions outside the EU (v1.2–1.3)
 
 - **NOVA and Nutri-Score are separate cards.** They are unrelated scores (processing level vs nutritional quality); showing the Nutri-Score strip inside the NOVA card read as "NOVA 3 = E".
@@ -155,6 +159,7 @@ Checked on real data: the Kaufland tomato paste 5949069402286 is in Open Food Fa
 │   ├── ocr.test.js            # label text extraction, merge into barcode results, mocked OCR worker, PaddleOCR maths, word correction
 │   ├── phase4.test.js         # history, avoid list import/export & per-type entries, highlighting, share, install, contrast
 │   ├── scan.test.js           # camera choice, misread protection, barcode format names
+│   ├── saved.test.js          # Remembered ingredients by barcode
 │   └── scores.test.js         # NOVA explanations, Nutri-Score facts, restrictions outside the EU
 └── .github/workflows/deploy.yml  # Build + deploy to GitHub Pages on push to main
 ```

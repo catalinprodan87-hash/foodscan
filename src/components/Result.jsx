@@ -1,3 +1,4 @@
+import PhotoButton from './PhotoButton.jsx';
 import { t, pick } from '../lib/i18n.js';
 import { normalize } from '../lib/analyze.js';
 import AdditiveList from './AdditiveList.jsx';
@@ -214,8 +215,30 @@ export function AvoidHits({ lang, hits }) {
   );
 }
 
+/** Ingredients remembered for this barcode (from the user's photo or text). */
+function SavedNote({ lang, saved, onRetake, onForget }) {
+  const date = new Date(saved.date).toLocaleDateString(lang === 'ro' ? 'ro-RO' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return (
+    <section className="saved-note" aria-label={t(lang, 'savedTitle')}>
+      <p>
+        <span aria-hidden="true">📌 </span>
+        {saved.fresh
+          ? t(lang, 'savedFresh')
+          : t(lang, saved.source === 'photo' ? 'savedFromPhoto' : 'savedFromText', { date })}
+      </p>
+      {!saved.fresh && (
+        <div className="saved-actions">
+          {onRetake && <PhotoButton lang={lang} onPhoto={onRetake} className="btn ghost small-btn" labelKey="savedRetake" />}
+          {onForget && <button type="button" className="link-btn" onClick={onForget}>{t(lang, 'savedForget')}</button>}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function Result({
   lang, result, text, typeAuto, product, barcode, fromPhoto, onBack, backLabel = 'back', notify,
+  saved, onRetake, onForget,
 }) {
   const food = isFood(result);
   return (
@@ -229,6 +252,7 @@ export default function Result({
           <span className="muted small">{t(lang, 'readFromPhotoHint')}</span>
         </p>
       )}
+      {saved && <SavedNote lang={lang} saved={saved} onRetake={onRetake} onForget={onForget} />}
       <VerdictBanner lang={lang} result={result} />
       <SafetyTips lang={lang} tips={result.safetyTips} />
       {food && <ScoreTiles lang={lang} processing={result.processing} why={result.novaWhy} grade={result.nutriscore} nutrition={product?.nutrition} />}
