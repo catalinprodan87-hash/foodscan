@@ -1,0 +1,38 @@
+name: Benchmarks
+
+# OCR and barcode benchmarks (bench/). Slow, so not on every push: run by hand
+# from the Actions tab, and weekly to catch drift. Fails if OCR recall drops
+# more than 2 points, or barcode reads drop / misreads rise, versus the
+# committed baselines. Timings are a CI machine's, not a phone's.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * 1' # Mondays 03:17 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Barcode benchmark
+        run: npm run bench:barcodes
+      - name: OCR benchmark
+        if: always()
+        run: npm run bench:ocr
+      - name: Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-results
+          path: bench/results/
+          retention-days: 90

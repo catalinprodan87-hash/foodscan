@@ -160,8 +160,20 @@ Checked on real data: the Kaufland tomato paste 5949069402286 is in Open Food Fa
 │   ├── phase4.test.js         # history, avoid list import/export & per-type entries, highlighting, share, install, contrast
 │   ├── scan.test.js           # camera choice, misread protection, barcode format names
 │   ├── saved.test.js          # Remembered ingredients by barcode
+│   ├── data.test.js           # Database schema: both languages, levels, codes, regions, alias clashes
 │   └── scores.test.js         # NOVA explanations, Nutri-Score facts, restrictions outside the EU
-└── .github/workflows/deploy.yml  # Build + deploy to GitHub Pages on push to main
+├── e2e/                       # Browser tests (Playwright, API mocked): paste, barcode flows, remembered
+│                              # ingredients offline, history, avoid list, RO/EN, one real OCR smoke test
+├── bench/
+│   ├── ocr/                   # OCR benchmark: labels.json → images/ (synthetic labels + phone photos),
+│   │                          # truth.json, harness, run.mjs, baseline.json
+│   ├── barcode/               # Barcode benchmark: 24 hard EAN-13 photos, truth.json, harness, baseline
+│   └── lib/                   # photoize.js (synthetic photo effects), dev server helper
+├── scripts/check-bundle.mjs   # First-load JS budget (420 KB raw)
+└── .github/workflows/
+    ├── ci.yml                 # Every branch / pull request: unit + build + budget + browser tests
+    ├── deploy.yml             # main: the same checks, then deploy to GitHub Pages
+    └── bench.yml              # Benchmarks: by hand and weekly
 ```
 
 ## Commands
@@ -171,10 +183,41 @@ Requires Node.js 20.19+ (CI uses Node 22).
 ```bash
 npm install        # install dependencies
 npm run dev        # dev server at http://localhost:5173
-npm test           # run the tests (Node's built-in test runner)
+npm test           # unit tests (Node's built-in test runner)
+npm run test:e2e   # build, then browser tests (Playwright, Chromium)
 npm run build      # production build into dist/
+npm run check:bundle  # first-load JS budget (after a build)
 npm run preview    # serve the production build locally
 ```
+
+## Testing and benchmarks
+
+| What | Command | Where it runs |
+|---|---|---|
+| Unit tests (logic, data schema) | `npm test` | every push |
+| Browser tests (main flows, API mocked) | `npm run test:e2e` | every push (CI and before each deploy) |
+| First-load JS budget | `npm run check:bundle` | every push |
+| Barcode benchmark | `npm run bench:barcodes` | by hand / weekly (`bench.yml`) |
+| OCR benchmark | `npm run bench:ocr` | by hand / weekly (`bench.yml`) |
+
+Browser tests never reach the real Open *Facts servers: every request is answered by a mock (`e2e/fixtures.js`). The first run needs Chromium: `npx playwright install chromium`.
+
+**OCR benchmark** (`bench/ocr`). Six synthetic labels (tomato paste, biscuits, chocolate, multilingual soup RO/HU/BG, shampoo INCI, detergent with Reg. 648/2004 bands), each as a flat image and as a synthetic phone photo (curve, perspective, tilt, blur, glare, noise, dim light). Each is read whole and cropped to the ingredients paragraph through the app's real OCR path in Chromium. Reported per image: key-word recall, CER (character error rate of the extracted ingredients text after normalisation) and time. The run fails if the average recall of any group drops more than 2 points below `baseline.json`. Change the labels in `labels.json`, then `npm run bench:labels`; accept new numbers with `npm run bench:ocr -- --update-baseline`.
+
+Baseline (14 Nov 2026, desktop CPU, one thread – a phone is slower):
+
+| Group | Recall | CER | Median time |
+|---|---|---|---|
+| flat / whole | 100% | 0.000 | 2.8 s |
+| flat / crop | 100% | 0.000 | 1.4 s |
+| photo / whole | 77.8% | 0.337 | 4.0 s |
+| photo / crop | 81.9% | 0.147 | 1.6 s |
+
+The weak cases are small, curved text: the tomato jar and the shampoo bottle (word spaces and letters lost). They are the targets of v2.2–v2.4.
+
+**Barcode benchmark** (`bench/barcode`). 24 synthetic hard photos (small, tiny, rotated 15/40/90/180°, perspective, blur, curve, glare, low contrast, noise, low JPEG quality, combinations) decoded by the app's photo path. Baseline: 22/24 read, 0 misreads (the misses are 3.5 px blur and curve + blur). Headless Chromium on Linux has no native `BarcodeDetector`, so this measures the ZXing fallback. Regenerate images with `npm run bench:barcodes:make`.
+
+Real photos are not in the benchmark yet (synthetic only).
 
 ## Analysis engine API
 
@@ -200,7 +243,7 @@ Food verdict rules: any high-risk additive or avoid-list hit → **bad**; otherw
 
 ## Deployment (GitHub Pages)
 
-The workflow in `.github/workflows/deploy.yml` runs the tests, builds and deploys on every push to `main` (and can be started manually from the Actions tab).
+The workflow in `.github/workflows/deploy.yml` runs the unit tests, builds, checks the bundle budget, runs the browser tests and only then deploys, on every push to `main` (and can be started manually from the Actions tab).
 
 One-time setup: in the repository go to **Settings → Pages → Build and deployment → Source** and select **GitHub Actions**.
 

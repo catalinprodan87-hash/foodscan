@@ -1,0 +1,29 @@
+{
+ "_about": "Hard barcode photos for the barcode benchmark: photoize options per image (see bench/lib/photoize.js). Codes are generated from a fixed seed.",
+ "variants": {
+  "clean_big": { "fill": 0.5 },
+  "small_in_frame": { "fill": 0.22 },
+  "tiny_in_frame": { "fill": 0.13 },
+  "rotated_15": { "fill": 0.4, "tilt": 15 },
+  "rotated_40": { "fill": 0.4, "tilt": 40 },
+  "sideways_90": { "fill": 0.4, "rotate": 1 },
+  "upside_down": { "fill": 0.4, "rotate": 2 },
+  "perspective": { "fill": 0.45, "keystone": 0.3 },
+  "blur_2px": { "fill": 0.4, "blur": 2 },
+  "blur_3_5px": { "fill": 0.4, "blur": 3.5 },
+  "curved_jar": { "fill": 0.45, "curve": 0.6 },
+  "curved_blur": { "fill": 0.45, "curve": 0.6, "blur": 1.5 },
+  "glare": { "fill": 0.4, "glare": 0.75 },
+  "low_contrast": { "fill": 0.4, "contrast": 0.3 },
+  "noisy": { "fill": 0.4, "noise": 70, "quality": 0.6 },
+  "jpeg_q_0_3": { "fill": 0.4, "quality": 0.3 },
+  "small_tilted_noisy": { "fill": 0.25, "tilt": 8, "noise": 25, "quality": 0.7 },
+  "curved_glare_small": { "fill": 0.3, "curve": 0.5, "glare": 0.6 },
+  "persp_blur_noise": { "fill": 0.4, "keystone": 0.25, "blur": 1.5, "noise": 30, "quality": 0.7 },
+  "low_contrast_blur": { "fill": 0.4, "contrast": 0.4, "blur": 1.5 },
+  "sideways_curved": { "fill": 0.4, "rotate": 1, "curve": 0.5 },
+  "small_jpeg": { "fill": 0.4, "sceneW": 800, "sceneH": 600, "quality": 0.5 },
+  "angled_25_glare": { "fill": 0.4, "tilt": 25, "glare": 0.6 },
+  "everything": { "fill": 0.35, "curve": 0.4, "keystone": 0.2, "tilt": 12, "blur": 1.5, "glare": 0.5, "noise": 30, "contrast": 0.6, "quality": 0.5 }
+ }
+}

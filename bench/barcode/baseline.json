@@ -1,0 +1,11 @@
+{
+ "date": "2026-11-14T16:37:42.755Z",
+ "summary": {
+  "images": 24,
+  "reads": 22,
+  "misses": 2,
+  "misreads": 0,
+  "medianMs": 56,
+  "native": false
+ }
+}

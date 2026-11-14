@@ -1,0 +1,207 @@
+{
+ "tomato": {
+  "truth": "concentrat de tomate, apă, sare. Substanță uscată solubilă min. 28% (fără adaosul de sare). Produs pasteurizat.",
+  "terms": [
+   "concentrat de tomate",
+   "apa",
+   "sare"
+  ],
+  "images": {
+   "flat": {
+    "file": "images/tomato-flat.png",
+    "crop": [
+     0.0331,
+     0.4265,
+     0.9337,
+     0.1697
+    ]
+   },
+   "photo": {
+    "file": "images/tomato-photo.jpg",
+    "crop": [
+     0.2139,
+     0.4622,
+     0.5744,
+     0.0881
+    ]
+   }
+  }
+ },
+ "biscuits": {
+  "truth": "făină de grâu 52%, zahăr, ulei de palmier, sirop de glucoză-fructoză, cacao degresată 4,5%, amidon de porumb, agenți de afânare (carbonați de amoniu, carbonați de sodiu), emulgatori (lecitine din soia, E471), sare, arome, colorant: caramel amoniacal-sulfitic.",
+  "terms": [
+   "faina de grau",
+   "zahar",
+   "ulei de palmier",
+   "sirop de glucoza-fructoza",
+   "cacao degresata",
+   "amidon de porumb",
+   "carbonati de amoniu",
+   "carbonati de sodiu",
+   "lecitine din soia",
+   "e471",
+   "sare",
+   "arome",
+   "caramel amoniacal-sulfitic"
+  ],
+  "images": {
+   "flat": {
+    "file": "images/biscuits-flat.png",
+    "crop": [
+     0.0296,
+     0.3723,
+     0.9409,
+     0.2911
+    ]
+   },
+   "photo": {
+    "file": "images/biscuits-photo.jpg",
+    "crop": [
+     0.1383,
+     0.4356,
+     0.7194,
+     0.137
+    ]
+   }
+  }
+ },
+ "shampoo": {
+  "truth": "AQUA, SODIUM LAURETH SULFATE, COCAMIDOPROPYL BETAINE, SODIUM CHLORIDE, GLYCERIN, PARFUM, ZINC PYRITHIONE, DIMETHICONE, SODIUM BENZOATE, METHYLCHLOROISOTHIAZOLINONE, METHYLISOTHIAZOLINONE, LIMONENE, LINALOOL, CI 42090.",
+  "terms": [
+   "aqua",
+   "sodium laureth sulfate",
+   "cocamidopropyl betaine",
+   "glycerin",
+   "parfum",
+   "zinc pyrithione",
+   "dimethicone",
+   "sodium benzoate",
+   "methylchloroisothiazolinone",
+   "methylisothiazolinone",
+   "limonene",
+   "linalool"
+  ],
+  "images": {
+   "flat": {
+    "file": "images/shampoo-flat.png",
+    "crop": [
+     0.0364,
+     0.47,
+     0.9272,
+     0.2339
+    ]
+   },
+   "photo": {
+    "file": "images/shampoo-photo.jpg",
+    "crop": [
+     0.19,
+     0.4793,
+     0.6172,
+     0.0919
+    ]
+   }
+  }
+ },
+ "detergent": {
+  "truth": "5-15% agenți de suprafață anionici, <5% agenți de suprafață neionici, săpun, fosfonați, enzime, parfumuri, Benzisothiazolinone, Methylisothiazolinone, Limonene.",
+  "terms": [
+   "agenti de suprafata anionici",
+   "agenti de suprafata neionici",
+   "sapun",
+   "fosfonati",
+   "enzime",
+   "parfumuri",
+   "benzisothiazolinone",
+   "methylisothiazolinone",
+   "limonene"
+  ],
+  "images": {
+   "flat": {
+    "file": "images/detergent-flat.png",
+    "crop": [
+     0.0342,
+     0.4023,
+     0.9317,
+     0.2186
+    ]
+   },
+   "photo": {
+    "file": "images/detergent-photo.jpg",
+    "crop": [
+     0.15,
+     0.4185,
+     0.705,
+     0.1681
+    ]
+   }
+  }
+ },
+ "chocolate": {
+  "truth": "zahăr, unt de cacao, lapte praf integral 20%, masă de cacao, zer praf, grăsime din lapte, emulgator: lecitină din soia, aromă naturală de vanilie. Cacao: minimum 30%.",
+  "terms": [
+   "zahar",
+   "unt de cacao",
+   "lapte praf integral",
+   "masa de cacao",
+   "zer praf",
+   "grasime din lapte",
+   "lecitina din soia",
+   "aroma naturala de vanilie"
+  ],
+  "images": {
+   "flat": {
+    "file": "images/chocolate-flat.png",
+    "crop": [
+     0.0322,
+     0.4023,
+     0.9357,
+     0.2186
+    ]
+   },
+   "photo": {
+    "file": "images/chocolate-photo.jpg",
+    "crop": [
+     0.16,
+     0.4696,
+     0.6789,
+     0.0644
+    ]
+   }
+  }
+ },
+ "multilang": {
+  "truth": "amidon modificat, sare, maltodextrină, potențiatori de aromă (glutamat monosodic, inozinat disodic), grăsime de palmier, carne de pui 2%, arome, ceapă, colorant (caramel simplu).",
+  "terms": [
+   "amidon modificat",
+   "sare",
+   "maltodextrina",
+   "glutamat monosodic",
+   "inozinat disodic",
+   "grasime de palmier",
+   "carne de pui",
+   "arome",
+   "ceapa",
+   "caramel simplu"
+  ],
+  "images": {
+   "flat": {
+    "file": "images/multilang-flat.png",
+    "crop": [
+     0.0304,
+     0.3349,
+     0.9392,
+     0.1782
+    ]
+   },
+   "photo": {
+    "file": "images/multilang-photo.jpg",
+    "crop": [
+     0.1394,
+     0.4415,
+     0.7211,
+     0.0785
+    ]
+   }
+  }
+ }
+}

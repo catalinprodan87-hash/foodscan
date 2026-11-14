@@ -344,7 +344,7 @@ textarea:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; bo
 .type-selector { margin: 8px 0 4px; }
 .segmented {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* labels wrap instead of widening the page */
   gap: 4px;
   padding: 4px;
   border: 1px solid var(--border);
@@ -352,6 +352,8 @@ textarea:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; bo
   background: var(--bg);
 }
 .segmented button {
+  min-width: 0;
+  overflow-wrap: anywhere;
   border: 0;
   border-radius: 9px;
   background: transparent;
@@ -365,6 +367,10 @@ textarea:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; bo
   white-space: nowrap;
 }
 .segmented button.active { background: var(--teal); color: #fff; box-shadow: var(--shadow); }
+/* Narrow phones: icon above the label so three labels fit without overflowing. */
+@media (max-width: 380px) {
+  .segmented button { display: flex; flex-direction: column; align-items: center; gap: 1px; white-space: normal; font-size: 0.8rem; line-height: 1.15; padding: 6px 2px; }
+}
 .segmented button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
 .type-hint { margin: 6px 2px 0; }
 
@@ -626,7 +632,7 @@ main:focus { outline: none; }
 /* Bottom tab bar */
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); /* columns may shrink below the label width */
   max-width: 640px; margin: 0 auto;
   padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
   background: var(--surface); border-top: 1px solid var(--border);
@@ -636,6 +642,7 @@ main:focus { outline: none; }
   position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px;
   min-height: 48px; border: 0; border-radius: 10px; background: none;
   color: var(--muted); font: inherit; font-size: 0.72rem; font-weight: 600; cursor: pointer;
+  min-width: 0; padding: 4px 2px; text-align: center; line-height: 1.15; overflow-wrap: anywhere;
 }
 .tabbar button.active { color: var(--teal); background: var(--teal-soft); }
 @media (prefers-color-scheme: dark) { .tabbar button.active { color: #99f6e4; } }

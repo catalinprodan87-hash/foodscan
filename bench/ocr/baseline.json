@@ -1,0 +1,29 @@
+{
+ "date": "2026-11-14T16:38:47.794Z",
+ "summary": {
+  "flat/whole": {
+   "images": 6,
+   "recall": 100,
+   "cer": 0,
+   "medianMs": 2839
+  },
+  "flat/crop": {
+   "images": 6,
+   "recall": 100,
+   "cer": 0,
+   "medianMs": 1447
+  },
+  "photo/whole": {
+   "images": 6,
+   "recall": 77.8,
+   "cer": 0.337,
+   "medianMs": 3992
+  },
+  "photo/crop": {
+   "images": 6,
+   "recall": 81.9,
+   "cer": 0.147,
+   "medianMs": 1595
+  }
+ }
+}

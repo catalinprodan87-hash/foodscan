@@ -7,3 +7,6 @@ dev-dist/
 public/ocr/
 .bench/
 public/scan/
+bench/results/
+test-results/
+playwright-report/

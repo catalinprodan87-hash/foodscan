@@ -21,7 +21,7 @@ export default function TypeSelector({ lang, value, auto, onChange }) {
             className={type === value ? (auto ? 'suggested' : 'active') : ''}
             onClick={() => onChange(type)}
           >
-            <span aria-hidden="true">{ICONS[type]}</span> {t(lang, 'type_' + type)}
+            <span className="seg-icon" aria-hidden="true">{ICONS[type]}</span> <span className="seg-label">{t(lang, 'type_' + type)}</span>
           </button>
         ))}
       </div>

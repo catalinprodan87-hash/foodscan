@@ -1,0 +1,162 @@
+{
+ "_about": "Synthetic ingredient labels for the OCR benchmark. html: the label; the ingredients paragraph has class ing. truth: the ingredients text the app should extract. terms: key words (normalised: lowercase, no diacritics) that must be found. photo: distortions for the photo variant (curve 0-1, tilt degrees, keystone 0-1, blur px, glare 0-1, noise 0-255, bright factor, fill = label width / scene width).",
+ "labels": {
+  "tomato": {
+   "style": "background:#c0392b;color:#fff;font-family:Arial;width:620px",
+   "html": "<div style='font-size:34px;font-weight:bold'>PASTĂ DE TOMATE 28%</div><div style='font-size:16px'>Kaufland · 310 g</div><p class='ing' style='font-size:15px'><b>Ingrediente:</b> concentrat de tomate, apă, sare. Substanță uscată solubilă min. 28% (fără adaosul de sare). Produs pasteurizat.</p><p style='font-size:13px'>A se consuma de preferință înainte de: vezi capacul. După deschidere a se păstra la frigider 0-4°C.</p><p style='font-size:13px'>Valori nutriționale / 100 g: Valoare energetică 386 kJ / 92 kcal; Grăsimi 0,5 g; Glucide 16 g; Sare 1,5 g</p>",
+   "truth": "concentrat de tomate, apă, sare. Substanță uscată solubilă min. 28% (fără adaosul de sare). Produs pasteurizat.",
+   "terms": [
+    "concentrat de tomate",
+    "apa",
+    "sare"
+   ],
+   "photo": {
+    "curve": 0.55,
+    "tilt": -3,
+    "keystone": 0.04,
+    "blur": 0.6,
+    "glare": 0.25,
+    "noise": 10,
+    "bright": 1.0,
+    "fill": 0.62
+   }
+  },
+  "biscuits": {
+   "style": "background:#f6d34a;color:#222;font-family:Arial;width:700px",
+   "html": "<div style='font-size:26px;font-weight:bold'>BISCUIȚI CU CACAO</div><p class='ing' style='font-size:13px'><b>Ingrediente:</b> făină de grâu 52%, zahăr, ulei de palmier, sirop de glucoză-fructoză, cacao degresată 4,5%, amidon de porumb, agenți de afânare (carbonați de amoniu, carbonați de sodiu), emulgatori (lecitine din soia, E471), sare, arome, colorant: caramel amoniacal-sulfitic. Poate conține urme de lapte și ouă.</p><p style='font-size:12px'>A se păstra la loc uscat și răcoros. Valori nutriționale medii la 100 g: Valoare energetică 1950 kJ / 465 kcal</p>",
+   "truth": "făină de grâu 52%, zahăr, ulei de palmier, sirop de glucoză-fructoză, cacao degresată 4,5%, amidon de porumb, agenți de afânare (carbonați de amoniu, carbonați de sodiu), emulgatori (lecitine din soia, E471), sare, arome, colorant: caramel amoniacal-sulfitic.",
+   "terms": [
+    "faina de grau",
+    "zahar",
+    "ulei de palmier",
+    "sirop de glucoza-fructoza",
+    "cacao degresata",
+    "amidon de porumb",
+    "carbonati de amoniu",
+    "carbonati de sodiu",
+    "lecitine din soia",
+    "e471",
+    "sare",
+    "arome",
+    "caramel amoniacal-sulfitic"
+   ],
+   "photo": {
+    "curve": 0,
+    "tilt": 4,
+    "keystone": 0.12,
+    "blur": 0.5,
+    "glare": 0.15,
+    "noise": 8,
+    "bright": 1.0,
+    "fill": 0.8
+   }
+  },
+  "shampoo": {
+   "style": "background:#eef4f7;color:#1d3557;font-family:Helvetica,Arial;width:560px",
+   "html": "<div style='font-size:22px;font-weight:bold'>ȘAMPON ANTI-MATREAȚĂ 400 ml</div><p style='font-size:12px'>Mod de utilizare: aplicați pe părul umed, masați ușor, clătiți.</p><p class='ing' style='font-size:11px'>INGREDIENTS: AQUA, SODIUM LAURETH SULFATE, COCAMIDOPROPYL BETAINE, SODIUM CHLORIDE, GLYCERIN, PARFUM, ZINC PYRITHIONE, DIMETHICONE, SODIUM BENZOATE, METHYLCHLOROISOTHIAZOLINONE, METHYLISOTHIAZOLINONE, LIMONENE, LINALOOL, CI 42090.</p><p style='font-size:11px'>Fabricat în UE.</p>",
+   "truth": "AQUA, SODIUM LAURETH SULFATE, COCAMIDOPROPYL BETAINE, SODIUM CHLORIDE, GLYCERIN, PARFUM, ZINC PYRITHIONE, DIMETHICONE, SODIUM BENZOATE, METHYLCHLOROISOTHIAZOLINONE, METHYLISOTHIAZOLINONE, LIMONENE, LINALOOL, CI 42090.",
+   "terms": [
+    "aqua",
+    "sodium laureth sulfate",
+    "cocamidopropyl betaine",
+    "glycerin",
+    "parfum",
+    "zinc pyrithione",
+    "dimethicone",
+    "sodium benzoate",
+    "methylchloroisothiazolinone",
+    "methylisothiazolinone",
+    "limonene",
+    "linalool"
+   ],
+   "photo": {
+    "curve": 0.7,
+    "tilt": 2,
+    "keystone": 0.03,
+    "blur": 0.4,
+    "glare": 0.3,
+    "noise": 8,
+    "bright": 1.0,
+    "fill": 0.66
+   }
+  },
+  "detergent": {
+   "style": "background:#1e5aa8;color:#fff;font-family:Arial;width:600px",
+   "html": "<div style='font-size:24px;font-weight:bold'>Detergent lichid 2 L</div><p class='ing' style='font-size:13px'><b>Conține:</b> 5-15% agenți de suprafață anionici, &lt;5% agenți de suprafață neionici, săpun, fosfonați, enzime, parfumuri, Benzisothiazolinone, Methylisothiazolinone, Limonene.</p><p style='font-size:12px'>Mod de utilizare: dozați în funcție de duritatea apei. PERICOL: Provoacă iritarea gravă a ochilor.</p>",
+   "truth": "5-15% agenți de suprafață anionici, <5% agenți de suprafață neionici, săpun, fosfonați, enzime, parfumuri, Benzisothiazolinone, Methylisothiazolinone, Limonene.",
+   "terms": [
+    "agenti de suprafata anionici",
+    "agenti de suprafata neionici",
+    "sapun",
+    "fosfonati",
+    "enzime",
+    "parfumuri",
+    "benzisothiazolinone",
+    "methylisothiazolinone",
+    "limonene"
+   ],
+   "photo": {
+    "curve": 0,
+    "tilt": -7,
+    "keystone": 0.06,
+    "blur": 0.7,
+    "glare": 0.1,
+    "noise": 10,
+    "bright": 0.95,
+    "fill": 0.78
+   }
+  },
+  "chocolate": {
+   "style": "background:#3b1f12;color:#f3e3c3;font-family:Georgia,serif;width:640px",
+   "html": "<div style='font-size:24px'>Ciocolată cu lapte 100 g</div><p class='ing' style='font-size:13px'><b>Ingrediente:</b> zahăr, unt de cacao, lapte praf integral 20%, masă de cacao, zer praf, grăsime din lapte, emulgator: lecitină din soia, aromă naturală de vanilie. Cacao: minimum 30%.</p><p style='font-size:12px'>A se păstra la loc răcoros și uscat.</p>",
+   "truth": "zahăr, unt de cacao, lapte praf integral 20%, masă de cacao, zer praf, grăsime din lapte, emulgator: lecitină din soia, aromă naturală de vanilie. Cacao: minimum 30%.",
+   "terms": [
+    "zahar",
+    "unt de cacao",
+    "lapte praf integral",
+    "masa de cacao",
+    "zer praf",
+    "grasime din lapte",
+    "lecitina din soia",
+    "aroma naturala de vanilie"
+   ],
+   "photo": {
+    "curve": 0.15,
+    "tilt": 1,
+    "keystone": 0.05,
+    "blur": 0.4,
+    "glare": 0.55,
+    "noise": 8,
+    "bright": 1.05,
+    "fill": 0.74
+   }
+  },
+  "multilang": {
+   "style": "background:#ffffff;color:#111;font-family:Arial;width:680px",
+   "html": "<div style='font-size:22px;font-weight:bold'>Supă instant de pui</div><p class='ing' style='font-size:12px'><b>RO: Ingrediente:</b> amidon modificat, sare, maltodextrină, potențiatori de aromă (glutamat monosodic, inozinat disodic), grăsime de palmier, carne de pui 2%, arome, ceapă, colorant (caramel simplu).</p><p style='font-size:12px'><b>HU: Összetevők:</b> módosított keményítő, só, maltodextrin, ízfokozók (nátrium-glutamát).</p><p style='font-size:12px'><b>BG: Съставки:</b> модифицирано нишесте, сол, малтодекстрин.</p>",
+   "truth": "amidon modificat, sare, maltodextrină, potențiatori de aromă (glutamat monosodic, inozinat disodic), grăsime de palmier, carne de pui 2%, arome, ceapă, colorant (caramel simplu).",
+   "terms": [
+    "amidon modificat",
+    "sare",
+    "maltodextrina",
+    "glutamat monosodic",
+    "inozinat disodic",
+    "grasime de palmier",
+    "carne de pui",
+    "arome",
+    "ceapa",
+    "caramel simplu"
+   ],
+   "photo": {
+    "curve": 0,
+    "tilt": -2,
+    "keystone": 0.08,
+    "blur": 0.9,
+    "glare": 0.05,
+    "noise": 14,
+    "bright": 0.62,
+    "fill": 0.8
+   }
+  }
+ }
+}
