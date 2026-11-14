@@ -5,3 +5,5 @@ dev-dist/
 *.log
 .vite/
 public/ocr/
+.bench/
+public/scan/

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { t } from '../lib/i18n.js';
-import { loadImage, previewCanvas, prepareForOcr, imageSize } from '../lib/imagePrep.js';
+import { loadImage, previewCanvas, prepareColour, imageSize } from '../lib/imagePrep.js';
 import { extractIngredients, needsBetterPhoto } from '../lib/ocrText.js';
+import { correctWords } from '../lib/lexicon.js';
 import CropBox from './CropBox.jsx';
 import PhotoButton from './PhotoButton.jsx';
 import ProductHeader from './ProductHeader.jsx';
@@ -50,11 +51,12 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
     setStep('reading');
     setProgress({ phase: 'init', progress: 0 });
     try {
-      const canvas = prepareForOcr(imgRef.current, cropRect);
+      const canvas = prepareColour(imgRef.current, cropRect);
       const thumb = previewCanvas(canvas, 600).toDataURL('image/jpeg', 0.8);
       const { recognize } = await import('../lib/ocr.js');
-      const ocr = await recognize(canvas, { cropped: !!cropRect, onProgress: setProgress });
+      const ocr = await recognize(canvas, { onProgress: setProgress });
       const extracted = extractIngredients(ocr.text);
+      extracted.text = correctWords(extracted.text).text; // "sore" → "sare", restores diacritics
       setReview({ text: extracted.text, confidence: ocr.confidence, thumb, foundStart: extracted.foundStart });
       setStep('review');
     } catch (err) {
@@ -96,7 +98,9 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
     const pct = downloading
       ? (progress.total ? progress.loaded / progress.total : 0)
       : progress.phase === 'recognize' ? progress.progress : null;
-    const label = downloading ? 'ocrDownloading' : progress.phase === 'recognize' ? 'ocrReading' : 'ocrPreparing';
+    const label = downloading ? 'ocrDownloading'
+      : progress.phase === 'recognize' ? 'ocrReading'
+      : progress.phase === 'detect' ? 'ocrDetecting' : 'ocrPreparing';
     return (
       <div className="result photo-flow">
         {header}

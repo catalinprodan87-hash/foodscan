@@ -5,6 +5,7 @@ import { NovaCard } from './Result.jsx';
 import AdditiveList from './AdditiveList.jsx';
 import PhotoButton from './PhotoButton.jsx';
 import { AddProductLinks } from './ResultExtras.jsx';
+import { editProductUrl } from '../lib/share.js';
 
 export function LookupLoading({ lang, code, onCancel }) {
   return (
@@ -70,6 +71,12 @@ export function NoIngredients({ lang, product, partial, onAnalyze, onPhoto, onBa
         <h2 className="card-title">📝 {t(lang, 'noIngredientsTitle')}</h2>
         <p>{t(lang, 'noIngredientsText', { source: product.source })}</p>
         <PhotoButton lang={lang} onPhoto={onPhoto} className="btn primary block" />
+        <p className="small muted">
+          {t(lang, 'noIngredientsHelp')}{' '}
+          <a className="source-link" href={editProductUrl(product.productType, product.code)} target="_blank" rel="noopener noreferrer">
+            {t(lang, 'completeOn', { source: product.source })} ↗
+          </a>
+        </p>
         <PastePrompt lang={lang} onAnalyze={onAnalyze} placeholderKey={placeholderKey} />
       </section>
       {food && partial && (product.nova || product.nutriscore) && (

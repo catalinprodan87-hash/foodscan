@@ -31,22 +31,30 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 
 ### Barcode scanning and lookup (phase 2)
 
-- **Scanner** (`src/lib/scanner.js`, lazy-loaded with the overlay): `@zxing/browser` + `@zxing/library`, EAN-13 / EAN-8 / UPC-A / UPC-E only, back camera (`facingMode: environment`), full-screen overlay with a scan frame, vibration on detection. The camera stops as soon as a code is read, when the overlay closes (✕, Escape) and when the page goes to the background. UPC-E is expanded to UPC-A before lookup.
-- **Fallbacks:** camera denied / missing / busy / insecure page → RO/EN message with manual entry and "read from a photo" (`decodeImageFile`: tries the photo as-is and rotated 90°, downscaled to 1600 px). Typed codes are checked (8/12/13/14 digits + check digit).
+- **Scanner** (`src/lib/scanner.js`, lazy-loaded): the browser's own `BarcodeDetector` where it exists (Chrome on Android – Google's detector), otherwise **ZXing-C++ compiled to WebAssembly** (`zxing-wasm`, self-hosted at `scan/zxing_reader.wasm`, 0.9 MB, precached). EAN-13 / EAN-8 / UPC-A / UPC-E. The main back lens is chosen on phones with several (ultra-wide lenses cannot focus close), with continuous autofocus, 1080p, slight zoom and a torch button. Without a native detector, frames cycle through fast / full-resolution / ±30° tilted decoding. The camera stops as soon as a code is accepted, when the overlay closes and when the page is hidden.
+- **No misreads:** every code must pass its check digit; the camera needs the same code in two frames, photos need two agreeing decoding passes (`camera.js`). UPC-E is expanded to UPC-A.
+- **Photos of barcodes:** native detector, then ZXing-C++ on several scales, crops, sharpened and rotated versions. Benchmark on 24 deliberately bad photos (small, tilted 40°, curved jar, blur, glare, noise, JPEG q 0.3, clutter): **23/24 read, 0 wrong** (the old zxing-js reader: 14/24). Live camera (fake-camera test, no native detector): 4/5 hard frames in 1–2 s.
 - **Lookup** (`src/lib/lookup.js`): the chosen product type's database is queried first; with auto or no match, the others follow in the order OFF → OBF → OPF. The database that finds the product (or the product's own `product_type`) sets the product type. Each request has an 8 s `AbortController` timeout; nothing found + any failed request → "error" with a retry button, otherwise "not found".
 - **Results:** product name, brand, quantity, image and barcode, a "View on Open … Facts" link, and the analysis (food also uses `additives_tags`, `nova_group`, `nutriscore_grade`). Not found or no ingredients → prompt to paste the ingredients; the barcode is kept with the analysis.
 - **Offline:** Open \*Facts API responses are cached by the service worker (NetworkFirst, 14 days, 300 entries).
-- **Known library issue:** `@zxing/browser` 0.2.1's `TRY_HARDER` rotation pass is broken (`HTMLCanvasElementLuminanceSource.rotate` keeps the old width/height), so it is not used; photos are rotated by the app instead.
 
-### Photo of the ingredients – on-device OCR (phase 3)
+### Photo of the ingredients – on-device OCR
 
-- **Entry points:** "Fotografiază ingredientele" on the home screen (`capture=environment`), and on the barcode screens "Produs negăsit" / "Lipsește lista de ingrediente" / lookup error, where the text is attached to that barcode (name, image and database scores are kept).
-- **Preprocessing** (`src/lib/imagePrep.js`): EXIF orientation applied on decode, optional crop (draggable, resizable box – or skip), long side downscaled to 2000 px, grayscale and a 2–98 % contrast stretch.
-- **OCR** (`src/lib/ocr.js`): tesseract.js 5 in a Web Worker, languages `ron` + `eng`, LSTM engine; page layout "single block" for a cropped box, automatic otherwise. tesseract.js is a dynamic import, loaded only when a photo is taken. **The photo never leaves the phone.**
-- **Self-hosted engine:** `scripts/copy-ocr-assets.mjs` (runs before `dev` / `build`) copies the worker, both LSTM WASM cores (SIMD and plain) and the `ron`/`eng` language data (`4.0.0_best_int`) from npm into `public/ocr/` (git-ignored). No third-party CDN. A device downloads about 8 MB once (one core + two languages) with a real progress bar ("Descarc cititorul de text (doar prima dată)…"); the service worker keeps it (CacheFirst, 90 days) so later photos work offline. The OCR files are excluded from the precache.
-- **Text extraction** (`src/lib/ocrText.js`): starts at `Ingrediente:` / `Compoziție:` (preferred), `Ingredients:`, `INCI:`, or `Conține:` (detergents); stops before "Poate conține", storage / usage / producer text, the nutrition table (`Valori nutriționale`, `kJ`/`kcal` lines), hazard codes (H319, P102, EUH208), and other languages' blocks (`HU:`, `Összetevők`, Cyrillic text …). Joins broken lines, undoes end-of-line hyphenation (keeping compounds such as `glucoză-fructoză`), fixes OCR errors in E-codes.
-- **Review screen:** photo thumbnail, editable text, "Analizează" / "Fă altă poză"; a tip (closer, flat label, good light, no glare) when confidence is under 55 % or the text is very short. The result is labelled "citit din fotografie".
-- **Product type:** the barcode lookup's type, else the user's choice, else detected from the text (`buildRequest()` in `src/lib/request.js`).
+- **Engine:** PaddleOCR PP-OCRv4 (text detector + English/Latin recogniser, `paddle-ocr-onnx-models`) on ONNX Runtime Web (WebAssembly) in a Web Worker (`src/workers/ocrWorker.js`, maths in `src/lib/paddleCore.js`). Text lines are cut along their own angle, so tilted and curved labels read line by line. **The photo never leaves the phone.**
+- **Why PaddleOCR:** benchmark on six realistic hard label photos (curved red jar with glare, small print, glossy, white-on-blue, multilingual RO/HU/BG, dim and noisy), share of key ingredients read correctly:
+
+  | | Uncropped photo | Cropped to the label |
+  |---|---|---|
+  | Tesseract 5 (v1.0) | 40 % | 91 % |
+  | **PaddleOCR (now)** | **94–97 %** | **98 %** |
+
+- **Self-hosted engine** (`scripts/copy-ocr-assets.mjs`, runs before `dev` / `build`): ONNX Runtime wasm (14 MB) + detector (4.7 MB) + recogniser (7.7 MB) + character list in `public/ocr/` (git-ignored). About 25 MB once, with a real progress bar; then kept by the service worker (CacheFirst, 90 days) for offline use. Not precached.
+- **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
+- **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
+
+### Products without ingredients in Open Food Facts
+
+Checked on real data: the Kaufland tomato paste 5949069402286 is in Open Food Facts with name, brand and photo, but no ingredients in any language and no photo of the ingredients panel. Of 100 recently updated Romanian products, 40 had ingredients and 60 had neither text nor an ingredients photo; none had the list only in another language. So the app makes the photo the main action on that screen, keeps the product's name, image and scores in the result, and offers "Copy the ingredients" + "Complete it on Open Food Facts" (the product's edit page) so the next person gets a result straight from the barcode.
 
 ### History, avoid list, install & polish (phase 4)
 
@@ -74,7 +82,8 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 ├── index.html                 # HTML entry
 ├── vite.config.js             # Vite + React + vite-plugin-pwa (base: './')
 ├── public/icons/              # App icons (SVG + PNG for the manifest)
-├── public/ocr/                # Generated: self-hosted OCR engine + language data (git-ignored)
+├── public/ocr/, public/scan/  # Generated: self-hosted OCR and barcode engines (git-ignored)
+├── src/workers/ocrWorker.js   # PaddleOCR in a Web Worker
 ├── scripts/copy-ocr-assets.mjs
 ├── src/
 │   ├── main.jsx               # React entry
@@ -113,9 +122,11 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 │   └── lib/
 │       ├── analyze.js         # Analysis engine (pure, runs in Node too)
 │       ├── lookup.js          # Open *Facts lookup, field mapping, barcode helpers
-│       ├── camera.js          # Scan formats, camera constraints, error classification
-│       ├── scanner.js         # zxing camera + photo decoding (lazy-loaded)
-│       ├── ocr.js             # tesseract.js worker, self-hosted assets, download progress
+│       ├── camera.js          # Camera choice, misread protection, formats, camera errors
+│       ├── scanner.js         # Barcode camera + photo decoding (native / ZXing-C++, lazy-loaded)
+│       ├── ocr.js             # OCR engine download (progress) + Web Worker client
+│       ├── paddleCore.js      # PaddleOCR maths: line boxes, CTC decoding, reading order
+│       ├── lexicon.js         # Ingredient word list: OCR slip correction, diacritics
 │       ├── ocrText.js         # Ingredients section extraction + OCR text cleaning
 │       ├── imagePrep.js       # EXIF, crop, downscale, grayscale, contrast
 │       ├── request.js         # What to analyse (paste / photo / barcode), product type
@@ -130,8 +141,9 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 │   ├── nonfood.test.js        # non-food database checks
 │   ├── producttype.test.js    # productType routing, auto-detection, non-food presets
 │   ├── lookup.test.js         # lookup routing (mocked fetch), field mapping, barcodes, camera errors
-│   ├── ocr.test.js            # label text extraction, merge into barcode results, mocked tesseract, preprocessing
-│   └── phase4.test.js         # history, avoid list import/export & per-type entries, highlighting, share, install, contrast
+│   ├── ocr.test.js            # label text extraction, merge into barcode results, mocked OCR worker, PaddleOCR maths, word correction
+│   ├── phase4.test.js         # history, avoid list import/export & per-type entries, highlighting, share, install, contrast
+│   └── scan.test.js           # camera choice, misread protection, barcode format names
 └── .github/workflows/deploy.yml  # Build + deploy to GitHub Pages on push to main
 ```
 

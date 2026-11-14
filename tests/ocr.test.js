@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 
 import { extractIngredients, cleanOcrText, findStart, needsBetterPhoto } from '../src/lib/ocrText.js';
 import { buildRequest } from '../src/lib/request.js';
-import { ocrAssets, ensureOcrAssets, getWorker, recognize, resetOcr, mapTesseractProgress, OCR_LANGS } from '../src/lib/ocr.js';
-import { fitSize, cropPixels, grayscaleContrast } from '../src/lib/imagePrep.js';
+import { ocrAssets, ensureOcrAssets, getEngine, recognize, resetOcr } from '../src/lib/ocr.js';
+import { detSize, linesFromProbMap, ctcDecode, joinLines } from '../src/lib/paddleCore.js';
+import { correctWords } from '../src/lib/lexicon.js';
+import { fitSize, cropPixels } from '../src/lib/imagePrep.js';
 import { mapProduct, analyzeInput } from '../src/lib/lookup.js';
 import { analyze } from '../src/lib/analyze.js';
 
@@ -225,38 +227,44 @@ describe('buildRequest(): photo text into the analysis', () => {
   });
 });
 
-// ─────────────────────────── OCR engine (mocked) ──────────────────────────
-describe('OCR engine with mocked tesseract', () => {
+// ───────────────────────── OCR engine (mocked worker) ─────────────────────
+describe('OCR engine with a mocked PaddleOCR worker', () => {
   const BASE = 'https://example.github.io/foodscan/';
-  let created;
-  let recognized;
+  let workers;
   let fetched;
 
-  function mockTesseract({ text = FOOD_RO_HU_BG, confidence = 78.4 } = {}) {
-    return async () => ({
-      default: {
-        createWorker: async (langs, oem, options) => {
-          created.push({ langs, oem, options });
-          options.logger?.({ status: 'loading tesseract core', progress: 1 });
-          return {
-            setParameters: async (p) => { recognized.push({ params: p }); },
-            recognize: async (image) => {
-              options.logger?.({ status: 'recognizing text', progress: 0.5 });
-              recognized.push({ image });
-              return { data: { text, confidence } };
-            },
-            terminate: async () => {},
-          };
+  /** Fake Web Worker speaking the ocrWorker.js protocol. */
+  function mockWorker({ text = FOOD_RO_HU_BG, confidence = 91.6, failInit = false } = {}) {
+    return () => {
+      const w = {
+        posted: [],
+        terminated: false,
+        postMessage(msg, transfer) {
+          w.posted.push({ msg, transfer });
+          queueMicrotask(() => {
+            if (msg.type === 'init') {
+              w.onmessage({ data: { type: 'progress', phase: 'init', progress: 0 } });
+              w.onmessage({ data: failInit ? { type: 'error', message: 'wasm failed' } : { type: 'ready' } });
+            } else if (msg.type === 'recognize') {
+              w.onmessage({ data: { type: 'progress', phase: 'detect', progress: 0 } });
+              w.onmessage({ data: { type: 'progress', phase: 'recognize', progress: 0.5 } });
+              w.onmessage({ data: { type: 'result', id: msg.id, text, confidence, lines: 7 } });
+            }
+          });
         },
-      },
-    });
+        terminate() { w.terminated = true; },
+      };
+      workers.push(w);
+      return w;
+    };
   }
 
   const sizes = {
-    'core/tesseract-core-simd-lstm.wasm.js': 40,
-    'core/tesseract-core-lstm.wasm.js': 40,
-    'lang/ron.traineddata.gz': 20,
-    'lang/eng.traineddata.gz': 30,
+    'ort/ort-wasm-simd-threaded.wasm': 50,
+    'ort/ort-wasm-simd-threaded.mjs': 2,
+    'paddle/det.onnx': 20,
+    'paddle/rec.onnx': 26,
+    'paddle/dict.txt': 2,
   };
   function mockFetch() {
     return async (url) => {
@@ -272,95 +280,173 @@ describe('OCR engine with mocked tesseract', () => {
 
   beforeEach(async () => {
     await resetOcr();
-    created = [];
-    recognized = [];
+    workers = [];
     fetched = [];
   });
 
-  test('self-hosted asset URLs per core variant', () => {
-    const a = ocrAssets(BASE, true);
-    assert.equal(a.worker, 'https://example.github.io/foodscan/ocr/worker.min.js');
-    assert.equal(a.core, 'https://example.github.io/foodscan/ocr/core/tesseract-core-simd-lstm.wasm.js');
-    assert.equal(a.langPath, 'https://example.github.io/foodscan/ocr/lang');
-    assert.deepEqual(a.downloads.slice(1), [
-      'https://example.github.io/foodscan/ocr/lang/ron.traineddata.gz',
-      'https://example.github.io/foodscan/ocr/lang/eng.traineddata.gz',
-    ]);
-    assert.ok(ocrAssets(BASE, false).core.endsWith('/tesseract-core-lstm.wasm.js'));
+  test('self-hosted asset URLs (no third-party CDN)', () => {
+    const a = ocrAssets(BASE);
+    assert.equal(a.ortDir, 'https://example.github.io/foodscan/ocr/ort/');
+    assert.equal(a.det, 'https://example.github.io/foodscan/ocr/paddle/det.onnx');
+    assert.equal(a.rec, 'https://example.github.io/foodscan/ocr/paddle/rec.onnx');
+    assert.equal(a.dict, 'https://example.github.io/foodscan/ocr/paddle/dict.txt');
+    assert.equal(a.downloads.length, 5);
+    assert.ok(a.downloads.every((u) => u.startsWith(BASE)));
   });
 
-  test('first use: downloads engine + ron/eng with byte progress, then recognises', async () => {
+  test('first use: downloads the engine with byte progress, then recognises in the worker', async () => {
     const progress = [];
-    const r = await recognize('IMAGE', {
-      loadTesseract: mockTesseract(), baseUrl: BASE, simdImpl: async () => true,
-      fetchImpl: mockFetch(), cachesImpl: emptyCache, onProgress: (p) => progress.push(p),
+    const r = await recognize({ fake: 'bitmap' }, {
+      createWorker: mockWorker(), baseUrl: BASE, fetchImpl: mockFetch(), cachesImpl: emptyCache, onProgress: (p) => progress.push(p),
     });
-    assert.equal(r.confidence, 78);
+    assert.equal(r.confidence, 92);
+    assert.equal(r.lines, 7);
     assert.ok(r.text.includes('Ingrediente'));
     const downloads = progress.filter((p) => p.phase === 'download');
-    assert.deepEqual(downloads[0], { phase: 'download', loaded: 0, total: 90 });
-    assert.deepEqual(downloads.at(-1), { phase: 'download', loaded: 90, total: 90 });
-    assert.ok(progress.some((p) => p.phase === 'recognize' && p.progress === 0.5));
-    assert.deepEqual(fetched.filter((u) => !u.endsWith('manifest.json')), ocrAssets(BASE, true).downloads);
-
-    assert.equal(created.length, 1);
-    const { langs, oem, options } = created[0];
-    assert.deepEqual(langs, ['ron', 'eng']);
-    assert.deepEqual(OCR_LANGS, ['ron', 'eng']);
-    assert.equal(oem, 1);
-    assert.equal(options.workerBlobURL, false);
-    assert.equal(options.workerPath, 'https://example.github.io/foodscan/ocr/worker.min.js');
-    assert.equal(options.cacheMethod, 'none');
-    assert.equal(recognized.at(-1).image, 'IMAGE');
+    assert.deepEqual(downloads[0], { phase: 'download', loaded: 0, total: 100 });
+    assert.deepEqual(downloads.at(-1), { phase: 'download', loaded: 100, total: 100 });
+    assert.deepEqual(progress.filter((p) => p.phase !== 'download').map((p) => p.phase), ['init', 'detect', 'recognize']);
+    assert.deepEqual(fetched.filter((u) => !u.endsWith('manifest.json')), ocrAssets(BASE).downloads);
+    const [init, rec] = workers[0].posted.map((x) => x.msg);
+    assert.equal(init.type, 'init');
+    assert.equal(init.assets.det, ocrAssets(BASE).det);
+    assert.equal(rec.type, 'recognize');
+    assert.deepEqual(rec.bitmap, { fake: 'bitmap' });
   });
 
-  test('cached engine: no download, no download progress', async () => {
+  test('cached engine: no download and no download progress', async () => {
     const progress = [];
-    await recognize('IMG', {
-      loadTesseract: mockTesseract(), baseUrl: BASE, simdImpl: async () => false,
-      fetchImpl: mockFetch(), cachesImpl: fullCache, onProgress: (p) => progress.push(p),
-    });
+    await recognize({}, { createWorker: mockWorker(), baseUrl: BASE, fetchImpl: mockFetch(), cachesImpl: fullCache, onProgress: (p) => progress.push(p) });
     assert.deepEqual(fetched, []);
     assert.ok(!progress.some((p) => p.phase === 'download'));
   });
 
   test('the worker is created once and reused for later photos', async () => {
-    const opts = { loadTesseract: mockTesseract(), baseUrl: BASE, simdImpl: async () => true, fetchImpl: mockFetch(), cachesImpl: fullCache };
-    await recognize('A', opts);
-    await recognize('B', { ...opts, cropped: true });
-    assert.equal(created.length, 1);
-    const params = recognized.filter((x) => x.params).map((x) => x.params.tessedit_pageseg_mode);
-    assert.deepEqual(params, ['3', '6']);
+    const opts = { createWorker: mockWorker(), baseUrl: BASE, fetchImpl: mockFetch(), cachesImpl: fullCache };
+    await recognize({}, opts);
+    await recognize({}, opts);
+    assert.equal(workers.length, 1);
+    assert.deepEqual(workers[0].posted.map((x) => x.msg.type), ['init', 'recognize', 'recognize']);
+  });
+
+  test('ImageBitmaps are transferred to the worker, not copied', async () => {
+    const bitmap = { close() {} };
+    await recognize(bitmap, { createWorker: mockWorker(), baseUrl: BASE, fetchImpl: mockFetch(), cachesImpl: fullCache });
+    assert.deepEqual(workers[0].posted[1].transfer, [bitmap]);
   });
 
   test('a failed start can be retried', async () => {
-    const failing = async () => { throw new Error('offline'); };
-    const opts = { baseUrl: BASE, simdImpl: async () => true, fetchImpl: mockFetch(), cachesImpl: fullCache };
-    await assert.rejects(getWorker({ ...opts, loadTesseract: failing }));
+    const opts = { baseUrl: BASE, fetchImpl: mockFetch(), cachesImpl: fullCache };
+    await assert.rejects(getEngine({ ...opts, createWorker: mockWorker({ failInit: true }) }), /wasm failed/);
     await new Promise((r) => setTimeout(r, 0));
-    const w = await getWorker({ ...opts, loadTesseract: mockTesseract() });
-    assert.ok(w.recognize);
+    const engine = await getEngine({ ...opts, createWorker: mockWorker() });
+    assert.ok(engine.recognize);
   });
 
   test('download errors are reported', async () => {
     const bad = async (url) => (url.endsWith('manifest.json') ? { ok: true, json: async () => ({ sizes }) } : { ok: false, status: 404 });
-    await assert.rejects(
-      ensureOcrAssets(ocrAssets(BASE, true), { fetchImpl: bad, cachesImpl: emptyCache }),
-      /HTTP 404/,
+    await assert.rejects(ensureOcrAssets(ocrAssets(BASE), { fetchImpl: bad, cachesImpl: emptyCache }), /HTTP 404/);
+  });
+});
+
+// ─────────────────────────── PaddleOCR pipeline maths ─────────────────────
+describe('PaddleOCR pipeline (pure parts)', () => {
+  /** Probability map with filled parallelograms = slanted text lines. */
+  function mapWithLines(w, h, lines) {
+    const prob = new Float32Array(w * h);
+    for (const { x0, x1, y0, thick, slope } of lines) {
+      for (let x = x0; x <= x1; x++) {
+        const yc = y0 + (x - x0) * slope;
+        for (let y = Math.round(yc); y < Math.round(yc) + thick; y++) prob[y * w + x] = 0.9;
+      }
+    }
+    return prob;
+  }
+
+  test('detector input: long side ≤ 1920 and multiples of 32', () => {
+    assert.deepEqual(detSize(4000, 3000), { w: 1920, h: 1440 });
+    assert.deepEqual(detSize(1000, 333), { w: 1024, h: 352 });
+  });
+
+  test('three tilted lines stay three separate, slanted boxes (not one tall box)', () => {
+    // 4° tilt over 300 px = 21 px rise > line pitch 14 px: upright boxes would overlap
+    const slope = Math.tan((4 * Math.PI) / 180);
+    const prob = mapWithLines(400, 120, [
+      { x0: 40, x1: 340, y0: 20, thick: 6, slope },
+      { x0: 40, x1: 340, y0: 34, thick: 6, slope },
+      { x0: 40, x1: 260, y0: 48, thick: 6, slope },
+    ]);
+    const boxes = linesFromProbMap(prob, 400, 120, 1, 1);
+    assert.equal(boxes.length, 3);
+    for (const b of boxes) {
+      assert.ok(Math.abs(b.angle - Math.atan(slope)) < 0.01, `angle ${b.angle}`);
+      // the detector marks a shrunk core; "unclip" grows it back to text height,
+      // but the box stays far thinner than an upright box (6 + 21 px rise)
+      assert.ok(b.thick < 6 + 21, `thick ${b.thick}`);
+    }
+    const centres = boxes.map((b) => b.cy).sort((a, b) => a - b);
+    assert.ok(Math.abs(centres[1] - centres[0] - 14) < 1.5, 'each box is centred on its own line');
+    assert.ok(boxes[0].len > 300 && boxes[2].len < boxes[0].len);
+  });
+
+  test('map → source scaling and noise filtering', () => {
+    const prob = mapWithLines(200, 60, [{ x0: 10, x1: 190, y0: 20, thick: 8, slope: 0 }]);
+    prob[5] = 0.9; // a lone speck
+    const boxes = linesFromProbMap(prob, 200, 60, 2, 2);
+    assert.equal(boxes.length, 1);
+    assert.ok(Math.abs(boxes[0].cx - 200) < 3 && Math.abs(boxes[0].cy - 47) < 3);
+  });
+
+  test('CTC decoding: blanks dropped, repeats collapsed, dictionary offset by one', () => {
+    const dict = ['a', 'b', 'c', ' '];
+    const seq = [1, 1, 0, 1, 2, 2, 0, 4, 3]; // a a _ a b b _ ' ' c → "aab c"
+    const C = 5;
+    const probs = new Float32Array(seq.length * C);
+    seq.forEach((c, t) => { probs[t * C + c] = 0.9; });
+    const r = ctcDecode(probs, seq.length, C, dict);
+    assert.equal(r.text, 'aab c');
+    assert.ok(Math.abs(r.conf - 0.9) < 1e-6);
+  });
+
+  test('reading order: lines top to bottom, pieces left to right, low confidence dropped', () => {
+    const item = (cx, cy, text, conf = 0.9) => ({ cx, cy, angle: 0, len: 100, thick: 20, text, conf });
+    const r = joinLines([item(300, 52, 'de grâu,'), item(150, 50, 'făină'), item(150, 90, 'zahăr'), item(400, 92, '???', 0.2)]);
+    assert.equal(r.text, 'făină de grâu,\nzahăr');
+    assert.equal(r.confidence, 90);
+  });
+});
+
+// ─────────────────────────────── word correction ──────────────────────────
+describe('ingredient word correction', () => {
+  test('fixes one-edit OCR slips and restores diacritics', () => {
+    assert.equal(correctWords('concentrat de tomate, apa, sore. Produs posteurizat.').text, 'concentrat de tomate, apă, sare. Produs pasteurizat.');
+    assert.equal(correctWords('faina de grau, zahar, ulei de palmier').text, 'făină de grâu, zahăr, ulei de palmier');
+    assert.equal(correctWords('METHYLISOTHIAZOLlNONE, LINALOOL').text, 'METHYLISOTHIAZOLINONE, LINALOOL');
+  });
+
+  test('splits two known words glued together where ", " was lost', () => {
+    assert.equal(
+      correctWords('sirop de glucoză-fructozacacao, maltodextrinapotentiatori de aromă (glutamat monosodicinozinat disodic)').text,
+      'sirop de glucoză-fructoză cacao, maltodextrină potențiatori de aromă (glutamat monosodic inozinat disodic)',
     );
   });
 
-  test('tesseract logger mapping', () => {
-    assert.deepEqual(mapTesseractProgress({ status: 'recognizing text', progress: 0.3 }), { phase: 'recognize', progress: 0.3 });
-    assert.equal(mapTesseractProgress({ status: 'initializing api', progress: 1 }).phase, 'init');
+  test('never changes real words or short codes (no invented additives)', () => {
+    const t = 'nitrat de tomate, BHA, E471, lapte, ouă';
+    assert.equal(correctWords(t).text, t);
+  });
+
+  test('ambiguous slips are left alone', () => {
+    const r = correctWords('xqzt');
+    assert.deepEqual(r.changes, []);
   });
 });
 
 // ───────────────────────────── preprocessing ──────────────────────────────
 describe('image preprocessing (pure parts)', () => {
-  test('downscale the long side to ~2000 px, never upscale', () => {
-    assert.deepEqual(fitSize(4000, 3000), { width: 2000, height: 1500, scale: 0.5 });
-    assert.deepEqual(fitSize(3024, 4032), { width: 1500, height: 2000, scale: 2000 / 4032 });
+  test('downscale the long side to 3000 px, never upscale', () => {
+    assert.deepEqual(fitSize(4000, 3000), { width: 3000, height: 2250, scale: 0.75 });
+    assert.deepEqual(fitSize(3024, 4032), { width: 2250, height: 3000, scale: 3000 / 4032 });
     assert.deepEqual(fitSize(800, 600), { width: 800, height: 600, scale: 1 });
   });
 
@@ -370,24 +456,4 @@ describe('image preprocessing (pure parts)', () => {
     assert.deepEqual(cropPixels(null, 640, 480), { sx: 0, sy: 0, sw: 640, sh: 480 });
   });
 
-  test('grayscale + contrast stretch maps the 2–98 % range to 0–255', () => {
-    // 100 pixels: a dull grey image between 100 and 150 (low contrast photo)
-    const px = [];
-    for (let i = 0; i < 100; i++) {
-      const v = 100 + Math.round((i / 99) * 50);
-      px.push(v, v, v, 255);
-    }
-    const rgba = new Uint8ClampedArray(px);
-    const { lo, hi } = grayscaleContrast(rgba);
-    assert.ok(lo <= 102 && hi >= 148);
-    assert.equal(rgba[0], 0); // darkest → black
-    assert.equal(rgba[rgba.length - 4], 255); // brightest → white
-    assert.equal(rgba[1], rgba[0]); // grey: R = G = B
-  });
-
-  test('colour is converted with luma weights', () => {
-    const rgba = new Uint8ClampedArray([255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255]);
-    grayscaleContrast(rgba, { low: 0, high: 1 });
-    assert.ok(rgba[4] > rgba[0] && rgba[0] > rgba[8]); // green brighter than red brighter than blue
-  });
 });

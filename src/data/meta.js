@@ -12,6 +12,13 @@ export const PRODUCT_SOURCES = [
   { name: 'Open Products Facts', url: 'https://world.openproductsfacts.org', licence: 'ODbL' },
 ];
 
+/** Open-source engines that run on the phone. */
+export const SOFTWARE = [
+  { name: 'PaddleOCR (PP-OCRv4)', licence: 'Apache-2.0', url: 'https://github.com/PaddlePaddle/PaddleOCR' },
+  { name: 'ONNX Runtime Web', licence: 'MIT', url: 'https://github.com/microsoft/onnxruntime' },
+  { name: 'ZXing-C++ (zxing-wasm)', licence: 'Apache-2.0', url: 'https://github.com/zxing-cpp/zxing-cpp' },
+];
+
 /** EU rules and scientific bodies cited in the ingredient databases. */
 export const REFERENCES = [
   { id: 'reg-1333', en: 'Regulation (EC) 1333/2008 – food additives', ro: 'Regulamentul (CE) 1333/2008 – aditivi alimentari', url: 'https://eur-lex.europa.eu/eli/reg/2008/1333/oj' },

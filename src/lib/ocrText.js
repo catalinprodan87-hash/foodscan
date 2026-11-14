@@ -21,7 +21,7 @@ import { normalize, stripDiacritics, fixOcrInECodes } from './analyze.js';
  * Patterns run on normalised text (lowercase, no diacritics).
  */
 const START_GROUPS = [
-  { kind: 'ro', re: /(?<![a-z0-9])(?:[il1|]ngrediente|compozitie|compozitia)(?![a-z0-9])\s*(?:\(inci\))?\s*[:;.]?/ },
+  { kind: 'ro', re: /(?<![a-z0-9])(?:[il1|]ngrediente|compozitie|compozitia)(?:(?![a-z0-9])\s*(?:\(inci\))?\s*[:;.]?|(?=[a-km-z]{3}))/ }, // also "Ingredientezahar" (colon and space lost), not "ingredientele"
   { kind: 'en', re: /(?<![a-z0-9])(?:[il1|]ngredients|composition)(?![a-z0-9])\s*(?:\(inci\))?\s*[:;.]?/ },
   { kind: 'inci', re: /(?<![a-z0-9])[il1|]nci(?![a-z0-9])\s*[:;]/ },
   // "Conține:" needs the colon, so "Poate conține urme de…" is not a start.
@@ -33,6 +33,51 @@ export function findStart(raw) {
   for (const g of START_GROUPS) {
     const m = g.re.exec(norm);
     if (m) return { kind: g.kind, index: m.index, end: m.index + m[0].length, marker: raw.slice(m.index, m.index + m[0].length).trim() };
+  }
+  return findFuzzyStart(raw, norm);
+}
+
+/** Edit distance (small strings only). */
+export function levenshtein(a, b) {
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
+const FUZZY_TARGETS = [
+  { word: 'ingrediente', kind: 'ro' },
+  { word: 'compozitie', kind: 'ro' },
+  { word: 'ingredients', kind: 'en' },
+  { word: 'contine', kind: 'contains' },
+];
+
+/*
+ * Badly read headings, used only when no exact heading exists:
+ * "ngrec lente:" (2 fragments, 3 edits from "ingrediente") or a truncated
+ * "...nte:" / "dients:" at the start of a line.
+ */
+function findFuzzyStart(raw, norm) {
+  const re = /([a-z0-9|]+(?:[ \t]+[a-z0-9|]+)?)[ \t]*:/g;
+  let m;
+  while ((m = re.exec(norm)) !== null) {
+    const frag = m[1].replace(/[\s|]+/g, '');
+    const lineStart = norm.lastIndexOf('\n', m.index) + 1;
+    const atLineStart = !norm.slice(lineStart, m.index).replace(/[^a-z0-9]/g, '');
+    for (const target of FUZZY_TARGETS) {
+      const d = levenshtein(frag, target.word);
+      const close = frag.length >= 6 && d <= Math.max(2, Math.floor(target.word.length * 0.3));
+      const truncated = atLineStart && frag.length >= 3 && frag.length < target.word.length && target.word.endsWith(frag) && target.kind !== 'contains';
+      if (close || truncated) {
+        const end = m.index + m[0].length;
+        return { kind: target.kind, index: m.index, end, marker: raw.slice(m.index, end).trim(), fuzzy: true };
+      }
+    }
   }
   return null;
 }
@@ -52,7 +97,8 @@ const STOP_PHRASES = [
   'a nu se', 'se pastreaza', 'pastrare', 'conditii de pastrare', 'mod de utilizare', 'mod de folosire',
   'mod de preparare', 'mod de administrare', 'mod de intrebuintare', 'instructiuni', 'store in', 'store at',
   'keep in', 'keep out', 'keep away', 'best before', 'use by', 'directions', 'how to use',
-  'consumati de preferinta', 'a se consuma de preferinta', 'expira', 'data expirarii',
+  'consumati de preferinta', 'a se consuma de preferinta', 'consuma de preferinta', 'de preferinta inainte',
+  'expira', 'data expirarii',
   'termen de valabilitate', 'valabil pana',
   // producer, lot, quantity
   'lot', 'produs in', 'produs de', 'fabricat in', 'fabricat de', 'made in', 'producator', 'importator',
@@ -77,7 +123,8 @@ const NON_LATIN_RUN = /[\u0370-\u03FF\u0400-\u04FF]{3,}/;
 
 let phraseRe = null;
 function getPhraseRe(phrases) {
-  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s+');
+  // "a se păstra" is often read as "ase păstra" or "a5e păstra"
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/^a se /, 'a\\s*[s5]e ').replace(/ /g, '\\s+');
   return new RegExp(`(?<![a-z0-9])(?:${phrases.map(esc).join('|')})(?![a-z0-9])`);
 }
 
@@ -145,6 +192,7 @@ export function cleanOcrText(section) {
     .replace(/\s+([,.;:)\]])/g, '$1')
     .replace(/([([])\s+/g, '$1')
     .replace(/([,;])(?=[^\s\d])/g, '$1 ')
+    .replace(/([:)%]|\.(?=\p{Lu}))(?=\p{L})/gu, '$1 ') // "52%zahăr", "):sare", ".Substanță"
     .replace(/,\s*,+/g, ',')
     .replace(/^[\s:;.,\-–—)]+/, '')
     .replace(/^\(?inci\)?\s*[:;]?\s*/i, '')

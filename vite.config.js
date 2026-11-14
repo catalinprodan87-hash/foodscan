@@ -5,9 +5,24 @@ import { readFileSync } from 'node:fs';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
+/*
+ * ONNX Runtime references its 14 MB .wasm with `new URL(…, import.meta.url)`,
+ * so Vite would emit a copy. The OCR worker loads the self-hosted one from
+ * ./ocr/ort/ (env.wasm.wasmPaths), so drop the duplicate from the build.
+ */
+const dropBundledOrtWasm = () => ({
+  name: 'drop-bundled-ort-wasm',
+  generateBundle(_options, bundle) {
+    for (const file of Object.keys(bundle)) {
+      if (/ort-wasm[^/]*\.wasm$/.test(file)) delete bundle[file];
+    }
+  },
+});
+
 export default defineConfig({
   // Relative base so the build works from any sub-path (GitHub Pages: /<repo>/).
   base: './',
+  worker: { format: 'es', plugins: () => [dropBundledOrtWasm()] }, // the OCR worker uses ES modules (ONNX Runtime)
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
     __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
@@ -37,7 +52,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
+        // Includes the 0.9 MB barcode decoder (scan/zxing_reader.wasm) so scanning works offline.
+        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest,wasm}'],
         clientsClaim: true, // the first install controls the page at once (OCR caching)
         // The OCR engine (~9 MB) is not precached: it downloads on first use.
         globIgnores: ['ocr/**'],

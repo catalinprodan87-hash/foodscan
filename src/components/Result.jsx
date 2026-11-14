@@ -2,7 +2,7 @@ import { t, pick } from '../lib/i18n.js';
 import { normalize } from '../lib/analyze.js';
 import AdditiveList from './AdditiveList.jsx';
 import ProductHeader from './ProductHeader.jsx';
-import { IngredientsText, ShareButton, AddProductLinks } from './ResultExtras.jsx';
+import { IngredientsText, ShareButton, AddProductLinks, CompleteProductCard } from './ResultExtras.jsx';
 
 const VERDICT_ICON = { bad: '✕', warn: '!', ok: '✓', unknown: '?' };
 
@@ -152,6 +152,7 @@ export default function Result({
       <AdditiveList lang={lang} additives={result.items} grouped={!food} />
       <IngredientsText lang={lang} text={text} result={result} />
       {barcode && !product && <AddProductLinks lang={lang} code={barcode} type={result.productType} />}
+      <CompleteProductCard lang={lang} product={product} text={text} notify={notify} />
       <div className="actions result-actions">
         <ShareButton lang={lang} result={result} product={product} barcode={barcode} text={text} notify={notify} />
       </div>

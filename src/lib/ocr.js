@@ -1,44 +1,34 @@
 /**
- * On-device OCR with tesseract.js v5 (Romanian + English) in a Web Worker.
+ * On-device OCR with PaddleOCR (PP-OCRv4 detector + English/Latin recogniser)
+ * running on ONNX Runtime Web in a Web Worker.
  *
  * Everything is self-hosted under ./ocr/ (copied from npm by
  * scripts/copy-ocr-assets.mjs) and cached by the service worker (CacheFirst,
- * 90 days), so after the first download OCR works offline and the photo never
- * leaves the phone. tesseract.js itself is loaded with a dynamic import, only
- * when the user takes a photo.
+ * 90 days): ~24 MB download on the first photo, offline afterwards. The photo
+ * never leaves the phone.
  *
- * `loadTesseract`, `fetchImpl`, `cachesImpl` and `simdImpl` are injectable for tests.
+ * `createWorker`, `fetchImpl` and `cachesImpl` are injectable for tests.
  */
-export const OCR_LANGS = ['ron', 'eng'];
 export const OCR_DIR = 'ocr/';
 
-/** Absolute URLs of the self-hosted OCR files, for this device's core variant. */
-export function ocrAssets(baseUrl, simd) {
+/** Absolute URLs of the self-hosted OCR files. */
+export function ocrAssets(baseUrl) {
   const base = new URL(OCR_DIR, baseUrl).href;
-  const core = `${base}core/tesseract-core-${simd ? 'simd-' : ''}lstm.wasm.js`;
-  const langPath = `${base}lang`;
-  return {
+  const ortDir = `${base}ort/`;
+  const assets = {
     manifest: `${base}manifest.json`,
-    worker: `${base}worker.min.js`,
-    core,
-    langPath,
-    downloads: [core, ...OCR_LANGS.map((l) => `${langPath}/${l}.traineddata.gz`)],
+    ortDir,
+    det: `${base}paddle/det.onnx`,
+    rec: `${base}paddle/rec.onnx`,
+    dict: `${base}paddle/dict.txt`,
   };
-}
-
-async function detectSimd() {
-  try {
-    const { simd } = await import('wasm-feature-detect');
-    return await simd();
-  } catch {
-    return false;
-  }
+  assets.downloads = [`${ortDir}ort-wasm-simd-threaded.wasm`, `${ortDir}ort-wasm-simd-threaded.mjs`, assets.det, assets.rec, assets.dict];
+  return assets;
 }
 
 /**
- * Makes sure the engine and language data are downloaded (and cached by the
- * service worker), reporting byte progress. Files already in Cache Storage are
- * skipped, so a cached device reports `{phase: 'download'}` only if needed.
+ * Makes sure the engine files are downloaded (and cached by the service
+ * worker), reporting byte progress. Files already in Cache Storage are skipped.
  * @param {(p: {phase: 'download', loaded: number, total: number}) => void} onProgress
  * @returns {Promise<{downloaded: boolean}>}
  */
@@ -79,59 +69,78 @@ export async function ensureOcrAssets(assets, { onProgress, fetchImpl = globalTh
   return { downloaded: true };
 }
 
-let workerPromise = null;
-let progressListener = null;
+const defaultCreateWorker = () => new Worker(new URL('../workers/ocrWorker.js', import.meta.url), { type: 'module' });
 
-/** Maps tesseract logger messages to app progress. */
-export function mapTesseractProgress(m) {
-  if (m?.status === 'recognizing text') return { phase: 'recognize', progress: m.progress || 0 };
-  return { phase: 'init', status: m?.status, progress: m?.progress || 0 };
-}
+let enginePromise = null;
+let progressListener = null;
 
 /**
  * One worker per page, reused across photos.
- * @returns {Promise<object>} tesseract worker
+ * @returns {Promise<{recognize: (bitmap) => Promise<{text, confidence, lines}>, terminate: () => void}>}
  */
-export function getWorker({ loadTesseract = () => import('tesseract.js'), baseUrl = globalThis.document?.baseURI, simdImpl = detectSimd, onProgress, fetchImpl, cachesImpl } = {}) {
+export function getEngine({ createWorker = defaultCreateWorker, baseUrl = globalThis.document?.baseURI, onProgress, fetchImpl, cachesImpl } = {}) {
   progressListener = onProgress || null;
-  if (!workerPromise) {
-    workerPromise = (async () => {
-      const assets = ocrAssets(baseUrl, await simdImpl());
+  if (!enginePromise) {
+    enginePromise = (async () => {
+      const assets = ocrAssets(baseUrl);
       await ensureOcrAssets(assets, { onProgress: (p) => progressListener?.(p), fetchImpl, cachesImpl });
-      const mod = await loadTesseract();
-      const Tesseract = mod.default || mod;
-      return Tesseract.createWorker(OCR_LANGS, 1 /* OEM LSTM_ONLY */, {
-        workerPath: assets.worker,
-        workerBlobURL: false, // same-origin worker, so the service worker caches its requests
-        corePath: assets.core,
-        langPath: assets.langPath,
-        gzip: true,
-        cacheMethod: 'none', // the service worker cache is the single copy
-        logger: (m) => progressListener?.(mapTesseractProgress(m)),
-      });
+      const worker = createWorker();
+      const pending = new Map();
+      let nextId = 1;
+      let readyResolve;
+      let readyReject;
+      const ready = new Promise((res, rej) => { readyResolve = res; readyReject = rej; });
+      worker.onmessage = (e) => {
+        const m = e.data;
+        if (m.type === 'progress') progressListener?.({ phase: m.phase, progress: m.progress });
+        else if (m.type === 'ready') readyResolve();
+        else if (m.type === 'result') { pending.get(m.id)?.resolve(m); pending.delete(m.id); }
+        else if (m.type === 'error') {
+          if (m.id && pending.has(m.id)) { pending.get(m.id).reject(new Error(m.message)); pending.delete(m.id); }
+          else readyReject(new Error(m.message));
+        }
+      };
+      worker.onerror = (e) => {
+        const err = new Error(e?.message || 'OCR worker failed');
+        readyReject(err);
+        pending.forEach((p) => p.reject(err));
+        pending.clear();
+      };
+      worker.postMessage({ type: 'init', assets });
+      await ready;
+      return {
+        recognize(bitmap) {
+          const id = nextId++;
+          return new Promise((resolve, reject) => {
+            pending.set(id, { resolve, reject });
+            worker.postMessage({ type: 'recognize', id, bitmap, assets }, bitmap && typeof bitmap.close === 'function' ? [bitmap] : []);
+          });
+        },
+        terminate() { worker.terminate(); },
+      };
     })();
-    workerPromise.catch(() => { workerPromise = null; }); // allow a retry after a failure
+    enginePromise.catch(() => { enginePromise = null; }); // allow a retry after a failure
   }
-  return workerPromise;
+  return enginePromise;
 }
 
 /**
- * Recognises text in an image (canvas / blob / URL).
- * @param {{cropped?: boolean}} options cropped images use a single-block layout
- * @returns {Promise<{text: string, confidence: number}>}
+ * Recognises text in an image (canvas or ImageBitmap).
+ * @returns {Promise<{text: string, confidence: number, lines: number}>}
  */
-export async function recognize(image, { cropped = false, onProgress, ...workerOptions } = {}) {
-  const worker = await getWorker({ onProgress, ...workerOptions });
-  // PSM 6 = one uniform block of text (a cropped ingredients box); 3 = automatic layout.
-  await worker.setParameters({ tessedit_pageseg_mode: cropped ? '6' : '3', preserve_interword_spaces: '0' });
-  const { data } = await worker.recognize(image);
-  return { text: data?.text || '', confidence: Math.round(data?.confidence ?? 0) };
+export async function recognize(image, { onProgress, ...engineOptions } = {}) {
+  const engine = await getEngine({ onProgress, ...engineOptions });
+  const bitmap = typeof createImageBitmap === 'function' && image && typeof image.getContext === 'function'
+    ? await createImageBitmap(image)
+    : image;
+  const r = await engine.recognize(bitmap);
+  return { text: r.text || '', confidence: Math.round(r.confidence ?? 0), lines: r.lines ?? 0 };
 }
 
-/** Test helper: forget the worker singleton. */
+/** Test helper: forget the engine singleton. */
 export async function resetOcr() {
-  const w = workerPromise;
-  workerPromise = null;
+  const p = enginePromise;
+  enginePromise = null;
   progressListener = null;
-  try { await (await w)?.terminate?.(); } catch { /* ignore */ }
+  try { (await p)?.terminate?.(); } catch { /* ignore */ }
 }

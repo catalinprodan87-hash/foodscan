@@ -10,7 +10,7 @@ import {
   sanitizeAvoidState, parseTermsInput, addCustom, updateCustom, removeCustom, setPreset,
   exportAvoidList, importAvoidList, previewCounts,
 } from '../src/lib/avoidList.js';
-import { collectSpans, highlightSegments, itemDomId, shareSummary, addProductUrl, addProductLinks } from '../src/lib/share.js';
+import { collectSpans, highlightSegments, itemDomId, shareSummary, addProductUrl, addProductLinks, editProductUrl } from '../src/lib/share.js';
 import { isIos, isStandalone, installMode } from '../src/lib/install.js';
 import { analyze } from '../src/lib/analyze.js';
 import { buildRequest } from '../src/lib/request.js';
@@ -323,6 +323,8 @@ describe('share and add-product links', () => {
     assert.ok(addProductUrl('cosmetic', '1').startsWith('https://world.openbeautyfacts.org/'));
     assert.ok(addProductUrl('household', '1').startsWith('https://world.openproductsfacts.org/'));
     assert.deepEqual(addProductLinks('1', 'household').map((l) => l.name), ['Open Products Facts', 'Open Food Facts', 'Open Beauty Facts']);
+    assert.equal(editProductUrl('food', '5949069402286'), 'https://world.openfoodfacts.org/cgi/product.pl?type=edit&code=5949069402286');
+    assert.ok(editProductUrl('cosmetic', '1').startsWith('https://world.openbeautyfacts.org/'));
   });
 });
 

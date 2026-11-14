@@ -1,5 +1,5 @@
 import { t, pick } from '../lib/i18n.js';
-import { DATABASES_REVIEWED, PRODUCT_SOURCES, REFERENCES } from '../data/meta.js';
+import { DATABASES_REVIEWED, PRODUCT_SOURCES, REFERENCES, SOFTWARE } from '../data/meta.js';
 
 const fmt = (iso, lang) => new Date(iso + 'T12:00:00Z').toLocaleDateString(lang === 'ro' ? 'ro-RO' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -37,6 +37,16 @@ export default function AboutView({ lang }) {
         <p className="muted small">
           {t(lang, 'aboutReviewed', { additives: fmt(DATABASES_REVIEWED.additives, lang), nonFood: fmt(DATABASES_REVIEWED.nonFood, lang) })}
         </p>
+      </section>
+
+      <section className="card" aria-labelledby="about-software">
+        <h2 id="about-software" className="card-title">{t(lang, 'aboutSoftware')}</h2>
+        <p className="small">{t(lang, 'aboutSoftwareText')}</p>
+        <ul className="link-list">
+          {SOFTWARE.map((s) => (
+            <li key={s.name}><a href={s.url} target="_blank" rel="noopener noreferrer">{s.name} ↗</a> <span className="muted small">({s.licence})</span></li>
+          ))}
+        </ul>
       </section>
 
       <section className="card" aria-labelledby="about-privacy">

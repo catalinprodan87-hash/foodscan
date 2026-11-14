@@ -15,7 +15,7 @@ import { UpdateBanner, OfflineBanner, InstallCard, Toast } from './components/Ba
 
 // The scanner (and the zxing decoder) is only downloaded when it is opened.
 const ScannerOverlay = lazy(() => import('./components/ScannerOverlay.jsx'));
-// Photo → OCR flow (tesseract itself is a further dynamic import inside it).
+// Photo → OCR flow (the OCR engine runs in a Web Worker, loaded on the first photo).
 const PhotoFlow = lazy(() => import('./components/PhotoFlow.jsx'));
 // Secondary tabs and the first-run slides are split out to keep the first load small.
 const HistoryView = lazy(() => import('./components/HistoryView.jsx'));

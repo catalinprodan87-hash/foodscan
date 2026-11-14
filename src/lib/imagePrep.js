@@ -1,10 +1,9 @@
 /**
- * Photo preprocessing for OCR: EXIF rotation, crop, downscale, grayscale,
- * contrast stretch. The pixel maths are pure functions (unit-tested); the
- * canvas wrappers run in the browser only.
+ * Photo preprocessing: EXIF rotation, crop and downscale. The size maths are
+ * pure functions (unit-tested); the canvas wrappers run in the browser only.
  */
 
-export const OCR_MAX_SIDE = 2000;
+export const OCR_MAX_SIDE = 3000;
 
 /** Output size so the long side is at most `max` (never upscales). */
 export function fitSize(width, height, max = OCR_MAX_SIDE) {
@@ -21,41 +20,6 @@ export function cropPixels(rect, width, height) {
   const w = Math.max(0.02, Math.min(1 - x, rect.w));
   const h = Math.max(0.02, Math.min(1 - y, rect.h));
   return { sx: Math.round(x * width), sy: Math.round(y * height), sw: Math.max(1, Math.round(w * width)), sh: Math.max(1, Math.round(h * height)) };
-}
-
-/**
- * In place: RGBA → grayscale (Rec. 601 luma) with a contrast stretch that maps
- * the 2nd–98th percentile to 0–255 (robust to glare spots and dark edges).
- * @param {Uint8ClampedArray} rgba
- */
-export function grayscaleContrast(rgba, { low = 0.02, high = 0.98 } = {}) {
-  const n = rgba.length / 4;
-  const gray = new Uint8Array(n);
-  const hist = new Uint32Array(256);
-  for (let i = 0, p = 0; i < n; i++, p += 4) {
-    const g = (rgba[p] * 299 + rgba[p + 1] * 587 + rgba[p + 2] * 114) / 1000;
-    gray[i] = g;
-    hist[gray[i]]++;
-  }
-  const percentile = (q) => {
-    const target = q * n;
-    let acc = 0;
-    for (let v = 0; v < 256; v++) {
-      acc += hist[v];
-      if (acc >= target) return v;
-    }
-    return 255;
-  };
-  let lo = percentile(low);
-  let hi = percentile(high);
-  if (hi - lo < 16) { lo = 0; hi = 255; } // flat image: leave as is
-  const span = hi - lo;
-  for (let i = 0, p = 0; i < n; i++, p += 4) {
-    const v = Math.max(0, Math.min(255, ((gray[i] - lo) * 255) / span));
-    rgba[p] = rgba[p + 1] = rgba[p + 2] = v;
-    rgba[p + 3] = 255;
-  }
-  return { lo, hi };
 }
 
 // ───────────────────────────── browser only ──────────────────────────────
@@ -98,22 +62,20 @@ export function previewCanvas(img, max = 1200) {
 }
 
 /**
- * Crop → downscale (long side ≤ 2000 px) → grayscale + contrast.
+ * Crop → downscale (long side ≤ 3000 px), colours kept: the input for
+ * PaddleOCR, which finds text lines itself and copes with coloured labels.
  * @param {{x, y, w, h}|null} rect normalised crop, or null for the whole photo
  * @returns {HTMLCanvasElement}
  */
-export function prepareForOcr(img, rect = null) {
+export function prepareColour(img, rect = null, maxSide = 3000) {
   const { width, height } = imageSize(img);
   const { sx, sy, sw, sh } = cropPixels(rect, width, height);
-  const out = fitSize(sw, sh);
+  const out = fitSize(sw, sh, maxSide);
   const canvas = document.createElement('canvas');
   canvas.width = out.width;
   canvas.height = out.height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const ctx = canvas.getContext('2d');
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, sx, sy, sw, sh, 0, 0, out.width, out.height);
-  const data = ctx.getImageData(0, 0, out.width, out.height);
-  grayscaleContrast(data.data);
-  ctx.putImageData(data, 0, 0);
   return canvas;
 }

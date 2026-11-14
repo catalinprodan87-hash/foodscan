@@ -14,6 +14,12 @@ export function addProductUrl(type, code) {
   return `${base}/cgi/product.pl?type=search_or_add&action=process&code=${encodeURIComponent(code)}`;
 }
 
+/** Open *Facts edit page of an existing product (to add its ingredients). */
+export function editProductUrl(type, code) {
+  const base = sourceFor(type) || sourceFor('food');
+  return `${base}/cgi/product.pl?type=edit&code=${encodeURIComponent(code)}`;
+}
+
 export function addProductLinks(code, firstType = 'food') {
   const order = ['food', 'cosmetic', 'household'];
   const types = [firstType, ...order.filter((x) => x !== firstType)].filter((x) => order.includes(x));

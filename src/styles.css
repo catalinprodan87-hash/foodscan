@@ -465,9 +465,18 @@ textarea:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; bo
 @keyframes scanline { from { top: 14%; } to { top: 86%; } }
 @media (prefers-reduced-motion: reduce) { .scan-line { animation: none; } }
 .scanner-hint {
-  position: absolute; left: 16px; right: 16px; bottom: calc(40px + env(safe-area-inset-bottom));
+  position: absolute; left: 16px; right: 16px; bottom: calc(28px + env(safe-area-inset-bottom));
   margin: 0; text-align: center; font-weight: 600; text-shadow: 0 1px 3px #000;
 }
+.scanner-hint p { margin: 0 0 10px; }
+.scanner-slow { font-weight: 500; font-size: 0.9rem; background: rgb(0 0 0 / 0.55); padding: 8px 10px; border-radius: 10px; text-shadow: none; }
+.scanner-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.scanner-pill {
+  min-height: 44px; padding: 8px 16px; border: 1px solid rgb(255 255 255 / 0.5); border-radius: 999px;
+  background: rgb(0 0 0 / 0.55); color: #fff; font: inherit; font-weight: 600; cursor: pointer;
+}
+.scanner-pill[aria-pressed='true'] { background: #fff; color: #111; }
+.scanner-pill:focus-visible { outline: 2px solid #5eead4; outline-offset: 2px; }
 .scanner-close {
   position: absolute; top: calc(12px + env(safe-area-inset-top)); right: 12px;
   width: 48px; height: 48px; border: 0; border-radius: 50%;
