@@ -3,6 +3,16 @@
 Status: proposal, 14 Nov 2026, written against v1.4.0 (commit `99d62f8`).
 No code was changed for this document.
 
+**Decisions (15 Nov 2026).** The v2 prompts based on these decisions are in `docs/V2_PROMPTS.md`.
+- **Audience:** you and your family. A public launch, usage statistics (T5) and store releases are not planned.
+- **Real photos (Q1):** not now. The benchmark stays synthetic; the open question stays open.
+- **Custom domain and Play Store (P5, P1):** skipped for now, kept open.
+- **Allergens (F1):** **information only**. "Contains" and "may contain traces" are shown but never change the verdict.
+- **Licence (O1):** undecided. Only a NOTICE file with third-party credits is added in v2.1.
+- **Contributing to Open Facts (C1):** skipped for now, kept open.
+- **Sync (C2):** explained again to you. Sharing a list by link (F10, v2.8) comes first.
+- **"Report a problem" (C5):** reshaped for family use. It shares an editable report through WhatsApp or e-mail (Web Share API) instead of opening a GitHub issue.
+
 Markers used below:
 - **[code]** checked in this repository.
 - **[measured]** measured in this session's container (desktop-class CPU, headless Chromium). Not measured on a phone.
@@ -168,7 +178,7 @@ Columns:
 | T2 | Wording rules for allergens and profiles (never "sigur", "fără", "potrivit pentru sarcină"), enforced by a test over i18n strings | 4 | S | none | F1 | v2.3 |
 | T3 | Source and date on every finding (D3), and "data în baza de date: Open Food Facts, actualizat la …" from `last_modified_t` [verify field] | 4 | S | none | D3 | v2.3 |
 | T4 | **Optional AI-vision fallback** for unreadable labels: the user's own API key; consent on each photo ("fotografia pleacă de pe telefon către <furnizor>"); the result is marked "citit de AI" and must be reviewed. Not default, not bundled with a key | 3 | M | key stored on device; cost; the AI can invent text, so review is mandatory | A4 | v3 (opt-in) |
-| T5 | Privacy-friendly usage counts (page views only, no cookies; e.g. GoatCounter [verify terms]) and opt-in OCR-failure reports (C5) | 2 | S | trust, if not opt-in | – | v3, only if you want numbers |
+| T5 | Privacy-friendly usage counts (page views only, no cookies; e.g. GoatCounter [verify terms]) and opt-in OCR-failure reports (C5) | 2 | S | trust, if not opt-in | – | later (family audience: not needed) |
 
 ### Quality engineering
 
@@ -205,17 +215,24 @@ Columns:
 
 ## 3. Roadmap
 
-### v2: "better and more accurate" (about 5–6 weeks of evenings, no backend)
+### v2: "better and more accurate" (about 6–7 weeks of evenings, no backend)
 
-| Release | Content | About |
-|---|---|---|
-| **v2.0 Foundation and quick wins** | Q1, Q2, Q3, Q4, Q6, A2, A9, A10, A13, D5, P3, U6, T1, C5, F9, O1 | 1.5 weeks |
-| **v2.1 Orientation and smart crop** | A1, A3, A7, Q5 | 1 week |
-| **v2.2 Reading quality** | A4, A5, A6, D6, C3 | 1–1.5 weeks |
-| **v2.3 Allergens and data quality** | F1, F5, A8, D1, D3 (schema), T2, T3, U2 | 1 week |
-| **v2.4 In-shop UX and profiles** | F7, F3, F2, F10, U1, U3, U4, U5 | 1 week |
+The plan was split into smaller releases so each fits one session. The prompts are in `docs/V2_PROMPTS.md`.
 
-A11 (multithreading) runs as a time-boxed spike in v2.1 (at most 2 evenings). It is adopted only if the benchmark shows at least 1.5× faster OCR and nothing else breaks.
+| Release | Content |
+|---|---|
+| **v2.0 Safety net** | Q1, Q2, Q3, Q4, Q5, D5, A13 |
+| **v2.1 Quick wins** | A2, A9, A10, P3, U6, T1, F9, C5 (family version), Q6, NOTICE |
+| **v2.2 Automatic orientation** | A1, A3 |
+| **v2.3 Smart crop and uncertain words** | A7, A4 |
+| **v2.4 Romanian word list and curved packs** | D6, A5, A6 |
+| **v2.5 Allergens (info only), vegan and palm oil** | F1, F5, A8, T2, U2 |
+| **v2.6 Coverage, sources and dates** | D1, D3, T3 |
+| **v2.7 Shopping mode and compare** | F7, F3 |
+| **v2.8 Family profiles, sharing and accessibility** | F2, F10, U1, U3, U4, U5 |
+| **v2.9 (optional) Share photos into the app** | C3 |
+
+A11 (multithreading) remains an optional time-boxed spike (at most 2 evenings). It is adopted only if it gives at least 1.5× faster OCR with nothing broken.
 
 ### v3: "connected"
 
