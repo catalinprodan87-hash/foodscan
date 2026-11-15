@@ -13,6 +13,52 @@
     "milk"
    ],
    "reason": "Open Food Facts tags eggs and milk; the ingredient list names neither (egg-free sauce)."
+  },
+  "5900910000631": {
+   "ids": [
+    "gluten",
+    "soy"
+   ],
+   "reason": "Gluten is not in the list; soy only implied by an unspecified \"lecitină\"."
+  },
+  "20078539": {
+   "ids": [
+    "milk"
+   ],
+   "reason": "The ingredients field holds a nutrition table, not an ingredient list."
+  },
+  "3800205875109": {
+   "ids": [
+    "soy"
+   ],
+   "reason": "The ingredient list does not mention soy."
+  },
+  "5996253002210": {
+   "ids": [
+    "gluten",
+    "milk",
+    "sesame",
+    "soy"
+   ],
+   "reason": "Lentil-flour snack: none of these is in the ingredient list (Open Food Facts tags them, probably from a \"may contain\" line not in the text)."
+  },
+  "4056489178828": {
+   "ids": [
+    "peanuts"
+   ],
+   "reason": "Coconut bar: the ingredient list names no peanuts."
+  },
+  "7622210999368": {
+   "ids": [
+    "peanuts"
+   ],
+   "reason": "The list has hazelnut paste but no peanuts."
+  },
+  "20358457": {
+   "ids": [
+    "milk"
+   ],
+   "reason": "Oat cereal: the ingredient list names no milk."
   }
  }
 }

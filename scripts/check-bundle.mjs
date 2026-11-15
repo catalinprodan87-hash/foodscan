@@ -8,7 +8,9 @@ import { readFileSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const MAIN_JS_BUDGET = 420 * 1024; // raw bytes (≈ 130 KB gzip)
+// Raw bytes. Raised from 420 to 470 KB in v2.6 on purpose: the full EU additive
+// list (162 more entries) is core data the analysis needs on the first screen.
+const MAIN_JS_BUDGET = 470 * 1024;
 
 const dist = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
 const html = readFileSync(join(dist, 'index.html'), 'utf8');

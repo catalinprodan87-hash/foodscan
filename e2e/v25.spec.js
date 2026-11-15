@@ -14,7 +14,8 @@ test('allergens are shown as information; watched ones get ⚠; the verdict does
   const verdict = await page.locator('.verdict h2').textContent();
 
   await tab(page, 2).click();
-  await page.check('#allergen-milk', { force: true });
+  await page.locator('label[for=allergen-milk]').click();
+  await expect(page.locator('#allergen-milk')).toBeChecked();
   await tab(page, 0).click();
   await page.click('text=Verificare nouă').catch(() => {});
   await pasteIngredients(page, text);

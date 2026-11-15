@@ -22,7 +22,7 @@ export const SOURCE_NAMES = {
 export const DEFAULT_TIMEOUT_MS = 8000;
 
 const COMMON_FIELDS = [
-  'code', 'product_type',
+  'code', 'product_type', 'last_modified_t',
   'product_name_ro', 'product_name', 'product_name_en',
   'brands', 'quantity', 'image_front_small_url',
   'ingredients_text_ro', 'ingredients_text', 'ingredients_text_en',
@@ -142,6 +142,8 @@ export function mapProduct(raw, type, code) {
     hasIngredients: ingredientsText.length > 0,
     source: SOURCE_NAMES[type],
     url: productPageUrl(type, first(p.code, code)),
+    // when the product page was last edited (Unix seconds → ISO date)
+    updated: Number(p.last_modified_t) > 0 ? new Date(Number(p.last_modified_t) * 1000).toISOString().slice(0, 10) : null,
   };
   if (type === 'food') {
     product.nutrition = mapNutrition(p);

@@ -27,6 +27,11 @@ export default function ProductHeader({ lang, product, barcode }) {
         <a className="small source-link" href={product.url} target="_blank" rel="noopener noreferrer">
           {t(lang, 'viewOn', { source: product.source })} ↗
         </a>
+        {product.updated && (
+          <p className="muted small product-updated">
+            {t(lang, 'productUpdated', { source: product.source, date: new Date(`${product.updated}T12:00:00Z`).toLocaleDateString(lang === 'ro' ? 'ro-RO' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) })}
+          </p>
+        )}
       </div>
     </section>
   );

@@ -1,5 +1,9 @@
 import { t, pick } from '../lib/i18n.js';
 import { DATABASES_REVIEWED, PRODUCT_SOURCES, REFERENCES, SOFTWARE, NOTICE_URL } from '../data/meta.js';
+import { ADDITIVES } from '../data/additives.js';
+import { NONFOOD_INGREDIENTS } from '../data/nonFoodIngredients.js';
+import { RESTRICTIONS } from '../data/restrictions.js';
+import { ALLERGENS } from '../data/allergens.js';
 import SettingsCard from './SettingsCard.jsx';
 
 const fmt = (iso, lang) => new Date(iso + 'T12:00:00Z').toLocaleDateString(lang === 'ro' ? 'ro-RO' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -54,9 +58,12 @@ export default function AboutView({ lang, onExport, onImport, onDeleteAll }) {
             <li key={r.id}><a href={r.url} target="_blank" rel="noopener noreferrer">{pick(r, lang)} ↗</a></li>
           ))}
         </ul>
-        <p className="muted small">
-          {t(lang, 'aboutReviewed', { additives: fmt(DATABASES_REVIEWED.additives, lang), nonFood: fmt(DATABASES_REVIEWED.nonFood, lang) })}
-        </p>
+        <ul className="small db-counts">
+          <li>{t(lang, 'dbAdditives', { n: ADDITIVES.length, date: fmt(DATABASES_REVIEWED.additives, lang) })}</li>
+          <li>{t(lang, 'dbNonFood', { n: NONFOOD_INGREDIENTS.length, date: fmt(DATABASES_REVIEWED.nonFood, lang) })}</li>
+          <li>{t(lang, 'dbRestrictions', { n: Object.keys(RESTRICTIONS).length, date: fmt(DATABASES_REVIEWED.restrictions, lang) })}</li>
+          <li>{t(lang, 'dbAllergens', { n: ALLERGENS.length, date: fmt(DATABASES_REVIEWED.allergens, lang) })}</li>
+        </ul>
       </section>
 
       <section className="card" aria-labelledby="about-software">

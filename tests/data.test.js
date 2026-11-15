@@ -13,7 +13,7 @@ import { AVOID_PRESETS } from '../src/data/avoidPresets.js';
 import { normalize } from '../src/lib/analyze.js';
 
 const LEVELS = ['high', 'medium', 'low', 'none'];
-const E_CODE = /^E\d{3,4}[a-f]?$/;
+const E_CODE = /^E\d{3,4}[a-h]?$/;
 const filled = (x) => typeof x === 'string' && x.trim().length > 0;
 
 // Aliases deliberately shared between entries (same substance listed twice on
@@ -132,6 +132,25 @@ describe('avoid-list presets', () => {
         if (E_CODE.test(c)) continue;
         assert.ok(NONFOOD_BY_CODE[c], `${p.id}: unknown code ${c}`);
       }
+    }
+  });
+});
+
+describe('sources and review dates (v2.6)', async () => {
+  const { sourcesFor, reviewedFor } = await import('../src/data/sources.js');
+  test('every high or medium entry, and every restriction outside the EU, cites at least one source', () => {
+    for (const e of [...ADDITIVES, ...NONFOOD_INGREDIENTS].filter((x) => x.level === 'high' || x.level === 'medium')) {
+      assert.ok(sourcesFor(e).length > 0, `${e.code}: no source in "${e.why.en.slice(0, 80)}"`);
+    }
+    for (const [code, rules] of Object.entries(RESTRICTIONS)) {
+      for (const r of rules) assert.ok(sourcesFor({ why: { en: '' } }, [r]).length > 0, `${code} ${r.region}: no source`);
+    }
+  });
+
+  test('sources have a title in both languages and an https link; review dates are ISO dates', () => {
+    for (const e of [...ADDITIVES, ...NONFOOD_INGREDIENTS]) {
+      for (const s of sourcesFor(e)) assert.ok(s.en && s.ro && /^https:\/\//.test(s.url), `${e.code} ${s.id}`);
+      assert.match(reviewedFor(e, ADDITIVES_BY_CODE[e.code] ? 'additives' : 'nonFood'), /^\d{4}-\d{2}-\d{2}$/, e.code);
     }
   });
 });

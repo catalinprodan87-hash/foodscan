@@ -69,7 +69,7 @@ export const ALLERGENS = [
     id: 'milk',
     name: { ro: 'lapte (inclusiv lactoză)', en: 'milk (including lactose)' },
     short: { ro: 'lapte', en: 'milk' },
-    terms: ['lapte', 'laptelui', 'lapte praf', 'lactoza', 'lactoză', 'cazeina', 'cazeinat', 'cazeinat de sodiu', 'zer', 'zer praf', 'proteine din lapte', 'smantana', 'frisca', 'unt', 'branza', 'branzeturi', 'cascaval', 'iaurt', 'chefir', 'mascarpone', 'ricotta', 'mozzarella', 'parmezan', 'milk', 'lactose', 'whey', 'casein', 'caseinate', 'butter', 'cream', 'cheese', 'yoghurt', 'yogurt', 'lait', 'lactoserum', 'beurre', 'creme', 'fromage', 'milch', 'milchpulver', 'molke', 'sahne', 'kase'],
+    terms: ['lapte', 'laptelui', 'lapte praf', 'produse lactate', 'derivate din lapte', 'produse din lapte', 'proteine lactate', 'lactoza', 'lactoză', 'cazeina', 'cazeinat', 'cazeinat de sodiu', 'zer', 'zer praf', 'proteine din lapte', 'smantana', 'frisca', 'unt', 'branza', 'branzeturi', 'cascaval', 'iaurt', 'chefir', 'mascarpone', 'ricotta', 'mozzarella', 'parmezan', 'milk', 'lactose', 'whey', 'casein', 'caseinate', 'butter', 'cream', 'cheese', 'yoghurt', 'yogurt', 'lait', 'lactoserum', 'beurre', 'creme', 'fromage', 'milch', 'milchpulver', 'molke', 'sahne', 'kase'],
     notAfter: NOT_DAIRY_AFTER,
     off: ['en:milk'],
   },
@@ -77,7 +77,7 @@ export const ALLERGENS = [
     id: 'nuts',
     name: { ro: 'fructe cu coajă lemnoasă', en: 'tree nuts' },
     short: { ro: 'fructe cu coajă', en: 'tree nuts' },
-    terms: ['migdale', 'migdala', 'alune', 'alune de padure', 'nuci', 'nuca', 'caju', 'fistic', 'nuci pecan', 'pecan', 'nuci braziliene', 'macadamia', 'almond', 'almonds', 'hazelnut', 'hazelnuts', 'walnut', 'walnuts', 'cashew', 'cashews', 'pistachio', 'pistachios', 'nuts', 'noisette', 'noisettes', 'amande', 'amandes', 'noix', 'haselnuss', 'haselnusse', 'mandeln', 'walnusse'],
+    terms: ['migdale', 'migdala', 'alune', 'alune de padure', 'nuci', 'nuca', 'caju', 'fistic', 'nuci pecan', 'pecan', 'nuci braziliene', 'macadamia', 'almond', 'almonds', 'hazelnut', 'hazelnuts', 'walnut', 'walnuts', 'cashew', 'cashews', 'pistachio', 'pistachios', 'nuts', 'fructe cu coaja lemnoasa', 'fructe cu coaja', 'nuci de toate felurile', 'noisette', 'noisettes', 'amande', 'amandes', 'noix', 'haselnuss', 'haselnusse', 'mandeln', 'walnusse'],
     // Peanuts are their own group; coconut is not on the Annex II list.
     notAfter: ['de pamant', 'de cocos', 'cocos'],
     off: ['en:nuts'],

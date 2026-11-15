@@ -2,6 +2,9 @@ import { t, pick } from '../lib/i18n.js';
 import { NONFOOD_CATEGORIES } from '../data/nonFoodIngredients.js';
 import { itemDomId } from '../lib/share.js';
 import { REGIONS, regionShort } from '../data/restrictions.js';
+import { sourcesFor, reviewedFor } from '../data/sources.js';
+import { ADDITIVES_BY_CODE } from '../data/additives.js';
+import { NONFOOD_BY_CODE } from '../data/nonFoodIngredients.js';
 
 const LEVEL_RANK = { high: 0, medium: 1, low: 2, unknown: 3, none: 4 };
 
@@ -58,9 +61,28 @@ function AdditiveItem({ lang, item, showCode }) {
               {t(lang, 'foundAs')}: {item.matches.map((m) => `“${m}”`).join(', ')}
             </p>
           )}
+          <Sources lang={lang} item={item} />
         </div>
       </details>
     </li>
+  );
+}
+
+const fmtDate = (iso, lang) => new Date(`${iso}T12:00:00Z`).toLocaleDateString(lang === 'ro' ? 'ro-RO' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+/** "Surse: EFSA ↗ · Reg. 1333/2008 ↗ · verificat 14 nov. 2026" */
+function Sources({ lang, item }) {
+  const db = item.why ? (ADDITIVES_BY_CODE[item.code] || NONFOOD_BY_CODE[item.code]) : null;
+  if (!db) return null;
+  const sources = sourcesFor(db, item.restrictions || []);
+  const reviewed = reviewedFor(db, ADDITIVES_BY_CODE[item.code] ? 'additives' : 'nonFood');
+  return (
+    <p className="muted small item-sources">
+      {sources.length > 0 && <>{t(lang, 'sourcesLabel')}: {sources.map((s, i) => (
+        <span key={s.id}>{i > 0 && ' · '}<a href={s.url} target="_blank" rel="noopener noreferrer">{pick(s, lang).split(' – ')[0]} ↗</a></span>
+      ))} · </>}
+      {t(lang, 'reviewedOn', { date: fmtDate(reviewed, lang) })}
+    </p>
   );
 }
 

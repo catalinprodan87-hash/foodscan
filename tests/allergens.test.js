@@ -116,8 +116,25 @@ describe('allergen fixes found on the real corpus', () => {
     assert.deepEqual(ids(findAllergens('vin, conservant: sulfiți').contains), ['sulphites']);
   });
 
+  test('legal group names: "fructe cu coajă lemnoasă", "produse lactate"', () => {
+    assert.deepEqual(ids(findAllergens('zahăr. Poate conține ou, semințe de susan și fructe cu coajă lemnoasă.').traces), ['eggs', 'nuts', 'sesame']);
+    assert.deepEqual(ids(findAllergens('cacao. Poate conține produse lactate.').traces), ['milk']);
+  });
+
   test('French and German words (imported products)', () => {
     assert.deepEqual(ids(findAllergens('farine de BLÉ, lait écrémé, soja, noisettes').contains), ['gluten', 'soy', 'milk', 'nuts']);
     assert.deepEqual(ids(findAllergens('Weizenmehl, Milchpulver, Haselnüsse, Senf').contains), ['milk', 'nuts', 'mustard']);
+  });
+});
+
+describe('additive names in the Romanian plural (found on real labels)', () => {
+  test('ciclamați, zaharine, sorbitoli are recognised; multi-word names are not pluralised', async () => {
+    const { romanianPlural } = await import('../src/lib/analyze.js');
+    const codes = (t) => analyze({ text: t, productType: 'food' }).items.map((x) => x.code);
+    assert.deepEqual(codes('îndulcitori: ciclamați, zaharine'), ['E952', 'E954']);
+    assert.deepEqual(codes('agent de umezire (sorbitoli)'), ['E420']);
+    assert.equal(romanianPlural('acid citric'), null);
+    assert.equal(romanianPlural('BHA'), null);
+    assert.equal(romanianPlural('pectina'), 'pectine');
   });
 });

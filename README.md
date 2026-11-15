@@ -58,13 +58,21 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
+### Full EU additive list, sources and dates (v2.6)
+
+- **All additives authorised in the EU** (Regulation (EC) 1333/2008, Annex II): 162 entries added in `src/data/additivesExtra.js` (RO/EN name, label words, one-line function; level `none` or that of their family, higher only with a stated reason – aluminium compounds, boric acid only in caviar, konjac not in jelly mini-cups). E203 is not included (authorisation withdrawn in 2018); "E960a" resolves to E960. Codes with letters up to h (E161g) are now read.
+- **Romanian plurals** of one-word additive names are recognised ("ciclamați" → E952 cyclamate on 8 real products, "zaharine" → E954, "sorbitoli" → E420), unless the plural is another additive's name.
+- **Sources and review date** on every expanded item ("Surse: EFSA ↗ · Regulamentul (CE) 1333/2008 ↗ · verificat 15 nov. 2026"). Sources are derived from what the explanation cites (`src/data/sources.js`), so they cannot drift from the text; restrictions outside the EU add their authority (FDA, Health Canada…). A test requires a source for every high / medium entry and every restriction.
+- The product header shows when the Open Food Facts page was last updated; About lists each database with its size and review date.
+- The first-screen JavaScript budget was raised from 420 to 470 KB on purpose (the full additive list is core data).
+
 ### Allergens, vegan, palm oil (v2.5) – information only
 
 - **Allergens** (`src/data/allergens.js`, `src/lib/allergens.js`): the 14 groups of EU Regulation 1169/2011 Annex II, with Romanian and English label words. Text after "Poate conține (urme de)…" / "May contain…" / "Produs într-o fabrică care procesează…" counts as **possible traces**, kept apart from what the product contains. Not counted: cocoa butter, coconut, plant drinks as milk; wheat glucose syrup, dextrose and maltodextrin, and refined soybean oil (Annex II exemptions); "fără …" mentions; "peste" (= over) and "cod" (= code). Sulphites also from E220–E228. Open Food Facts' `allergens_tags` / `traces_tags` are merged, with the source shown.
 - Shown in a card under the verdict: "Eticheta menționează: …", "Urme posibile: …"; with nothing found: "Nu am găsit alergeni în textul citit. Verifică eticheta – alergenii sunt scriși îngroșat." **Never** "fără alergeni", and allergens **never change the verdict**. Lista mea → *Alergeni de evidențiat* marks the ones to highlight with ⚠. A test checks the RO/EN texts for promises of safety.
 - **Vegan / vegetarian / palm oil** chips (`src/lib/diet.js`): Open Food Facts' ingredient analysis when it has one, otherwise a cautious reading of the ingredients ("după ingrediente"; no animal ingredient seen is "nu am găsit ingrediente de origine animală", not "vegan").
 - A one-line summary at the top of the result: "2 din lista ta · alergeni: lapte, soia · NOVA 4".
-- **Golden corpus test** (`tests/corpus.test.js`): the analysis of all 474 corpus lists against a snapshot (`UPDATE_SNAPSHOTS=1 npm test` to accept changes), unknown E-codes listed, allergen recall against Open Food Facts' own tags.
+- **Golden corpus test** (`tests/corpus.test.js`): the analysis of all 474 corpus lists against a snapshot (`UPDATE_SNAPSHOTS=1 npm test` to accept changes), unknown E-codes listed, allergen recall against Open Food Facts' own tags (267/267 on the 275 lists tagged so far; tags the ingredient text does not support are reviewed by hand in `bench/corpus/tag-review.json`).
 
 ### Your data, backup, problem reports (v2.1)
 

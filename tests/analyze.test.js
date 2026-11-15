@@ -329,8 +329,8 @@ describe('analyze()', () => {
   });
 
   test('unknown E-numbers are reported as unknown', () => {
-    const r = analyze({ text: 'E999' });
-    assert.equal(r.additives[0].code, 'E999');
+    const r = analyze({ text: 'E1599' });
+    assert.equal(r.additives[0].code, 'E1599');
     assert.equal(r.additives[0].level, 'unknown');
     assert.equal(r.counts.unknown, 1);
   });
@@ -348,7 +348,7 @@ describe('additive database', () => {
     assert.ok(ADDITIVES.length >= 100, `only ${ADDITIVES.length}`);
     assert.equal(new Set(ADDITIVES.map((a) => a.code)).size, ADDITIVES.length);
     for (const a of ADDITIVES) {
-      assert.match(a.code, /^E\d{3,4}[a-f]?$/, a.code);
+      assert.match(a.code, /^E\d{3,4}[a-h]?$/, a.code);
       assert.ok(CATEGORIES.includes(a.category), a.code);
       assert.ok(LEVELS.includes(a.level), a.code);
       assert.ok(a.name.en && a.name.ro, a.code);

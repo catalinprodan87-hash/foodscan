@@ -2,9 +2,10 @@
 
 /** When the ingredient databases were last reviewed against the cited sources. */
 export const DATABASES_REVIEWED = {
-  additives: '2026-11-14',
+  additives: '2026-11-15',
   nonFood: '2026-11-13',
   restrictions: '2026-11-14',
+  allergens: '2026-11-15',
 };
 
 export const PRODUCT_SOURCES = [

@@ -19,6 +19,8 @@
  * Wording is deliberately cautious: where evidence is limited it says so.
  */
 
+import { ADDITIVES_EXTRA } from './additivesExtra.js';
+
 const SOUTHAMPTON_EN =
   'One of the six "Southampton colours": since 2010 EU Regulation 1333/2008 (Annex V) requires foods containing it to carry the warning "may have an adverse effect on activity and attention in children".';
 const SOUTHAMPTON_RO =
@@ -81,7 +83,7 @@ function a(code, category, level, en, ro, aliases, whyEn, whyRo) {
   return { code, category, level, name: { en, ro }, aliases, why: { en: whyEn, ro: whyRo } };
 }
 
-export const ADDITIVES = [
+const BASE = [
   // ───────────────────────────── Colours ─────────────────────────────
   a('E100', 'colour', 'none', 'Curcumin', 'Curcumină',
     ['curcumin', 'curcumina', 'curcumine'],
@@ -724,6 +726,9 @@ export const ADDITIVES = [
 ];
 
 /** Lookup map by code (exact, as stored: "E150d", "E407a", "E471"). */
+/** All additives: the hand-written list above plus the rest of the EU Union list (additivesExtra.js). */
+export const ADDITIVES = [...BASE, ...ADDITIVES_EXTRA];
+
 export const ADDITIVES_BY_CODE = Object.fromEntries(ADDITIVES.map((x) => [x.code, x]));
 
 export const LEVELS = ['high', 'medium', 'low', 'none'];

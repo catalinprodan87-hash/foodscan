@@ -124,7 +124,7 @@ function* execAll(re, text) {
 
 // ──────────────────────────── E-number parsing ───────────────────────────
 
-const OCR_CANDIDATE = /(?<![\p{L}\p{N}])(E[ ]?-?[ ]?|e)([0-9OoIl|]{3,4})(?=[a-fA-F]?(?:\(?(?:i{1,3}|iv|vi{0,3})\)?)?(?![\p{L}\p{N}]))/gu;
+const OCR_CANDIDATE = /(?<![\p{L}\p{N}])(E[ ]?-?[ ]?|e)([0-9OoIl|]{3,4})(?=[a-hA-H]?(?:\(?(?:i{1,3}|iv|vi{0,3})\)?)?(?![\p{L}\p{N}]))/gu;
 
 /**
  * Fixes common OCR confusions inside E-codes only: O/o → 0, I/l/| → 1.
@@ -145,7 +145,7 @@ export function fixOcrInECodes(text) {
  * Optional letter suffix (E150d, E407a) and roman-numeral sub-variant
  * (E322i, E450(iii), E160aiv) which is ignored.
  */
-const E_CODE_RE = /(?<![\p{L}\p{N}])(?:E[ ]?-?[ ]?|e)(\d{3,4})([a-fA-F])?(?:\(?(?:i{1,3}|iv|vi{0,3})\)?)?(?![\p{L}\p{N}])(?![ ]?%)/gu;
+const E_CODE_RE = /(?<![\p{L}\p{N}])(?:E[ ]?-?[ ]?|e)(\d{3,4})([a-hA-H])?(?:\(?(?:i{1,3}|iv|vi{0,3})\)?)?(?![\p{L}\p{N}])(?![ ]?%)/gu;
 
 /** Resolves digits + optional letter to a database code, or an unknown code. */
 export function resolveCode(digits, letter) {
@@ -198,9 +198,34 @@ function buildAliasIndex(entries) {
   return index;
 }
 
+/**
+ * The regular Romanian plural of a one-word additive name, for labels that
+ * use it ("sorbitoli", "lecitine"): consonant + i, -a → -e. Only names of at
+ * least 6 letters, not ALL-CAPS codes; null when there is none.
+ */
+export function romanianPlural(alias) {
+  if (isCapsAlias(alias) || /\s/.test(alias.trim())) return null; // one-word names only: in "acid citric" the noun is first
+  const words = [alias.trim()];
+  const last = words[0];
+  const key = normalize(last);
+  if (normalize(alias).replace(/\s/g, '').length < 6 || !/^[a-z-]+$/.test(key) || key.length < 4) return null;
+  let plural;
+  if (/[bcdfghjklmnprstvxz]$/.test(key)) plural = `${last}i`;
+  else if (/a$/.test(key) && !/ia$/.test(key)) plural = `${last.slice(0, -1)}e`;
+  else return null;
+  return [...words.slice(0, -1), plural].join(' ');
+}
+
 let aliasIndex = null;
 function getAliasIndex() {
-  if (!aliasIndex) aliasIndex = buildAliasIndex(ADDITIVES);
+  if (!aliasIndex) {
+    // Plurals are added only where they do not collide with another additive's name.
+    const taken = new Set(ADDITIVES.flatMap((a) => a.aliases.map((x) => normalize(x))));
+    aliasIndex = buildAliasIndex(ADDITIVES.map((a) => ({
+      code: a.code,
+      aliases: [...a.aliases, ...a.aliases.map(romanianPlural).filter((p) => p && !taken.has(normalize(p)))],
+    })));
+  }
   return aliasIndex;
 }
 
