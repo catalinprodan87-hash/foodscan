@@ -203,5 +203,27 @@
     ]
    }
   }
+ },
+ "_pairs": {
+  "jar": {
+   "truth": "ardei copți 40%, vinete coapte 25%, ceapă, pastă de tomate, ulei de floarea-soarelui, zahăr, sare, oțet de vin, foi de dafin, piper negru, acidifiant: acid citric.",
+   "terms": [
+    "ardei copti",
+    "vinete coapte",
+    "ceapa",
+    "pasta de tomate",
+    "ulei de floarea-soarelui",
+    "zahar",
+    "sare",
+    "otet de vin",
+    "foi de dafin",
+    "piper negru",
+    "acid citric"
+   ],
+   "images": [
+    "images/jar-a.jpg",
+    "images/jar-b.jpg"
+   ]
+  }
  }
 }

@@ -231,3 +231,109 @@ export const MIN_TEXT_LENGTH = 25;
 export function needsBetterPhoto({ confidence, text }) {
   return (Number.isFinite(confidence) && confidence < MIN_CONFIDENCE) || String(text || '').trim().length < MIN_TEXT_LENGTH;
 }
+
+// ──────────────────────── several photos of one label ────────────────────────
+
+/** Letters and digits only (normalised), with the index of each in the original text. */
+function letters(text) {
+  const keys = [];
+  const at = [];
+  const src = String(text);
+  for (let i = 0; i < src.length; i++) {
+    const k = normalize(src[i]);
+    for (const ch of k) {
+      if (/[a-z0-9]/.test(ch)) { keys.push(ch); at.push(i); }
+    }
+  }
+  return { key: keys.join(''), at };
+}
+
+/**
+ * Overlap between the end of `a` and the start of `b`, on letters and digits
+ * only (OCR glues and splits words differently in two photos), allowing
+ * `maxRatio` of edits. Also a `b` that lies entirely inside the end of `a`.
+ * @returns {number|null} index in `b` right after the overlap, or null
+ */
+export function textOverlap(a, b, { minLen = 15, maxLen = 220, maxRatio = 0.2 } = {}) {
+  const A = letters(a);
+  const B = letters(b);
+  const top = Math.min(maxLen, A.key.length, B.key.length);
+  // Score = length − 3 × edits, the overlap must end (almost) on the same letters:
+  // a longer but shifted overlap collects edits and loses.
+  let best = null;
+  let bestScore = -Infinity;
+  for (let len = top; len >= minLen; len--) {
+    const tail = A.key.slice(-len);
+    const head = B.key.slice(0, len);
+    if (levenshtein(tail.slice(-3), head.slice(-3)) > 1) continue;
+    const d = levenshtein(tail, head);
+    if (d > maxRatio * len) continue;
+    const score = len - 3 * d;
+    if (score > bestScore) { bestScore = score; best = len; }
+  }
+  if (best != null) return B.at[best - 1] + 1;
+  // b (short) found inside the last part of a: nothing new to add
+  if (B.key.length >= minLen && B.key.length <= maxLen) {
+    const window = A.key.slice(-Math.min(A.key.length, maxLen));
+    for (let start = 0; start + B.key.length <= window.length; start++) {
+      if (levenshtein(window.slice(start, start + B.key.length), B.key) <= maxRatio * B.key.length) return String(b).length;
+    }
+  }
+  return null;
+}
+
+const lineList = (s) => String(s).split('\n').map((l) => l.trim()).filter(Boolean);
+
+/** a + whatever b adds after their overlap. */
+function joinAt(a, b, cut) {
+  const rest = String(b).slice(cut);
+  if (!rest.trim()) return String(a);
+  return String(a).trimEnd() + (/^[\s,.;:)]/.test(rest) ? '' : ' ') + rest.replace(/^[ \t]+/, rest.startsWith(' ') ? ' ' : '');
+}
+
+/**
+ * Merges the OCR texts of two photos of the same label (curved packs: a jar
+ * or bottle photographed from two sides). Tries, in order:
+ *   1. continuation – the second text starts where the first one ends:
+ *      joined once, no duplicate;
+ *   2. side by side – each photo holds part of every line (text running
+ *      round a jar): lines matched in order and joined at their overlap;
+ *   3. otherwise the second text is appended after " … ".
+ * @returns {{text: string, how: 'continued'|'lines'|'appended'|'single'}}
+ */
+export function mergeOcrTexts(a, b) {
+  if (!String(a || '').trim()) return { text: String(b || ''), how: 'single' };
+  if (!String(b || '').trim()) return { text: String(a), how: 'single' };
+
+  // 1. continuation (≥ 15 letters in common)
+  const cut = textOverlap(a, b, { minLen: 15 });
+  if (cut != null && cut < String(b).length) return { text: joinAt(a, b, cut), how: 'continued' };
+
+  // 2. side by side: match lines in order (a line of a or b may have no partner, e.g. a title)
+  const al = lineList(a);
+  const bl = lineList(b);
+  const out = [];
+  let j = 0;
+  let joined = 0;
+  for (const line of al) {
+    let merged = null;
+    for (let look = j; look < Math.min(bl.length, j + 3) && merged == null; look++) {
+      const c = textOverlap(line, bl[look], { minLen: 6, maxLen: 120 });
+      if (c != null) { merged = joinAt(line, bl[look], c); j = look + 1; }
+    }
+    if (merged != null) joined++;
+    out.push(merged ?? line);
+  }
+  if (joined >= Math.max(1, Math.ceil(Math.min(al.length, bl.length) / 2)) && joined >= Math.min(2, bl.length)) {
+    return { text: [...out, ...bl.slice(j)].join('\n'), how: 'lines' };
+  }
+  if (cut != null) return { text: String(a), how: 'continued' }; // b adds nothing new
+
+  // 3. nothing in common
+  return { text: `${String(a).trimEnd()}\n… ${String(b).trimStart()}`, how: 'appended' };
+}
+
+/** Merges any number of photo texts in order. */
+export function mergeAll(texts) {
+  return texts.reduce((acc, t) => mergeOcrTexts(acc, t).text, '');
+}

@@ -6,6 +6,8 @@
  *   npm run bench:ocr                       run, compare with baseline.json
  *   npm run bench:ocr -- --update-baseline  run and store as the new baseline
  *   npm run bench:ocr -- --only=tomato      one label
+ *   npm run bench:ocr -- --merge            label pairs (two sides of a jar): each photo
+ *                                           alone vs. both merged
  *   npm run bench:ocr -- --rotations        also every image turned 90/180/270°
  *                                           (re-encoded without EXIF): automatic
  *                                           orientation, then the same read
@@ -20,7 +22,8 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { startServer, root } from '../lib/server.mjs';
 import { normalize } from '../../src/lib/analyze.js';
-import { levenshtein } from '../../src/lib/ocrText.js';
+import { levenshtein, mergeOcrTexts, extractIngredients } from '../../src/lib/ocrText.js';
+import { correctWords } from '../../src/lib/lexicon.js';
 import { coverage } from '../../src/lib/cropSuggest.js';
 
 const here = join(root, 'bench', 'ocr');
@@ -57,7 +60,7 @@ page.on('pageerror', (e) => console.error('page error:', e.message));
 await page.goto(`${server.url}bench/ocr/harness.html`);
 await page.waitForFunction(() => window.benchReady);
 
-const names = Object.keys(truth).filter((n) => !only || n === only);
+const names = Object.keys(truth).filter((n) => !n.startsWith('_') && (!only || n === only));
 // Warm-up: engine download from the dev server + model initialisation.
 const first = truth[names[0]].images.flat;
 await page.evaluate(([u]) => window.readImage(u, null), [`${server.url}bench/ocr/${first.file}`]);
@@ -84,6 +87,24 @@ for (const name of names) {
     }
   }
 }
+// Pairs: the two sides of a jar, each alone and merged (what "Adaugă o fotografie" does).
+let mergeStats = null;
+if (args.includes('--merge') || rotations) {
+  console.log('\nTwo photos of one label (merged):');
+  mergeStats = {};
+  for (const [name, pair] of Object.entries(truth._pairs || {})) {
+    const reads = [];
+    for (const file of pair.images) reads.push(await page.evaluate(([u]) => window.readImage(u, null), [`${server.url}bench/ocr/${file}`]));
+    const singles = reads.map((r) => scoreText(r.text, pair));
+    let raw = '';
+    let how = '';
+    for (const r of reads) ({ text: raw, how } = mergeOcrTexts(raw, r.raw));
+    const merged = scoreText(correctWords(extractIngredients(raw).text).text, pair);
+    mergeStats[name] = { singleRecall: singles.map((x) => Math.round(x.recall * 1000) / 10), mergedRecall: Math.round(merged.recall * 1000) / 10, how, raws: reads.map((r) => r.raw), merged: raw };
+    console.log(`${name.padEnd(10)} photo alone: ${singles.map((x) => `${Math.round(x.recall * 100)}%`).join(' / ')}  merged (${how}): ${Math.round(merged.recall * 100)}%${merged.missing.length ? `  missing: ${merged.missing.join(', ')}` : ''}`);
+  }
+}
+
 // Crop suggestion: share of the true ingredients paragraph inside the suggested box.
 const suggestRows = [];
 if (args.includes('--suggest') || rotations) {
@@ -171,7 +192,7 @@ const f = rows.reduce((a, r) => ({ wrong: a.wrong + r.flags.wrong, wf: a.wf + r.
 const flagStats = { wrongWords: f.wrong, wrongFlagged: f.wrong ? Math.round((f.wf / f.wrong) * 1000) / 10 : null, rightFlagged: f.right ? Math.round((f.rf / f.right) * 1000) / 10 : null };
 console.log(`Uncertain words: ${flagStats.wrongFlagged}% of ${f.wrong} misread words flagged; ${flagStats.rightFlagged}% of ${f.right} correct words flagged`);
 
-const result = { date: new Date().toISOString(), only: only || null, summary, orientation, crop, flagStats, rows, orientRows, suggestRows };
+const result = { date: new Date().toISOString(), only: only || null, summary, orientation, crop, flagStats, merge: mergeStats, rows, orientRows, suggestRows };
 mkdirSync(join(root, 'bench', 'results'), { recursive: true });
 const out = join(root, 'bench', 'results', `ocr-${result.date.slice(0, 19).replace(/[:T]/g, '-')}.json`);
 writeFileSync(out, `${JSON.stringify(result, null, 1)}\n`);
@@ -181,7 +202,7 @@ const baselinePath = join(here, 'baseline.json');
 if (updateBaseline) {
   if (only || !retry) throw new Error('--update-baseline needs a full run (no --only / --no-retry)');
   if (!rotations) throw new Error('--update-baseline needs --rotations (the baseline includes orientation)');
-  writeFileSync(baselinePath, `${JSON.stringify({ date: result.date, summary, orientation, crop }, null, 1)}\n`);
+  writeFileSync(baselinePath, `${JSON.stringify({ date: result.date, summary, orientation, crop, merge: mergeStats }, null, 1)}\n`);
   console.log('Baseline updated.');
 } else if (existsSync(baselinePath) && !only) {
   const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'));
@@ -190,6 +211,10 @@ if (updateBaseline) {
     .map(([g, b]) => `${g}: ${summary[g].recall}% (baseline ${b.recall}%)`);
   // Orientation: no image may be turned wrongly that was right before; recall as above.
   if (crop && baseline.crop && crop.covered95 < baseline.crop.covered95) drops.push(`crop suggestion: ${crop.covered95}% (baseline ${baseline.crop.covered95}%)`);
+  for (const [n, m] of Object.entries(mergeStats || {})) {
+    const b = baseline.merge?.[n];
+    if (b && m.mergedRecall < b.mergedRecall - MAX_RECALL_DROP) drops.push(`merged ${n}: ${m.mergedRecall}% (baseline ${b.mergedRecall}%)`);
+  }
   for (const [g, b] of Object.entries((rotations && baseline.orientation) || {})) {
     const o = orientation?.[g];
     if (!o) continue;

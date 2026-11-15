@@ -158,5 +158,46 @@
     "fill": 0.8
    }
   }
- }
+ },
+ "pairs": {
+  "jar": {
+   "style": "background:#fbe7c6;color:#3b2a14;font-family:Arial;width:980px",
+   "html": "<div style='font-size:26px;font-weight:bold'>ZACUSCĂ DE LEGUME 300 g</div><p class='ing' style='font-size:17px'><b>Ingrediente:</b> ardei copți 40%, vinete coapte 25%, ceapă, pastă de tomate, ulei de floarea-soarelui, zahăr, sare, oțet de vin, foi de dafin, piper negru, acidifiant: acid citric. Poate conține urme de țelină.</p><p style='font-size:14px'>A se păstra la loc uscat și răcoros. După deschidere a se păstra la frigider.</p>",
+   "truth": "ardei copți 40%, vinete coapte 25%, ceapă, pastă de tomate, ulei de floarea-soarelui, zahăr, sare, oțet de vin, foi de dafin, piper negru, acidifiant: acid citric.",
+   "terms": [
+    "ardei copti",
+    "vinete coapte",
+    "ceapa",
+    "pasta de tomate",
+    "ulei de floarea-soarelui",
+    "zahar",
+    "sare",
+    "otet de vin",
+    "foi de dafin",
+    "piper negru",
+    "acid citric"
+   ],
+   "split": [
+    [
+     0,
+     0.62
+    ],
+    [
+     0.38,
+     1
+    ]
+   ],
+   "photo": {
+    "curve": 0.6,
+    "tilt": 0,
+    "keystone": 0.03,
+    "blur": 0.4,
+    "glare": 0.15,
+    "noise": 8,
+    "bright": 1.0,
+    "fill": 0.8
+   }
+  }
+ },
+ "_about_pairs": "pairs: one label photographed from two sides of a jar; split = the horizontal share of the label each photo shows (overlapping), merged by mergeOcrTexts."
 }

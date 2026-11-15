@@ -1,29 +1,29 @@
 {
- "date": "2026-11-15T13:12:53.567Z",
+ "date": "2026-11-15T13:32:19.204Z",
  "summary": {
   "flat/whole": {
    "images": 6,
    "recall": 100,
-   "cer": 0.001,
-   "medianMs": 2867
+   "cer": 0,
+   "medianMs": 2946
   },
   "flat/crop": {
    "images": 6,
    "recall": 100,
-   "cer": 0.001,
-   "medianMs": 1329
+   "cer": 0,
+   "medianMs": 1230
   },
   "photo/whole": {
    "images": 6,
    "recall": 77.8,
    "cer": 0.336,
-   "medianMs": 3733
+   "medianMs": 3174
   },
   "photo/crop": {
    "images": 6,
    "recall": 93.1,
-   "cer": 0.131,
-   "medianMs": 1682
+   "cer": 0.132,
+   "medianMs": 1643
   }
  },
  "orientation": {
@@ -31,55 +31,70 @@
    "images": 6,
    "correct": 100,
    "recall": 100,
-   "medianOrientMs": 242
+   "medianOrientMs": 248
   },
   "flat/90": {
    "images": 6,
    "correct": 100,
    "recall": 100,
-   "medianOrientMs": 383
+   "medianOrientMs": 355
   },
   "flat/180": {
    "images": 6,
    "correct": 100,
    "recall": 100,
-   "medianOrientMs": 234
+   "medianOrientMs": 176
   },
   "flat/270": {
    "images": 6,
    "correct": 100,
    "recall": 100,
-   "medianOrientMs": 406
+   "medianOrientMs": 429
   },
   "photo/0": {
    "images": 6,
    "correct": 100,
    "recall": 83.3,
-   "medianOrientMs": 560
+   "medianOrientMs": 506
   },
   "photo/90": {
    "images": 6,
    "correct": 100,
    "recall": 90.3,
-   "medianOrientMs": 1021
+   "medianOrientMs": 975
   },
   "photo/180": {
    "images": 6,
    "correct": 100,
    "recall": 88.9,
-   "medianOrientMs": 478
+   "medianOrientMs": 497
   },
   "photo/270": {
    "images": 6,
    "correct": 100,
    "recall": 90.3,
-   "medianOrientMs": 877
+   "medianOrientMs": 936
   }
  },
  "crop": {
   "images": 12,
   "covered95": 83.3,
   "meanCoverage": 82.4,
-  "medianMs": 1547
+  "medianMs": 1382
+ },
+ "merge": {
+  "jar": {
+   "singleRecall": [
+    54.5,
+    45.5
+   ],
+   "mergedRecall": 100,
+   "how": "lines",
+   "raws": [
+    "ZACUSCA DE LEGUME 300 g\nIngrediente ardei copti 40%vinete coapte 25%ceapapasta de tomate, ulei de\ndafin piper negru, acidifiant acid citric.Poate contine urme de telina.\nAse pastra la loc uscat si racoros.Dupa deschidere a se pastra la frigider.",
+    "ceapa pastade tomate ulei de floarea-soarelui, zahar, sareotet de vin foi de\nntine urme de telina.\nastra la frigider."
+   ],
+   "merged": "ZACUSCA DE LEGUME 300 g\nIngrediente ardei copti 40%vinete coapte 25%ceapapasta de tomate, ulei de floarea-soarelui, zahar, sareotet de vin foi de\ndafin piper negru, acidifiant acid citric.Poate contine urme de telina..\nAse pastra la loc uscat si racoros.Dupa deschidere a se pastra la frigider.."
+  }
  }
 }

@@ -7,6 +7,7 @@
 import { ADDITIVES } from '../data/additives.js';
 import { NONFOOD_INGREDIENTS } from '../data/nonFoodIngredients.js';
 import { AVOID_PRESETS } from '../data/avoidPresets.js';
+import { LEXICON_RO } from '../data/lexicon-ro.js';
 import { normalize } from './analyze.js';
 import { levenshtein } from './ocrText.js';
 
@@ -29,11 +30,13 @@ masă cacao produs fabricat ambalat origine conținut valoare energetică medie 
 `;
 
 let lexicon = null;
+let rank = null; // key → 0 for the hand-made lists, 1 + frequency rank for words from real labels
 
 /** normalised word → preferred spelling (with diacritics where known). */
 export function getLexicon() {
   if (lexicon) return lexicon;
   lexicon = new Map();
+  rank = new Map();
   const add = (phrase) => {
     for (const w of String(phrase).split(/[^\p{L}\p{N}-]+/u)) {
       if (w.length < 3 || /\d/.test(w)) continue;
@@ -50,6 +53,13 @@ export function getLexicon() {
   for (const a of ADDITIVES) { a.aliases.forEach(add); add(a.name.ro); add(a.name.en); }
   for (const n of NONFOOD_INGREDIENTS) { n.aliases.forEach(add); add(n.name.ro); add(n.name.en); }
   for (const p of AVOID_PRESETS) { p.terms.forEach(add); add(p.label.ro); }
+  for (const key of lexicon.keys()) rank.set(key, 0);
+  // Words from real Romanian labels (scripts/build-lexicon.mjs, most frequent first);
+  // the lists above keep their spelling and win ties.
+  LEXICON_RO.split(' ').forEach((w, i) => {
+    const key = normalize(w);
+    if (w && !lexicon.has(key)) { lexicon.set(key, w); rank.set(key, i + 1); }
+  });
   return lexicon;
 }
 
@@ -71,6 +81,13 @@ function matchCase(word, replacement) {
   if (letters.length > 1 && upper / letters.length >= 0.7) return replacement.toUpperCase();
   if (word[0] === word[0].toUpperCase()) return replacement[0].toUpperCase() + replacement.slice(1);
   return replacement;
+}
+
+const ENDINGS = ['i', 'e', 'a', 'ul', 'le', 'lor', 'uri', 'ii', 'ele', 'ilor'];
+
+/** `key` is `base` + a Romanian ending (normalised, no diacritics). */
+export function isInflection(key, base) {
+  return key.startsWith(base) && ENDINGS.includes(key.slice(base.length));
 }
 
 /**
@@ -105,12 +122,20 @@ export function correctWords(text, lex = getLexicon()) {
     let best = null;
     let bestD = maxD + 1;
     let tie = false;
+    // Nearest known word; between equally near ones the hand-made lists, then the more
+    // frequent word, win ("sore" → "sare", not "soare"); a real tie changes nothing.
+    const rankOf = (k) => rank?.get(k) ?? 0;
     for (const k of keys) {
       if (Math.abs(k.length - key.length) > maxD) continue;
       const d = levenshtein(key, k);
-      if (d < bestD) { best = k; bestD = d; tie = false; } else if (d === bestD) tie = true;
+      if (d < bestD) { best = k; bestD = d; tie = false; } else if (d === bestD) {
+        if (rankOf(k) < rankOf(best)) { best = k; tie = false; } else if (rankOf(k) === rankOf(best)) tie = true;
+      }
     }
     if (!best || tie || bestD > maxD) return word;
+    // An inflected form of a known word ("copți" of "copt", "ardeii" of "ardei"):
+    // Romanian endings are not slips – keep the word.
+    if (isInflection(key, best)) return word;
     const fixed = matchCase(word, lex.get(best));
     changes.push({ from: word, to: fixed });
     return fixed;

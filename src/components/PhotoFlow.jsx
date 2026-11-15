@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { t } from '../lib/i18n.js';
 import { loadImage, previewCanvas, prepareColour, imageSize, rotateImage } from '../lib/imagePrep.js';
-import { needsBetterPhoto } from '../lib/ocrText.js';
+import { needsBetterPhoto, extractIngredients, mergeOcrTexts } from '../lib/ocrText.js';
+import { correctWords } from '../lib/lexicon.js';
 import { readIngredients, wordsToCheck } from '../lib/readPhoto.js';
 import CropBox from './CropBox.jsx';
 import PhotoButton from './PhotoButton.jsx';
@@ -11,6 +12,7 @@ import { recordTiming } from '../lib/diagnostics.js';
 
 const DEFAULT_RECT = { x: 0.04, y: 0.15, w: 0.92, h: 0.55 };
 const ORIENT_LIMIT_MS = 3000; // after the engine is ready; then the photo stays as it is
+const MAX_PHOTOS = 3; // one label photographed from up to three sides (curved packs)
 const SUGGEST_LIMIT_MS = 15000; // crop suggestion: applied whenever it arrives, unless the user moved the box or started reading
 const mb = (n) => (n / 1048576).toFixed(1);
 
@@ -169,7 +171,10 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
       });
       if (!alive.current) return;
       recordTiming('ocr', performance.now() - t0, true, `${cropRect ? 'crop' : 'whole'} ${canvas.width}×${canvas.height} conf ${best.confidence} lines ${best.lines} tries ${best.tries}`);
-      setReview({ text: best.text, rawText: best.rawText, confidence: best.confidence, thumb, foundStart: best.foundStart, retried: best.retried, uncertain: best.uncertain });
+      setReview({
+        text: best.text, rawText: best.rawText, confidence: best.confidence, thumb, foundStart: best.foundStart, retried: best.retried, uncertain: best.uncertain,
+        parts: [{ raw: best.rawText, thumb, confidence: best.confidence, uncertain: best.uncertain }],
+      });
       setStep('review');
     } catch (err) {
       recordTiming('ocr', performance.now() - t0, false, String(err?.message || err).slice(0, 60));
@@ -177,6 +182,54 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
       setStep('error');
     }
   };
+
+  /** The review text rebuilt from all photos of the label, merged in order. */
+  const fromParts = (parts) => {
+    let raw = '';
+    let how = 'single';
+    parts.forEach((p, i) => {
+      const m = mergeOcrTexts(raw, p.raw);
+      raw = m.text;
+      if (i > 0) how = m.how;
+    });
+    const extracted = extractIngredients(raw);
+    return {
+      parts,
+      rawText: raw,
+      text: correctWords(extracted.text).text,
+      foundStart: extracted.foundStart,
+      confidence: Math.min(...parts.map((p) => p.confidence)),
+      uncertain: [...new Set(parts.flatMap((p) => p.uncertain || []))],
+      merged: parts.length > 1 ? how : null,
+    };
+  };
+
+  // Another photo of the same label (the other side of a jar or bottle): turned upright,
+  // cropped to the ingredients when a heading is found, read, and merged with the others.
+  const addPhoto = async (file) => {
+    setReview((r) => ({ ...r, adding: true, addError: null }));
+    const t0 = performance.now();
+    try {
+      let image = await loadImage(file);
+      const { detectOrientation, suggestCrop, recognize } = await import('../lib/ocr.js');
+      try {
+        const o = await detectOrientation(image);
+        if (o.turns) image = rotateImage(image, o.turns);
+      } catch { /* keep as it is */ }
+      let rect = null;
+      try { rect = (await suggestCrop(image))?.rect || null; } catch { /* whole photo */ }
+      const canvas = prepareColour(image, rect);
+      const thumb = previewCanvas(canvas, 600).toDataURL('image/jpeg', 0.8);
+      const r = await readIngredients(canvas, { recognize, rotate: rotateImage, orientationChecked: true, shouldStop: () => !alive.current });
+      if (!alive.current) return;
+      recordTiming('ocr', performance.now() - t0, true, `extra photo conf ${r.confidence}`);
+      setReview((prev) => ({ ...prev, ...fromParts([...prev.parts, { raw: r.rawText, thumb, confidence: r.confidence, uncertain: r.uncertain }]), adding: false }));
+    } catch {
+      if (alive.current) setReview((prev) => ({ ...prev, adding: false, addError: true }));
+    }
+  };
+
+  const removePhoto = (index) => setReview((prev) => ({ ...prev, ...fromParts(prev.parts.filter((_, i) => i !== index)) }));
 
   const header = <ProductHeader lang={lang} product={product} barcode={barcode} />;
 
@@ -273,7 +326,21 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
           }}
         >
           <h2 className="card-title">{t(lang, 'reviewTitle')}</h2>
-          <img className="ocr-thumb" src={review.thumb} alt="" />
+          {(review.parts?.length || 1) === 1 ? (
+            <img className="ocr-thumb" src={review.thumb} alt="" />
+          ) : (
+            <ol className="photo-parts" aria-label={t(lang, 'photosOfLabel')}>
+              {review.parts.map((p, i) => (
+                <li key={p.thumb}>
+                  <img src={p.thumb} alt={t(lang, 'photoN', { n: i + 1 })} />
+                  {i > 0 && (
+                    <button type="button" className="part-remove" onClick={() => removePhoto(i)} aria-label={t(lang, 'photoRemove', { n: i + 1 })}>×</button>
+                  )}
+                </li>
+              ))}
+            </ol>
+          )}
+          {review.merged && <p className="muted small">{t(lang, 'mergedPhotos', { n: review.parts.length })} {t(lang, 'merged_' + review.merged)}</p>}
           {tip && (
             <div className="photo-tip" role="note">
               <strong>💡 {t(lang, 'photoTipTitle')}</strong>
@@ -314,9 +381,18 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
           />
           <p className="muted small">{t(lang, 'ocrConfidence', { value: review.confidence })}</p>
           <div className="actions">
-            <button type="submit" className="btn primary" disabled={!review.text.trim()}>{t(lang, 'analyze')}</button>
+            <button type="submit" className="btn primary" disabled={!review.text.trim() || review.adding}>{t(lang, 'analyze')}</button>
             <PhotoButton lang={lang} onPhoto={onRetake} className="btn ghost" labelKey="retakePhoto" />
           </div>
+          {review.adding ? (
+            <p className="muted small photo-note" role="status"><span className="spinner tiny" aria-hidden="true" /> {t(lang, 'addingPhoto')}</p>
+          ) : (review.parts?.length || 1) < MAX_PHOTOS && (
+            <div className="add-photo">
+              <PhotoButton lang={lang} onPhoto={addPhoto} className="btn ghost block" labelKey="addPhoto" />
+              <p className="muted small">{t(lang, 'addPhotoHint')}</p>
+            </div>
+          )}
+          {review.addError && <p className="small form-error" role="alert">{t(lang, 'addPhotoError')}</p>}
         </form>
         <ReportProblem lang={lang} screen="photo-review" ocr={{ confidence: review.confidence, text: review.rawText || review.text }} product={product} />
         <button type="button" className="btn ghost block" onClick={onCancel}>{t(lang, 'cancel')}</button>
