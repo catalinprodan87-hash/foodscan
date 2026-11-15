@@ -5,6 +5,7 @@
  *   public/ocr/ort/…                  ONNX Runtime Web (WebAssembly, CPU), 12 MB
  *   public/ocr/paddle/det.onnx        PaddleOCR PP-OCRv4 text detector, 4.7 MB
  *   public/ocr/paddle/rec.onnx        PaddleOCR PP-OCRv4 English/Latin recogniser, 7.7 MB
+ *   public/ocr/paddle/cls.onnx        PaddleOCR text direction classifier (0°/180°), 0.6 MB
  *   public/ocr/paddle/dict.txt        recogniser character list
  *   public/ocr/manifest.json          file sizes for the download progress bar
  *
@@ -41,6 +42,8 @@ const files = {
   'ort/ort-wasm-simd-threaded.mjs': join(ort, 'ort-wasm-simd-threaded.mjs'),
   'paddle/det.onnx': join(models, 'ch_PP-OCRv4_det_infer.onnx'),
   'paddle/rec.onnx': join(models, 'en_PP-OCRv4_rec.onnx'),
+  // Text direction classifier (0° / 180°), for photos taken upside down.
+  'paddle/cls.onnx': join(models, 'ch_ppocr_mobile_v2.0_cls_infer.onnx'),
 };
 const sizes = {};
 for (const [target, source] of Object.entries(files)) {

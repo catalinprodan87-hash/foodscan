@@ -28,7 +28,7 @@ jobs:
         run: npm run bench:barcodes
       - name: OCR benchmark
         if: always()
-        run: npm run bench:ocr
+        run: npm run bench:ocr -- --rotations
       - name: Results
         if: always()
         uses: actions/upload-artifact@v5

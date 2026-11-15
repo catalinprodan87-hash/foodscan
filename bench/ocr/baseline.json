@@ -1,29 +1,79 @@
 {
- "date": "2026-11-14T16:38:47.794Z",
+ "date": "2026-11-15T12:42:49.359Z",
  "summary": {
   "flat/whole": {
    "images": 6,
    "recall": 100,
-   "cer": 0,
-   "medianMs": 2839
+   "cer": 0.001,
+   "medianMs": 2832
   },
   "flat/crop": {
    "images": 6,
    "recall": 100,
-   "cer": 0,
-   "medianMs": 1447
+   "cer": 0.001,
+   "medianMs": 1204
   },
   "photo/whole": {
    "images": 6,
    "recall": 77.8,
-   "cer": 0.337,
-   "medianMs": 3992
+   "cer": 0.336,
+   "medianMs": 3425
   },
   "photo/crop": {
    "images": 6,
-   "recall": 81.9,
-   "cer": 0.147,
-   "medianMs": 1595
+   "recall": 93.1,
+   "cer": 0.131,
+   "medianMs": 1631
+  }
+ },
+ "orientation": {
+  "flat/0": {
+   "images": 6,
+   "correct": 100,
+   "recall": 100,
+   "medianOrientMs": 178
+  },
+  "flat/90": {
+   "images": 6,
+   "correct": 100,
+   "recall": 100,
+   "medianOrientMs": 386
+  },
+  "flat/180": {
+   "images": 6,
+   "correct": 100,
+   "recall": 100,
+   "medianOrientMs": 211
+  },
+  "flat/270": {
+   "images": 6,
+   "correct": 100,
+   "recall": 100,
+   "medianOrientMs": 426
+  },
+  "photo/0": {
+   "images": 6,
+   "correct": 100,
+   "recall": 83.3,
+   "medianOrientMs": 495
+  },
+  "photo/90": {
+   "images": 6,
+   "correct": 100,
+   "recall": 90.3,
+   "medianOrientMs": 966
+  },
+  "photo/180": {
+   "images": 6,
+   "correct": 100,
+   "recall": 88.9,
+   "medianOrientMs": 517
+  },
+  "photo/270": {
+   "images": 6,
+   "correct": 100,
+   "recall": 90.3,
+   "medianOrientMs": 978
   }
  }
 }

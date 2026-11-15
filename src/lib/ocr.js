@@ -9,6 +9,9 @@
  *
  * `createWorker`, `fetchImpl` and `cachesImpl` are injectable for tests.
  */
+import { pickRotation } from './orientation.js';
+import { ORIENT_MAX_SIDE } from './paddleCore.js';
+
 export const OCR_DIR = 'ocr/';
 
 /** Absolute URLs of the self-hosted OCR files. */
@@ -20,9 +23,10 @@ export function ocrAssets(baseUrl) {
     ortDir,
     det: `${base}paddle/det.onnx`,
     rec: `${base}paddle/rec.onnx`,
+    cls: `${base}paddle/cls.onnx`,
     dict: `${base}paddle/dict.txt`,
   };
-  assets.downloads = [`${ortDir}ort-wasm-simd-threaded.wasm`, `${ortDir}ort-wasm-simd-threaded.mjs`, assets.det, assets.rec, assets.dict];
+  assets.downloads = [`${ortDir}ort-wasm-simd-threaded.wasm`, `${ortDir}ort-wasm-simd-threaded.mjs`, assets.det, assets.rec, assets.cls, assets.dict];
   return assets;
 }
 
@@ -109,11 +113,18 @@ export function getEngine({ createWorker = defaultCreateWorker, baseUrl = global
       worker.postMessage({ type: 'init', assets });
       await ready;
       return {
-        recognize(bitmap) {
+        recognize(bitmap, { detMaxSide, upscale } = {}) {
           const id = nextId++;
           return new Promise((resolve, reject) => {
             pending.set(id, { resolve, reject });
-            worker.postMessage({ type: 'recognize', id, bitmap, assets }, bitmap && typeof bitmap.close === 'function' ? [bitmap] : []);
+            worker.postMessage({ type: 'recognize', id, bitmap, assets, detMaxSide, upscale }, bitmap && typeof bitmap.close === 'function' ? [bitmap] : []);
+          });
+        },
+        orient(bitmap) {
+          const id = nextId++;
+          return new Promise((resolve, reject) => {
+            pending.set(id, { resolve: (m) => resolve(m.orient), reject });
+            worker.postMessage({ type: 'orient', id, bitmap, assets }, bitmap && typeof bitmap.close === 'function' ? [bitmap] : []);
           });
         },
         terminate() { worker.terminate(); },
@@ -128,13 +139,34 @@ export function getEngine({ createWorker = defaultCreateWorker, baseUrl = global
  * Recognises text in an image (canvas or ImageBitmap).
  * @returns {Promise<{text: string, confidence: number, lines: number}>}
  */
-export async function recognize(image, { onProgress, ...engineOptions } = {}) {
+export async function recognize(image, { onProgress, detMaxSide, upscale, ...engineOptions } = {}) {
   const engine = await getEngine({ onProgress, ...engineOptions });
   const bitmap = typeof createImageBitmap === 'function' && image && typeof image.getContext === 'function'
     ? await createImageBitmap(image)
     : image;
-  const r = await engine.recognize(bitmap);
+  const r = await engine.recognize(bitmap, { detMaxSide, upscale });
   return { text: r.text || '', confidence: Math.round(r.confidence ?? 0), lines: r.lines ?? 0 };
+}
+
+/**
+ * How many quarter turns (clockwise) make the photo's text upright. Works on
+ * a small copy (long side 960 px); see src/lib/orientation.js for the rule.
+ * @param image ImageBitmap / canvas / image of the whole photo
+ * @returns {Promise<{turns: 0|1|2|3, method: string, confidence: number, ms: number}>}
+ */
+export async function detectOrientation(image, { onProgress, ...engineOptions } = {}) {
+  const engine = await getEngine({ onProgress, ...engineOptions });
+  const t0 = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  let small = image;
+  if (typeof OffscreenCanvas === 'function' && image && image.width) {
+    const k = Math.min(1, ORIENT_MAX_SIDE / Math.max(image.width, image.height));
+    const c = new OffscreenCanvas(Math.max(1, Math.round(image.width * k)), Math.max(1, Math.round(image.height * k)));
+    c.getContext('2d').drawImage(image, 0, 0, c.width, c.height);
+    small = typeof createImageBitmap === 'function' ? await createImageBitmap(c) : c;
+  }
+  const measured = await engine.orient(small);
+  const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  return { ...pickRotation(measured), ms: Math.round(now - t0), measured };
 }
 
 /** Test helper: forget the engine singleton. */

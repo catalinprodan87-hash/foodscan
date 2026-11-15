@@ -290,7 +290,8 @@ describe('OCR engine with a mocked PaddleOCR worker', () => {
     assert.equal(a.det, 'https://example.github.io/foodscan/ocr/paddle/det.onnx');
     assert.equal(a.rec, 'https://example.github.io/foodscan/ocr/paddle/rec.onnx');
     assert.equal(a.dict, 'https://example.github.io/foodscan/ocr/paddle/dict.txt');
-    assert.equal(a.downloads.length, 5);
+    assert.equal(a.cls, 'https://example.github.io/foodscan/ocr/paddle/cls.onnx');
+    assert.equal(a.downloads.length, 6);
     assert.ok(a.downloads.every((u) => u.startsWith(BASE)));
   });
 
@@ -418,6 +419,11 @@ describe('PaddleOCR pipeline (pure parts)', () => {
 
 // ─────────────────────────────── word correction ──────────────────────────
 describe('ingredient word correction', () => {
+  test('"masa de cacao" is not turned into "maia" (found by the OCR benchmark)', () => {
+    assert.equal(correctWords('zahăr, unt de cacao, masa de cacao').text, 'zahăr, unt de cacao, masă de cacao');
+    assert.equal(correctWords('masă de cacao').text, 'masă de cacao');
+  });
+
   test('fixes one-edit OCR slips and restores diacritics', () => {
     assert.equal(correctWords('concentrat de tomate, apa, sore. Produs posteurizat.').text, 'concentrat de tomate, apă, sare. Produs pasteurizat.');
     assert.equal(correctWords('faina de grau, zahar, ulei de palmier').text, 'făină de grâu, zahăr, ulei de palmier');

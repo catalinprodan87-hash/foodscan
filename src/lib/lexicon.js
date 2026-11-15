@@ -25,6 +25,7 @@ acidifiant corector aciditate agent agenți afânare îngroșare gelifiant îndu
 potențiator potențiatori sare iodată condimente legume fructe verdețuri ciuperci mazăre fasole linte năut
 pasteurizat pasteurizată sterilizat uscat uscată uscate solubilă substanță conține poate urme minimum maxim adaos
 integral integrală degresat degresată semidegresat hidrogenat hidrogenată parțial modificat modificată rafinat rafinată
+masă cacao produs fabricat ambalat origine conținut valoare energetică medie porție vanilie
 `;
 
 let lexicon = null;

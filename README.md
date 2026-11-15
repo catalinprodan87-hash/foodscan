@@ -41,6 +41,8 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 ### Photo of the ingredients – on-device OCR
 
 - **Engine:** PaddleOCR PP-OCRv4 (text detector + English/Latin recogniser, `paddle-ocr-onnx-models`) on ONNX Runtime Web (WebAssembly) in a Web Worker (`src/workers/ocrWorker.js`, maths in `src/lib/paddleCore.js`). Text lines are cut along their own angle, so tilted and curved labels read line by line. **The photo never leaves the phone.**
+- **Automatic orientation (v2.2):** photos saved sideways or upside down without an EXIF tag are turned upright before the crop step. On a 960 px copy the detector finds the text; if most line-shaped text is steep, the photo is sideways (turn 90°). PaddleOCR's direction classifier (`cls.onnx`, 0.6 MB) then votes 0° / 180° on short pieces of the main lines (`lineSegments`: whole long lines squeezed into its 192 × 48 input are unreadable). When it is unsure (< 0.75), the same pieces are read both ways and the reading with known words wins (`src/lib/orientation.js`). Runs while the crop step is shown; ignored after 3 s, or once you rotate or start reading; **⟳ Rotește** always overrides. Benchmark: 48/48 rotated images turned correctly, 0.2–1.0 s on a desktop CPU.
+- **Second chance for weak reads (v2.2):** a read with low confidence, almost no text, or no ingredients heading and few known words is read again: upside down (only if the orientation could not be checked), then with the text detector enlarged up to 2× (only crops and photos ≤ 1600 px – on whole photos it tripled the time for nothing). The better reading wins (`src/lib/readPhoto.js`). Benchmark: cropped phone photos 85.4% → 93.1% key words.
 - **Why PaddleOCR:** benchmark on six realistic hard label photos (curved red jar with glare, small print, glossy, white-on-blue, multilingual RO/HU/BG, dim and noisy), share of key ingredients read correctly:
 
   | | Uncropped photo | Cropped to the label |
@@ -172,6 +174,7 @@ Checked on real data: the Kaufland tomato paste 5949069402286 is in Open Food Fa
 │   ├── saved.test.js          # Remembered ingredients by barcode
 │   ├── data.test.js           # Database schema: both languages, levels, codes, regions, alias clashes
 │   ├── v21.test.js            # Backup / restore / delete, diagnostics report, rotation sizes
+│   ├── orientation.test.js    # Sideways / upside-down detection, classifier vote, retries for weak reads
 │   └── scores.test.js         # NOVA explanations, Nutri-Score facts, restrictions outside the EU
 ├── e2e/                       # Browser tests (Playwright, API mocked): paste, barcode flows, remembered
 │                              # ingredients offline, history, avoid list, RO/EN, one real OCR smoke test
@@ -215,16 +218,20 @@ Browser tests never reach the real Open *Facts servers: every request is answere
 
 **OCR benchmark** (`bench/ocr`). Six synthetic labels (tomato paste, biscuits, chocolate, multilingual soup RO/HU/BG, shampoo INCI, detergent with Reg. 648/2004 bands), each as a flat image and as a synthetic phone photo (curve, perspective, tilt, blur, glare, noise, dim light). Each is read whole and cropped to the ingredients paragraph through the app's real OCR path in Chromium. Reported per image: key-word recall, CER (character error rate of the extracted ingredients text after normalisation) and time. The run fails if the average recall of any group drops more than 2 points below `baseline.json`. Change the labels in `labels.json`, then `npm run bench:labels`; accept new numbers with `npm run bench:ocr -- --update-baseline`.
 
-Baseline (14 Nov 2026, desktop CPU, one thread – a phone is slower):
+Baseline (15 Nov 2026, v2.2, desktop CPU, one thread – a phone is slower). Reading includes the app's word clean-up and the second chance for weak reads:
 
 | Group | Recall | CER | Median time |
 |---|---|---|---|
-| flat / whole | 100% | 0.000 | 2.8 s |
-| flat / crop | 100% | 0.000 | 1.4 s |
-| photo / whole | 77.8% | 0.337 | 4.0 s |
-| photo / crop | 81.9% | 0.147 | 1.6 s |
+| flat / whole | 100% | 0.001 | 2.8 s |
+| flat / crop | 100% | 0.001 | 1.2 s |
+| photo / whole | 77.8% | 0.336 | 3.4 s |
+| photo / crop | 93.1% | 0.131 | 1.6 s |
 
-The weak cases are small, curved text: the tomato jar and the shampoo bottle (word spaces and letters lost). They are the targets of v2.2–v2.4.
+`--rotations` also turns every image 90/180/270° (re-encoded as JPEG without EXIF, like a phone that did not record the rotation) and runs the app's automatic orientation first. Orientation was correct on 48/48 images; recall after turning matches the same path at 0° (photo / crop: 83.3% at 0°, 88.9–90.3% at 90/180/270°; re-encoding is why 0° is below the table above). Median orientation time 0.2–0.4 s for flat labels, 0.5–1.0 s for photos (sideways photos need a second detection pass). The baseline fails a run if any image's orientation goes wrong that was right before.
+
+The weak cases are small, curved text: the tomato jar (whole photo) and the shampoo bottle (word spaces and letters lost). Targets of v2.3–v2.4.
+
+The benchmark found one clean-up bug, fixed in v2.2: "masa de cacao" was "corrected" to "maia de cacao" because "masă" was missing from the word list.
 
 **Barcode benchmark** (`bench/barcode`). 24 synthetic hard photos (small, tiny, rotated 15/40/90/180°, perspective, blur, curve, glare, low contrast, noise, low JPEG quality, combinations) decoded by the app's photo path. Baseline: 22/24 read, 0 misreads (the misses are 3.5 px blur and curve + blur). Headless Chromium on Linux has no native `BarcodeDetector`, so this measures the ZXing fallback. Regenerate images with `npm run bench:barcodes:make`.
 
