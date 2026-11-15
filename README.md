@@ -58,6 +58,12 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
+### Shopping mode and comparing products (v2.7)
+
+- **Mod cumpărături** in the scanner: the camera stays on and each new barcode becomes a card in a sheet at the bottom (name, verdict colour, the main reason; badges *salvat*, *lipsesc ingredientele*, *cod magazin*, *negăsit*), looked up in the background. The same code within 10 s is ignored (the box is still in front of the camera); a code already in the list moves to the top. Tapping a card opens the full result; **Înapoi la cumpărături** returns to the camera with the list intact. Shopping scans go to the history. The camera stops after 5 minutes without a new product (battery, heat). `src/lib/shopping.js`.
+- **Compare two** in the history: pick two products for a side-by-side view (verdict, NOVA, Nutri-Score, nutrient levels, additives to avoid / limit, your list, allergens), worked out again with the current list and offline; items found in both are marked. Stacked rows, readable at 320 px. `src/lib/compare.js`, `CompareView.jsx`.
+- Browser tests drive shopping mode with Chromium's fake camera and a stand-in `BarcodeDetector`.
+
 ### Full EU additive list, sources and dates (v2.6)
 
 - **All additives authorised in the EU** (Regulation (EC) 1333/2008, Annex II): 162 entries added in `src/data/additivesExtra.js` (RO/EN name, label words, one-line function; level `none` or that of their family, higher only with a stated reason – aluminium compounds, boric acid only in caviar, konjac not in jelly mini-cups). E203 is not included (authorisation withdrawn in 2018); "E960a" resolves to E960. Codes with letters up to h (E161g) are now read.

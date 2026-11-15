@@ -145,7 +145,11 @@ async function tuneTrack(track) {
  * @param {{onReady?: (info: {torch: boolean, engine: string}) => void}} options
  * @returns {{stop: () => void, setTorch: (on: boolean) => Promise<boolean>}}
  */
-export function startCameraScan(videoEl, onDetect, onError, { onReady } = {}) {
+/**
+ * @param {{onReady?: Function, continuous?: boolean}} opts continuous: keep scanning
+ *   after a code (shopping mode); the caller ignores repeats of the same code.
+ */
+export function startCameraScan(videoEl, onDetect, onError, { onReady, continuous = false } = {}) {
   let stopped = false;
   let stream = null;
   let timer = null;
@@ -191,10 +195,13 @@ export function startCameraScan(videoEl, onDetect, onError, { onReady } = {}) {
             : await strategies[frame++ % strategies.length]();
           if (stopped) return;
           if (hit && vote(hit.code)) {
-            stop();
-            vibrate();
-            onDetect(hit);
-            return;
+            if (!continuous) {
+              stop();
+              vibrate();
+              onDetect(hit);
+              return;
+            }
+            onDetect(hit); // shopping mode: the caller vibrates for new products only
           }
         }
         timer = setTimeout(tick, native ? 80 : 120);

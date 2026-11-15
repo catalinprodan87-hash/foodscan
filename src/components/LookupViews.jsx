@@ -45,7 +45,7 @@ export function PastePrompt({ lang, onAnalyze, onPhoto, placeholderKey = 'inputP
   );
 }
 
-export function NotFound({ lang, code, type = 'food', cached = false, onAnalyze, onPhoto, onBack, onRetry }) {
+export function NotFound({ lang, code, type = 'food', cached = false, onAnalyze, onPhoto, onBack, onRetry, backLabel = 'back' }) {
   return (
     <div className="result">
       <section className="card notice">
@@ -61,13 +61,13 @@ export function NotFound({ lang, code, type = 'food', cached = false, onAnalyze,
           <button type="button" className="btn ghost block" onClick={onRetry}>🔄 {t(lang, 'searchAgain')}</button>
         </section>
       )}
-      <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, 'back')}</button>
+      <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, backLabel)}</button>
     </div>
   );
 }
 
 /** Product found but without ingredients: show what is available + paste prompt. */
-export function NoIngredients({ lang, product, partial, onAnalyze, onPhoto, onBack }) {
+export function NoIngredients({ lang, product, partial, onAnalyze, onPhoto, onBack, backLabel = 'back' }) {
   const food = product.productType === 'food';
   const placeholderKey = food ? 'inputPlaceholder' : 'inputPlaceholder_' + product.productType;
   return (
@@ -91,13 +91,13 @@ export function NoIngredients({ lang, product, partial, onAnalyze, onPhoto, onBa
       {food && partial && partial.additives.length > 0 && (
         <AdditiveList lang={lang} additives={partial.additives} title={t(lang, 'tagsAdditives')} />
       )}
-      <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, 'back')}</button>
+      <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, backLabel)}</button>
     </div>
   );
 }
 
 /** EAN-13 20–29: a code printed by the shop (weighed / packed in store). */
-export function InStore({ lang, code, onAnalyze, onPhoto, onBack }) {
+export function InStore({ lang, code, onAnalyze, onPhoto, onBack, backLabel = 'back' }) {
   return (
     <div className="result">
       <section className="card notice">
@@ -106,12 +106,12 @@ export function InStore({ lang, code, onAnalyze, onPhoto, onBack }) {
         <PhotoButton lang={lang} onPhoto={onPhoto} className="btn primary block" />
         <PastePrompt lang={lang} onAnalyze={onAnalyze} />
       </section>
-      <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, 'back')}</button>
+      <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, backLabel)}</button>
     </div>
   );
 }
 
-export function LookupFailed({ lang, code, kind, onRetry, onAnalyze, onPhoto, onBack }) {
+export function LookupFailed({ lang, code, kind, onRetry, onAnalyze, onPhoto, onBack, backLabel = 'back' }) {
   return (
     <div className="result">
       <section className="card notice notice-error" role="alert">
@@ -124,7 +124,7 @@ export function LookupFailed({ lang, code, kind, onRetry, onAnalyze, onPhoto, on
         <PhotoButton lang={lang} onPhoto={onPhoto} className="btn ghost block" />
         <PastePrompt lang={lang} onAnalyze={onAnalyze} />
       </section>
-      <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, 'back')}</button>
+      <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, backLabel)}</button>
     </div>
   );
 }

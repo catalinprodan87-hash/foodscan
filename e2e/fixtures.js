@@ -29,8 +29,9 @@ export const test = base.extend({
       if (state.fail) return route.abort('internetdisconnected');
       const url = route.request().url();
       const db = url.includes('openfoodfacts') ? 'food' : url.includes('openbeautyfacts') ? 'beauty' : 'products';
-      const p = state[db];
-      return route.fulfill(p && url.includes(p.code) ? found(p) : notFound);
+      // one product or a list of products per database
+      const p = [].concat(state[db] || []).find((x) => url.includes(`/${x.code}.json`));
+      return route.fulfill(p ? found(p) : notFound);
     });
     await use({
       set: (patch) => Object.assign(state, patch),

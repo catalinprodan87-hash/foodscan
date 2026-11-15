@@ -3,15 +3,36 @@ import { t } from '../lib/i18n.js';
 import { classifyCameraError } from '../lib/camera.js';
 import { startCameraScan } from '../lib/scanner.js';
 import BarcodeEntry from './BarcodeEntry.jsx';
+import { IDLE_STOP_MS } from '../lib/shopping.js';
 
 const SLOW_HINT_MS = 10000;
+const VERDICT_ICON = { bad: '✕', warn: '!', ok: '✓', unknown: '?' };
+
+/** One scanned product in shopping mode. */
+function ShopCard({ lang, item, onOpen }) {
+  const badge = { saved: 'shopSaved', no_ingredients: 'shopNoIngredients', not_found: 'shopNotFound', in_store: 'shopInStore', error: 'shopError' }[item.state];
+  return (
+    <li>
+      <button type="button" className={`shop-card verdict-dot-border-${item.verdict || 'none'}`} onClick={() => onOpen(item)}>
+        <span className={`shop-verdict verdict-dot-${item.verdict || 'unknown'}`} aria-hidden="true">{item.state === 'loading' ? '…' : VERDICT_ICON[item.verdict] || '?'}</span>
+        <span className="shop-text">
+          <span className="shop-name">{item.name || item.code}</span>
+          <span className="shop-sub">
+            {item.state === 'loading' ? t(lang, 'shopLooking') : [item.verdict && t(lang, 'verdict_' + item.verdict), item.reason].filter(Boolean).join(' · ')}
+          </span>
+          {badge && <span className={`shop-badge shop-badge-${item.state}`}>{t(lang, badge)}</span>}
+        </span>
+      </button>
+    </li>
+  );
+}
 
 /**
  * Full-screen camera scanner (lazy-loaded with the decoder). The camera stops
  * as soon as a code is accepted, when the overlay closes, and when the page
  * goes to the background.
  */
-export default function ScannerOverlay({ lang, onCode, onClose }) {
+export default function ScannerOverlay({ lang, onCode, onClose, shopping = false, onShopping, items = [], onOpenItem }) {
   const videoRef = useRef(null);
   const scanRef = useRef(null);
   const [state, setState] = useState('starting'); // starting | scanning | error | manual
@@ -21,9 +42,24 @@ export default function ScannerOverlay({ lang, onCode, onClose }) {
   const [slow, setSlow] = useState(false);
   const onCodeRef = useRef(onCode);
   onCodeRef.current = onCode;
+  const [paused, setPaused] = useState(false); // shopping mode: camera off after 5 min without a new code
+  const lastAt = items[0]?.at || 0;
+
+  // Shopping mode: stop the camera after IDLE_STOP_MS without a new product (battery, heat).
+  useEffect(() => {
+    if (!shopping || paused) return undefined;
+    const started = Date.now();
+    const timer = setInterval(() => {
+      if (Date.now() - Math.max(lastAt, started) > IDLE_STOP_MS) {
+        scanRef.current?.stop();
+        setPaused(true);
+      }
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [shopping, paused, lastAt, attempt]);
 
   useEffect(() => {
-    if (state === 'manual') return undefined;
+    if (state === 'manual' || paused) return undefined;
     const video = videoRef.current;
     if (!navigator.mediaDevices?.getUserMedia) {
       setErrorKind(classifyCameraError(null));
@@ -40,6 +76,7 @@ export default function ScannerOverlay({ lang, onCode, onClose }) {
         setState('error');
       },
       {
+        continuous: shopping,
         onReady: ({ torch: canTorch }) => {
           setState('scanning');
           setTorch({ supported: canTorch, on: false });
@@ -53,7 +90,7 @@ export default function ScannerOverlay({ lang, onCode, onClose }) {
       scan.stop();
       scanRef.current = null;
     };
-  }, [attempt, state === 'manual']); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [attempt, state === 'manual', shopping, paused]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // While open: lock page scroll, close on Escape, and close (camera off)
   // when the page goes to the background (app switch, screen lock).
@@ -76,10 +113,10 @@ export default function ScannerOverlay({ lang, onCode, onClose }) {
     if (await scanRef.current?.setTorch(next)) setTorch({ ...torch, on: next });
   };
 
-  const live = state === 'starting' || state === 'scanning';
+  const live = (state === 'starting' || state === 'scanning') && !paused;
 
   return (
-    <div className="scanner" role="dialog" aria-modal="true" aria-label={t(lang, 'scanButton')}>
+    <div className={`scanner${shopping ? ' shopping' : ''}`} role="dialog" aria-modal="true" aria-label={t(lang, 'scanButton')}>
       <video ref={videoRef} className="scanner-video" muted playsInline autoPlay aria-hidden="true" />
       {live && (
         <>
@@ -98,9 +135,30 @@ export default function ScannerOverlay({ lang, onCode, onClose }) {
               <button type="button" className="scanner-pill" onClick={() => setState('manual')}>
                 ⌨️ {t(lang, 'typeCode')}
               </button>
+              {onShopping && (
+                <button type="button" className="scanner-pill shop-toggle" aria-pressed={shopping} onClick={() => onShopping(!shopping)}>
+                  🛒 {t(lang, 'shopMode')}
+                </button>
+              )}
             </div>
           </div>
         </>
+      )}
+      {shopping && paused && (
+        <div className="scanner-hint">
+          <p className="scanner-slow">{t(lang, 'shopPaused')}</p>
+          <button type="button" className="scanner-pill" onClick={() => { setPaused(false); setAttempt((n) => n + 1); }}>📷 {t(lang, 'shopResume')}</button>
+        </div>
+      )}
+      {shopping && (
+        <section className="shop-sheet" aria-label={t(lang, 'shopListTitle')}>
+          <h2 className="shop-title">{t(lang, 'shopListTitle')} <span className="badge">{items.length}</span></h2>
+          {items.length === 0 ? <p className="shop-empty">{t(lang, 'shopEmpty')}</p> : (
+            <ul className="shop-list" aria-live="polite">
+              {items.map((item) => <ShopCard key={item.code} lang={lang} item={item} onOpen={onOpenItem} />)}
+            </ul>
+          )}
+        </section>
       )}
       <button type="button" className="scanner-close" onClick={onClose} aria-label={t(lang, 'close')}>
         ✕

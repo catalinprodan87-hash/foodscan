@@ -7,6 +7,9 @@ import { LookupLoading, NotFound, NoIngredients, LookupFailed, InStore } from '.
 import { analyze, detectProductType } from './lib/analyze.js';
 import { lookupProduct, analyzeInput, isInStoreCode, createNotFoundCache } from './lib/lookup.js';
 import { recordTiming } from './lib/diagnostics.js';
+import { createRepeatFilter, addScan, updateScan } from './lib/shopping.js';
+import { vibrate } from './lib/camera.js';
+import { summaryParts } from './components/Result.jsx';
 import { buildBackup, backupFileName, historyToRestore, mergeSaved, clearLocalData, requestPersistence } from './lib/backup.js';
 import { defaultAvoidState } from './data/avoidPresets.js';
 import { buildRequest } from './lib/request.js';
@@ -23,6 +26,7 @@ const ScannerOverlay = lazy(() => import('./components/ScannerOverlay.jsx'));
 const PhotoFlow = lazy(() => import('./components/PhotoFlow.jsx'));
 // Secondary tabs and the first-run slides are split out to keep the first load small.
 const HistoryView = lazy(() => import('./components/HistoryView.jsx'));
+const CompareView = lazy(() => import('./components/CompareView.jsx'));
 const AvoidListView = lazy(() => import('./components/AvoidListView.jsx'));
 const AboutView = lazy(() => import('./components/AboutView.jsx'));
 const Onboarding = lazy(() => import('./components/Onboarding.jsx'));
@@ -45,6 +49,10 @@ export default function App() {
   const [text, setText] = useState('');
   const [chosenType, setChosenType] = useState(null); // null = auto
   const [scanning, setScanning] = useState(false);
+  // Shopping mode: camera stays on, each product becomes a card ({ on, items }).
+  const [shop, setShop] = useState({ on: false, items: [] });
+  const repeatRef = useRef(createRepeatFilter());
+  const shopItemsRef = useRef([]); // the list, updated synchronously (several codes can arrive quickly)
   const [lookup, setLookup] = useState(null); // { status, code, product?, kind? }
   // What is being analysed: see buildRequest() in lib/request.js
   const [submitted, setSubmitted] = useState(null);
@@ -53,6 +61,7 @@ export default function App() {
   const [tab, setTab] = useState('scan');
   const [history, setHistory] = useState([]);
   const [historyOpen, setHistoryOpen] = useState(null); // request rebuilt from an entry
+  const [compare, setCompare] = useState(null); // two history entries
   const [onboarded, setOnboarded] = useState(() => getFlag('onboarded'));
   const [toast, setToast] = useState(null);
   const abortRef = useRef(null);
@@ -257,6 +266,67 @@ export default function App() {
 
   const closeScanner = useCallback(() => setScanning(false), []);
 
+  // ───── Shopping mode ─────
+  /** What a code leads to, without changing the screen (saved → database → not found). */
+  const lookupQuietly = useCallback(async (code) => {
+    const saved = savedStoreRef.current.get(code);
+    if (saved) return { state: 'saved', request: requestFromSaved(saved) };
+    if (isInStoreCode(code)) return { state: 'in_store' };
+    if (notFoundRef.current.has(code)) return { state: 'not_found' };
+    const t0 = performance.now();
+    const res = await lookupProduct(code, { productType: chosenType });
+    recordTiming('lookup', performance.now() - t0, res.status !== 'error', `shop ${res.status}`);
+    if (res.status === 'found' && res.product.hasIngredients) {
+      return { state: 'found', request: { text: '', type: res.product.productType, auto: false, product: res.product, barcode: code } };
+    }
+    if (res.status === 'found') return { state: 'no_ingredients', product: res.product };
+    if (res.status === 'not_found') { notFoundRef.current.add(code); return { state: 'not_found' }; }
+    return { state: 'error' };
+  }, [chosenType]);
+
+  const onShopCode = useCallback(async (code) => {
+    if (!repeatRef.current(code)) return; // the same box still in front of the camera
+    const r = addScan(shopItemsRef.current, code);
+    shopItemsRef.current = r.items;
+    setShop((s) => ({ ...s, items: r.items }));
+    if (!r.isNew) return;
+    vibrate();
+    let out;
+    try { out = await lookupQuietly(code); } catch { out = { state: 'error' }; }
+    let patch = { state: out.state, product: out.product || out.request?.product || null, request: out.request || null };
+    patch.name = patch.product?.name || '';
+    if (out.request) {
+      const input = out.request.product ? analyzeInput(out.request.product, out.request.text) : { text: out.request.text, productType: out.request.type };
+      const result = analyze(input, avoid);
+      patch = { ...patch, verdict: result.verdict, reason: summaryParts(result, lang)[0] || '' };
+      // Shopping scans go to the history too (for comparing later).
+      const entry = makeEntry(out.request, result);
+      storeRef.current?.then((store) => store.save(entry, 200)).then(setHistory).catch(() => {});
+    }
+    shopItemsRef.current = updateScan(shopItemsRef.current, code, patch);
+    setShop((s) => ({ ...s, items: shopItemsRef.current }));
+  }, [lookupQuietly, avoid, lang]);
+
+  const openShopItem = useCallback((item) => {
+    setScanning(false);
+    setPhoto(null);
+    if (item.request) { setLookup(null); setSubmitted(item.request); scrollTop(); return; }
+    setSubmitted(null);
+    if (item.state === 'no_ingredients') setLookup({ status: 'no_ingredients', code: item.code, product: item.product });
+    else if (item.state === 'not_found') setLookup({ status: 'not_found', code: item.code, cached: true });
+    else if (item.state === 'in_store') setLookup({ status: 'in_store', code: item.code });
+    else runLookup(item.code, { force: true });
+  }, [runLookup]);
+
+  // From a product opened in shopping mode back to the camera, list intact.
+  const backToShopping = useCallback(() => {
+    abortRef.current?.abort();
+    setLookup(null);
+    setSubmitted(null);
+    setPhoto(null);
+    setScanning(true);
+  }, []);
+
   // Barcode context to attach pasted / photographed ingredients to.
   const lookupContext = () => ({
     product: lookup?.status === 'no_ingredients' ? lookup.product : null,
@@ -313,7 +383,7 @@ export default function App() {
     setAvoidState(s);
   };
   const changeTab = (next) => {
-    if (next === tab && next === 'history') setHistoryOpen(null);
+    if (next === tab && next === 'history') { setHistoryOpen(null); setCompare(null); }
     if (next === tab && next === 'scan' && !scanning) goHome();
     setTab(next);
   };
@@ -327,8 +397,19 @@ export default function App() {
     if (!value.trim() && chosenType && !lookup) setChosenType(null); // clearing goes back to auto
   };
 
+  // In shopping mode, "back" from a product returns to the camera.
+  const shopping = shop.on && shop.items.length > 0;
+  const leave = shopping ? backToShopping : goHome;
+  const leaveLabel = shopping ? 'backToShopping' : undefined;
+
   let screen;
-  if (tab === 'history') {
+  if (tab === 'history' && compare) {
+    screen = (
+      <Suspense fallback={<Loading />}>
+        <CompareView lang={lang} entries={compare} avoid={avoid} onBack={() => setCompare(null)} />
+      </Suspense>
+    );
+  } else if (tab === 'history') {
     screen = historyOpen && historyResult ? (
       <Result
         lang={lang} result={historyResult} text={historyOpen.product ? historyOpen.product.ingredientsText || historyOpen.text : historyOpen.text}
@@ -340,7 +421,7 @@ export default function App() {
         <HistoryView
           lang={lang} entries={history} avoid={avoid}
           onOpen={(entry) => { setHistoryOpen(entryRequest(entry)); scrollTop(); }}
-          onDelete={deleteEntry} onClear={clearHistory}
+          onDelete={deleteEntry} onClear={clearHistory} onCompare={(pair) => { setCompare(pair); scrollTop(); }}
         />
       </Suspense>
     );
@@ -371,23 +452,23 @@ export default function App() {
     screen = (
       <NotFound
         lang={lang} code={lookup.code} type={chosenType || 'food'} cached={lookup.cached}
-        onAnalyze={analyzeText} onPhoto={startPhoto} onBack={goHome} onRetry={() => runLookup(lookup.code, { force: true })}
+        onAnalyze={analyzeText} onPhoto={startPhoto} onBack={leave} backLabel={leaveLabel} onRetry={() => runLookup(lookup.code, { force: true })}
       />
     );
   } else if (lookup?.status === 'in_store') {
-    screen = <InStore lang={lang} code={lookup.code} onAnalyze={analyzeText} onPhoto={startPhoto} onBack={goHome} />;
+    screen = <InStore lang={lang} code={lookup.code} onAnalyze={analyzeText} onPhoto={startPhoto} onBack={leave} backLabel={leaveLabel} />;
   } else if (lookup?.status === 'no_ingredients') {
     screen = (
       <NoIngredients
         lang={lang} product={lookup.product} partial={partial}
-        onAnalyze={analyzeText} onPhoto={startPhoto} onBack={goHome}
+        onAnalyze={analyzeText} onPhoto={startPhoto} onBack={leave} backLabel={leaveLabel}
       />
     );
   } else if (lookup?.status === 'error') {
     screen = (
       <LookupFailed
         lang={lang} code={lookup.code} kind={lookup.kind}
-        onRetry={() => runLookup(lookup.code, { force: true })} onAnalyze={analyzeText} onPhoto={startPhoto} onBack={goHome}
+        onRetry={() => runLookup(lookup.code, { force: true })} onAnalyze={analyzeText} onPhoto={startPhoto} onBack={leave} backLabel={leaveLabel}
       />
     );
   } else if (result) {
@@ -395,7 +476,7 @@ export default function App() {
       <Result
         lang={lang} result={result} typeAuto={submitted.auto} notify={notify}
         text={submitted.text?.trim() ? submitted.text : submitted.product?.ingredientsText || ''}
-        product={submitted.product} barcode={submitted.barcode} fromPhoto={submitted.fromPhoto} onBack={goHome}
+        product={submitted.product} barcode={submitted.barcode} fromPhoto={submitted.fromPhoto} onBack={leave} backLabel={leaveLabel}
         saved={submitted.saved} onRetake={retakeSaved} onForget={() => forgetSaved(submitted.barcode)}
         watchedAllergens={avoid.allergens}
       />
@@ -444,7 +525,10 @@ export default function App() {
       )}
       {scanning && (
         <Suspense fallback={<div className="scanner scanner-loading" aria-busy="true" />}>
-          <ScannerOverlay lang={lang} onCode={onCode} onClose={closeScanner} />
+          <ScannerOverlay
+            lang={lang} onCode={shop.on ? onShopCode : onCode} onClose={closeScanner}
+            shopping={shop.on} onShopping={(on) => setShop((s) => ({ ...s, on }))} items={shop.items} onOpenItem={openShopItem}
+          />
         </Suspense>
       )}
     </div>

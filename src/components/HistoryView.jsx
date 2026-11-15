@@ -17,7 +17,7 @@ function verdictLabel(lang, v, type) {
  * One history row: tap to open, swipe left or long-press to delete.
  * A delete button is also reachable by keyboard / screen reader.
  */
-function HistoryRow({ lang, entry, verdict, onOpen, onDelete }) {
+function HistoryRow({ lang, entry, verdict, onOpen, onDelete, picked = null }) {
   const [dx, setDx] = useState(0);
   const g = useRef(null);
   const rowRef = useRef(null);
@@ -61,7 +61,7 @@ function HistoryRow({ lang, entry, verdict, onOpen, onDelete }) {
   const cancel = () => { cancelTimer(); setDx(0); g.current = null; };
 
   return (
-    <li className="history-row" ref={rowRef}>
+    <li className={`history-row${picked ? ' picked' : ''}`} ref={rowRef}>
       <div className="history-row-bg" aria-hidden="true">🗑 {t(lang, 'customDelete')}</div>
       <div
         className="history-row-main"
@@ -77,6 +77,7 @@ function HistoryRow({ lang, entry, verdict, onOpen, onDelete }) {
           className="history-open"
           onClick={(e) => { if (e.detail === 0) onOpen(entry); }} /* keyboard activation; pointer handled above */
           aria-label={`${title}, ${t(lang, 'type_' + entry.productType)}, ${verdictLabel(lang, verdict, entry.productType)}`}
+          aria-pressed={picked === null ? undefined : picked}
         >
           {entry.image ? (
             <img className="history-thumb" src={entry.image} alt="" loading="lazy" referrerPolicy="no-referrer" />
@@ -111,10 +112,14 @@ function HistoryRow({ lang, entry, verdict, onOpen, onDelete }) {
   );
 }
 
-export default function HistoryView({ lang, entries, avoid, onOpen, onDelete, onClear }) {
+export default function HistoryView({ lang, entries, avoid, onOpen, onDelete, onClear, onCompare }) {
   const [query, setQuery] = useState('');
   const [type, setType] = useState('all');
   const [verdict, setVerdict] = useState('all');
+  // Compare: pick two products.
+  const [picking, setPicking] = useState(false);
+  const [picked, setPicked] = useState([]);
+  const togglePick = (e) => setPicked((p) => (p.includes(e.id) ? p.filter((x) => x !== e.id) : [...p, e.id].slice(-2)));
 
   // Verdicts with the CURRENT avoid list (changes apply to old scans).
   const verdicts = useMemo(() => {
@@ -157,6 +162,22 @@ export default function HistoryView({ lang, entries, avoid, onOpen, onDelete, on
               ))}
             </select>
             <p className="muted small history-hint">{t(lang, 'historyCount', { count: shown.length })} · {t(lang, 'historyHint')}</p>
+            {onCompare && entries.length > 1 && (
+              <div className="compare-bar">
+                <button type="button" className={`btn ${picking ? 'primary' : 'ghost'} small-btn`} aria-pressed={picking} onClick={() => { setPicking(!picking); setPicked([]); }}>
+                  ⚖️ {t(lang, picking ? 'cmpCancel' : 'cmpStart')}
+                </button>
+                {picking && (
+                  <>
+                    <span className="muted small">{t(lang, 'cmpPicked', { n: picked.length })}</span>
+                    <button
+                      type="button" className="btn primary small-btn" disabled={picked.length !== 2}
+                      onClick={() => onCompare(picked.map((id) => entries.find((e) => e.id === id)))}
+                    >{t(lang, 'cmpGo')}</button>
+                  </>
+                )}
+              </div>
+            )}
           </>
         )}
       </section>
@@ -166,7 +187,10 @@ export default function HistoryView({ lang, entries, avoid, onOpen, onDelete, on
       ) : (
         <ul className="history-list">
           {shown.map((e) => (
-            <HistoryRow key={e.id} lang={lang} entry={e} verdict={verdictOf(e)} onOpen={onOpen} onDelete={onDelete} />
+            <HistoryRow
+              key={e.id} lang={lang} entry={e} verdict={verdictOf(e)} onDelete={onDelete}
+              onOpen={picking ? togglePick : onOpen} picked={picking ? picked.includes(e.id) : null}
+            />
           ))}
         </ul>
       ))}

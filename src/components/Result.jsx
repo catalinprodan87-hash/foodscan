@@ -296,10 +296,11 @@ export function summaryParts(result, lang) {
 }
 
 export default function Result({
-  lang, result, text, typeAuto, product, barcode, fromPhoto, onBack, backLabel = 'back', notify,
+  lang, result, text, typeAuto, product, barcode, fromPhoto, onBack, backLabel: backLabelProp, notify,
   saved, onRetake, onForget, watchedAllergens = [],
 }) {
   const food = isFood(result);
+  const backLabel = backLabelProp || 'back';
   return (
     <div className="result">
       <h1 className="sr-only page-title" tabIndex={-1}>{product?.name || t(lang, 'verdict_' + result.verdict)}</h1>
