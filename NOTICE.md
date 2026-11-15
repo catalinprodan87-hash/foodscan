@@ -12,6 +12,8 @@ IngrediScan uses the following data and software. Thank you to everyone who buil
 
 The benchmark corpus that later releases build from Open Food Facts data stays under the ODbL, with attribution in its file header.
 
+The real-photo benchmark (`tests/corpus/off/`, never deployed) includes ingredient photos from Open Food Facts by Open Food Facts contributors, under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/); `tests/corpus/off/truth.json` links each photo to its source. The photos in `tests/corpus/own/` were taken by the app's owner.
+
 ## Software bundled with or downloaded by the app
 
 | Component | Licence | Used for |

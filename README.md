@@ -258,6 +258,8 @@ npm run preview    # serve the production build locally
 
 ## Testing and benchmarks
 
+**Real-photo benchmark** (`bench/real`, `npm run bench:real`). 20 real label photos (12 taken in Romanian shops in `tests/corpus/own/`, 8 from Open Food Facts under CC BY-SA in `tests/corpus/off/`), each text block transcribed by hand. It reports the character and word error rate per language, strict (diacritics count) and folded (as the analysis sees it), the nutrition table rows and values found, what the app picks by itself, and the time per photo. Results and findings: [docs/OCR_REAL.md](docs/OCR_REAL.md). The corpus is never deployed.
+
 | What | Command | Where it runs |
 |---|---|---|
 | Unit tests (logic, data schema) | `npm test` | every push |

@@ -1,0 +1,116 @@
+{
+ "_about": "Ingredient photos from Open Food Facts (https://world.openfoodfacts.org), contributed by Open Food Facts contributors under CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/); each entry links its source image. Most are cropped to the ingredients panel by contributors, so they test reading, not finding the text. Transcripts by hand (superscript footnote marks left out). Used only by the benchmark; never deployed.",
+ "photos": [
+  {
+   "file": "off-pl-4000417025005.jpg",
+   "product": "off-4000417025005",
+   "source": "https://images.openfoodfacts.org/images/products/400/041/702/5005/ingredients_pl.188.full.jpg",
+   "blocks": [
+    {
+     "kind": "ingredients",
+     "lang": "pl",
+     "text": "Czekolada deserowa z nadzieniem marcepanowym (44 %). Składniki: cukier, miazga kakaowa, MIGDAŁY (16 %), tłuszcz kakaowy, syrop cukru inwertowanego, emulgator: lecytyny (z SOI), substancja utrzymująca wilgoć: inwertaza. Może zawierać orzeszki ziemne, inne orzechy, zboża zawierające gluten, mleko i jaja."
+    },
+    {
+     "kind": "ingredients",
+     "lang": "ro",
+     "text": "cereale care conțin gluten, lapte și ouă."
+    },
+    {
+     "kind": "ingredients",
+     "lang": "bg",
+     "text": "Тъмен шоколад с пълнеж от марципан (44 %). Съставки: захар, какаова маса, БАДЕМИ (16 %),"
+    }
+   ]
+  },
+  {
+   "file": "off-de-4000417025005.jpg",
+   "product": "off-4000417025005",
+   "source": "https://images.openfoodfacts.org/images/products/400/041/702/5005/ingredients_de.90.full.jpg",
+   "blocks": [
+    {
+     "kind": "ingredients",
+     "lang": "de",
+     "text": "Zucker, Kakaomasse, MANDELN (16 %), Kakaobutter, Invertzuckersirup, Emulgator: Lecithine (SOJA), Feuchthaltemittel: Invertase. Kann Spuren von Erdnüssen, anderen Schalenfrüchten, glutenhaltigem Getreide, Milch und Ei enthalten."
+    }
+   ]
+  },
+  {
+   "file": "off-de-4008400402222.jpg",
+   "product": "off-4008400402222",
+   "source": "https://images.openfoodfacts.org/images/products/400/840/040/2222/ingredients_de.198.full.jpg",
+   "blocks": [
+    {
+     "kind": "ingredients",
+     "lang": "de",
+     "text": "Zutaten: Zucker, Palmöl, HASELNÜSSE (13 %), MAGERMILCHPULVER (8,7 %), fettarmer Kakao (7,4 %), Emulgator Lecithine (SOJA), Vanillin."
+    }
+   ]
+  },
+  {
+   "file": "off-de-8076809513753.jpg",
+   "product": "off-8076809513753",
+   "source": "https://images.openfoodfacts.org/images/products/807/680/951/3753/ingredients_de.280.full.jpg",
+   "blocks": [
+    {
+     "kind": "ingredients",
+     "lang": "de",
+     "text": "Zutaten: pflanzliche Öle (Olive, Sonnenblume), frisches Basilikum 30%, CASHEWKERNE, Parmigiano Reggiano g.U. Käse 5% (MILCH), Maisfaser, Molkepulver (MILCH), Salz, MILCHeiweiss, natives Olivenöl extra, Zucker, Basilikumextrakt, natürliche Aromen (MILCH), Säureregulator: Milchsäure, Knoblauch. Kann Spuren von anderen Schalenfrüchten (Hartschalenobst) enthalten."
+    },
+    {
+     "kind": "other",
+     "lang": "de",
+     "text": "Allergenhinweise: Enthält: Milch und Milcherzeugnisse (einschließlich Lactose). Nüsse und Nusserzeugnisse. Kaschunuss und Kaschunusserzeugnisse."
+    }
+   ]
+  },
+  {
+   "file": "off-fr-8076809513753.jpg",
+   "product": "off-8076809513753",
+   "source": "https://images.openfoodfacts.org/images/products/807/680/951/3753/ingredients_fr.362.full.jpg",
+   "blocks": [
+    {
+     "kind": "ingredients",
+     "lang": "fr",
+     "text": "INGRÉDIENTS: huiles végétales (olive, tournesol), basilic frais 30%, noix de cajou, fromage Parmigiano Reggiano AOP 5% (lait), fibre de maïs, lactosérum en poudre (lait), sel, protéines de lait, huile d'olive vierge extra, sucre, extrait de basilic, arômes naturels (lait), correcteur d'acidité: acide lactique, ail. Peut contenir des traces d'autres fruits à coque."
+    }
+   ]
+  },
+  {
+   "file": "off-fr-8000500310427.jpg",
+   "product": "off-8000500310427",
+   "source": "https://images.openfoodfacts.org/images/products/800/050/031/0427/ingredients_fr.475.full.jpg",
+   "blocks": [
+    {
+     "kind": "ingredients",
+     "lang": "fr",
+     "text": "Biscuit fourré à la pâte à tartiner aux noisettes et au cacao NUTELLA® Ingrédients : pâte à tartiner aux NOISETTES et au cacao 40% (sucre, huile de palme, NOISETTES 13%, LAIT écrémé en poudre 8,7%, cacao maigre 7,4%, émulsifiants : lécithines [SOJA] ; vanilline), farine de FROMENT 32,5%, graisses végétales (palme, palmiste), sucre de canne (contient BLE) 8,5%, LACTOSE, son de BLE, LAIT en poudre, extrait en poudre de malt d'ORGE et de maïs, miel, poudres à lever (diphosphate disodique, carbonate acide d'ammonium, carbonate acide de sodium), cacao maigre, sel, amidon de FROMENT, farine d'ORGE malté, émulsifiants : lécithines [SOJA] ; vanilline."
+    }
+   ]
+  },
+  {
+   "file": "off-it-8013355999143.jpg",
+   "product": "off-8013355999143",
+   "source": "https://images.openfoodfacts.org/images/products/801/335/599/9143/ingredients_it.175.full.jpg",
+   "blocks": [
+    {
+     "kind": "ingredients",
+     "lang": "it",
+     "text": "BISCOTTI FROLLINI CON CIOCCOLATO Ingredienti: farina di grano tenero, zucchero, cioccolato 14,6%* [zucchero, pasta di cacao, burro di cacao, cacao magro, emulsionante: lecitine (soia)], olio di semi di girasole, burro, sciroppo di glucosio, amido di frumento, agenti lievitanti (carbonato acido di sodio, carbonato acido d'ammonio), sale, aroma vaniglia. *% espresse sul prodotto finito. Può contenere tracce di frutta a guscio, senape, semi di sesamo e uovo."
+    }
+   ]
+  },
+  {
+   "file": "off-it-8076800195057.jpg",
+   "product": "off-8076800195057",
+   "source": "https://images.openfoodfacts.org/images/products/807/680/019/5057/ingredients_it.516.full.jpg",
+   "blocks": [
+    {
+     "kind": "ingredients",
+     "lang": "it",
+     "text": "PASTA DI SEMOLA DI GRANO DURO - Ingredienti: semola di grano duro, acqua. Paese di coltivazione del grano: Italia. Paese di molitura: Italia. Può contenere tracce di soia."
+    }
+   ]
+  }
+ ]
+}

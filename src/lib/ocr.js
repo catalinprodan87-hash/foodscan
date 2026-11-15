@@ -114,11 +114,11 @@ export function getEngine({ createWorker = defaultCreateWorker, baseUrl = global
       worker.postMessage({ type: 'init', assets });
       await ready;
       return {
-        recognize(bitmap, { detMaxSide, upscale } = {}) {
+        recognize(bitmap, { detMaxSide, upscale, debug } = {}) {
           const id = nextId++;
           return new Promise((resolve, reject) => {
             pending.set(id, { resolve, reject });
-            worker.postMessage({ type: 'recognize', id, bitmap, assets, detMaxSide, upscale }, bitmap && typeof bitmap.close === 'function' ? [bitmap] : []);
+            worker.postMessage({ type: 'recognize', id, bitmap, assets, detMaxSide, upscale, debug }, bitmap && typeof bitmap.close === 'function' ? [bitmap] : []);
           });
         },
         suggest(bitmap) {
@@ -147,13 +147,14 @@ export function getEngine({ createWorker = defaultCreateWorker, baseUrl = global
  * Recognises text in an image (canvas or ImageBitmap).
  * @returns {Promise<{text: string, confidence: number, lines: number}>}
  */
-export async function recognize(image, { onProgress, detMaxSide, upscale, ...engineOptions } = {}) {
+export async function recognize(image, { onProgress, detMaxSide, upscale, debug, ...engineOptions } = {}) {
   const engine = await getEngine({ onProgress, ...engineOptions });
   const bitmap = typeof createImageBitmap === 'function' && image && typeof image.getContext === 'function'
     ? await createImageBitmap(image)
     : image;
-  const r = await engine.recognize(bitmap, { detMaxSide, upscale });
-  return { text: r.text || '', confidence: Math.round(r.confidence ?? 0), lines: r.lines ?? 0, uncertain: r.uncertain || [] };
+  const r = await engine.recognize(bitmap, { detMaxSide, upscale, debug });
+  // debug (benchmarks only): every line box with its text, in image coordinates.
+  return { text: r.text || '', confidence: Math.round(r.confidence ?? 0), lines: r.lines ?? 0, uncertain: r.uncertain || [], ...(debug ? { items: r.items } : {}) };
 }
 
 /**

@@ -224,7 +224,8 @@ self.onmessage = async (e) => {
       const { text, confidence } = joinLines(items);
       // Words the recogniser was unsure about (kept lines only), for the review step.
       const uncertain = [...new Set(items.filter((it) => it.conf >= 0.5).flatMap((it) => uncertainWords(it.text, it.probs).map((w) => w.word)))];
-      self.postMessage({ type: 'result', id: msg.id, text, confidence, lines: items.length, uncertain });
+      const debugItems = msg.debug ? items.map(({ cx, cy, angle, len, thick, text: t, conf }) => ({ cx, cy, angle, len, thick, text: t, conf })) : undefined;
+      self.postMessage({ type: 'result', id: msg.id, text, confidence, lines: items.length, uncertain, items: debugItems });
     }
   } catch (err) {
     self.postMessage({ type: 'error', id: msg.id, message: String(err?.message || err) });

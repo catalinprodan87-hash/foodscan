@@ -1,0 +1,140 @@
+{
+  "_about": "Reference text for the real-photo benchmark (bench/real). Photos taken in Romanian shops by the app's owner and kept only in this repository (never deployed). Each photo lists the text blocks printed on it, transcribed by hand exactly as printed (diacritics, capitals, punctuation); text cut off at the photo edge or hidden by glare is left out. kind: ingredients | nutrition | origin | other. Prose blocks are scored by character / word error rate; nutrition tables by the share of row names (labels) and values found, since the reading order inside a table varies. 'product' groups photos of the same pack; 'pairs' are photos of one label meant to be merged.",
+  "photos": [
+    {
+      "file": "ro-01-ulei-floarea-soarelui.jpg",
+      "product": "ulei-floarea-soarelui",
+      "blocks": [
+        { "kind": "ingredients", "lang": "ro", "text": "100% ulei rafinat de primă presă din semințe de floarea-soarelui 100% românești." },
+        { "kind": "other", "lang": "ro", "text": "1L de ulei conține 920g=92 de porții a câte 10g A se consuma de preferință înainte de: vezi ambalajul. A se păstra la temperatură ambiantă, în locuri ferite de lumină, căldură și mirosuri străine." },
+        { "kind": "origin", "lang": "ro", "text": "Produs de BUNGE ROMANIA SRL, cu sediul în Buzău, Bulevardul Industriei nr. 36, Jud. Buzău. Produs în România din semințe de floarea-soarelui origine România." },
+        { "kind": "nutrition", "lang": "ro", "labels": ["Declarație nutrițională", "Valoare energetică", "Grăsimi", "din care acizi grași saturați", "Glucide", "din care zaharuri", "Proteine", "Sare"], "values": ["370 kJ", "90 kcal", "3700 kJ", "900 kcal", "10 g", "100 g", "1,1 g", "11 g", "0 g", "0 g", "0 g", "0 g"] }
+      ]
+    },
+    {
+      "file": "ro-02-taitei-instant-a.jpg",
+      "product": "taitei-instant",
+      "blocks": [
+        { "kind": "other", "lang": "ro", "text": "PAȘI DE PREPARARE:/ 1/ Îndepărtează capacul. Tăiteii sunt deja condimentați. 2/ Adaugă apă fierbinte până la linie (225ml) și așteaptă 1 min. 3/ Amestecă bine cu o furculiță și așteaptă încă 4 min." },
+        { "kind": "other", "lang": "bg", "text": "НАЧИН НА ПРИГОТВЯНЕ:/ 1/ Отстранете капака. Подправката за овкусяване е смесена със спагетините. 2/ Залейте с вряща вода до линията на пълнене (225ml) и оставете настрана за 1 мин. 3/ Разбъркайте добре с вилица и изчакайте още 4 мин." },
+        { "kind": "other", "lang": "hr", "text": "NAČIN PRIPREME: 1/ Uklonite poklopac. Mješavina s povrćem i začinima je prisutna u šalici s rezancima. 2/ Prelijte kipućom vodom do oznake na unutarnjoj strani (225ml) i čekajte 1 min. 3/ Dobro promiješajte i ostavite da odstoji dodatne 4 min." },
+        { "kind": "nutrition", "lang": "ro", "labels": ["Declarație nutrițională", "Valoare energetică", "Grăsimi", "din care acizi grași saturați", "Glucide", "din care zaharuri", "Fibre", "Proteine", "Sare"], "values": ["1941 kJ", "463 kcal", "1456 kJ", "347 kcal", "17%", "18,9 g", "14,2 g", "20%", "1,9 g", "1,4 g", "7%", "62,1 g", "46,6 g", "18%", "12,4 g", "9,3 g", "10%", "3,6 g", "2,7 g", "8,9 g", "6,7 g", "13%", "2,4 g", "1,8 g", "30%", "100 g", "300 g"] },
+        { "kind": "nutrition", "lang": "bg", "labels": ["Хранителна информация", "Енергийна стойност", "Мазнини", "наситени мастни киселини", "Въглехидрати", "захари", "Влакнини", "Белтъци", "Сол"], "values": [] }
+      ]
+    },
+    {
+      "file": "ro-03-taitei-instant-b.jpg",
+      "product": "taitei-instant",
+      "note": "Right half of the ingredients panel (the left half is in ro-04).",
+      "blocks": [
+        { "kind": "ingredients", "lang": "ro", "text": "Ingrediente: tăiței 73,3% (făină de GRÂU, ulei de (carbonați de potasiu, carbonați de sodiu), zahăr, amidon din cartofi, boia de ardei dulce 0,2%, ghimbir, ardei iute jalapeno 0,1%, extract de drojdie, praz 0,2%, ulei de floarea soarelui, colorant extract Poate conține: ȚELINĂ, OU, LAPTE, MUȘTAR, SEMINȚE DE SUSAN," },
+        { "kind": "ingredients", "lang": "bg", "text": "изделие от пшеничено брашно със слънчогледово олио 18,4%. Съставки: 73,3% спагетини олио, сол, набухватели (калиеви карбонати, натриеви лют пипер чили 0,3%, червен пипер 0,2%, джинджифил, сол, червен пипер, домати, екстракт от мая, 0,2% праз лук, киселина (лимонена киселина). Може да съдържа СУСАМ, СОЯ." },
+        { "kind": "ingredients", "lang": "hr", "text": "[HR] Dehidrirani proizvod za pripremu jela s prženim sa suncokretovim uljem (18,4%). Sastojci: prženi rezanci 73,3% tvari za rahljenje (kalijevi karbonati, natrijevi karbonati)], šećer, paprika u prahu 0,2%, đumbir, jalapeno čili papričice 0,1%, ekstrakt kvasca, poriluk 0,2%, suncokretovo ulje, bojilo: ekstrakt Može sadržavati CELER, JAJA, MLIJEKO, GORUŠICU, SEZAM i SOJU." }
+      ]
+    },
+    {
+      "file": "ro-04-taitei-instant-c.jpg",
+      "product": "taitei-instant",
+      "note": "Left half of the ingredients panel (the right half is in ro-03).",
+      "blocks": [
+        { "kind": "ingredients", "lang": "ro", "text": "[RO] Preparat instant cu tăiței în sos dulce-picant. Ingrediente: tăiței 73,3% floarea soarelui, sare, agenți de afânare (carbonați de potasiu, carbonați de sodiu), condimente (usturoi, ardei roșu iute 0,3%, boia de ardei dulce 0,2%, ghimbir, coriandru), sare, ardei gras roșu, roșii, extract de drojdie, praz 0,2%, ulei de floarea de ardei roșu, acidifiant acid citric. Poate conține: ȚELINĂ, OU, LAPTE, MUȘTAR, SOIA." },
+        { "kind": "ingredients", "lang": "bg", "text": "[BG] Спагетини със сладко-пикантен сос - изделие от сладко-пикантни подправки, слънчогледово олио 18,4%. Съставки: (ПШЕНИЧЕНО брашно, слънчогледово олио, сол, набухватели (калиеви карбонати)], захар, нишесте, подправки (чесън, лют пипер чили 0,3%, червен люти чушки (халапеньос) 0,1%, кориандър), сол, червен пипер, домати, слънчогледово олио, оцветител (екстракт от паприка), киселина (лимонена ЦЕЛИНА, ЯЙЦА, МЛЯКО, СИНАП, СУСАМ, СОЯ." },
+        { "kind": "ingredients", "lang": "hr", "text": "[HR] Dehidrirani proizvod za rezancima u slatko ljutom umaku, sa suncokretovim uljem (18,4%). (PŠENIČNO brašno, suncokretovo ulje, sol, tvari za rahljenje (kalijevi karbonati, škrob, začini (češnjak, čili 0,3%, slatka paprika u prahu 0,2%, đumbir, korijander), sol, crvena paprika, rajčica, ekstrakt kvasca, poriluk 0,2%, paprike, kiselina: limunska kiselina. Može sadržavati CELER, JAJA, MLIJEKO," }
+      ]
+    },
+    {
+      "file": "ro-05-crema-prajituri.jpg",
+      "product": "crema-prajituri",
+      "blocks": [
+        { "kind": "ingredients", "lang": "ro", "text": "Ingrediente: sirop de glucoză, grăsime vegetală de palmier (ulei din sâmburi de palmier, ulei de palmier fracționat), amidon modificat, zahăr, emulsifiant (esteri ai acidului lactic cu mono- și digliceridele acizilor grași), gelatină alimentară, proteine din LAPTE, arome, colorant (beta-caroten). Poate conține: GLUTEN." },
+        { "kind": "nutrition", "lang": "ro", "labels": ["Valoare energetică", "Grăsimi", "din care acizi grași saturați", "Glucide", "din care zaharuri", "Proteine", "Sare"], "values": ["634 kJ", "151 kcal", "5,6 g", "4,5 g", "21 g", "16 g", "4,1 g", "0,13 g", "100 g"] },
+        { "kind": "other", "lang": "ro", "text": "2. Se toarnă conținutul plicului peste lapte și se adaugă 2 linguri de zahăr pudră. Se amestecă cu mixerul la viteză mică la început, apoi se bate 4 minute la viteză mare." }
+      ]
+    },
+    {
+      "file": "ro-06-ketchup.jpg",
+      "product": "ketchup",
+      "blocks": [
+        { "kind": "ingredients", "lang": "ro", "text": "RO Sos de tomate dulce. Produs pasteurizat. Ingrediente: apă, zahăr 21,2% (din UE și din afara UE), pastă de tomate* 15,2% (din afara UE), oțet din alcool etilic rafinat, amidon modificat din porumb, sare, aromă naturală. *Preparat cu 132 g de tomate pentru 100 g de ketchup." },
+        { "kind": "ingredients", "lang": "en", "text": "GB Sweet tomato ketchup. Pasteurized product. Ingredients: water, sugar 21,2% (EU and non-EU), tomato concentrate* 15,2% (non-EU), vinegar from refined ethyl alcohol, modified maize starch, salt, natural flavouring. *Prepared with 132 g tomatoes per 100 g of ketchup." },
+        { "kind": "nutrition", "lang": "ro", "labels": ["Valori nutriționale medii", "Valoare energetică", "Grăsimi", "din care acizi grași saturați", "Glucide", "din care zaharuri", "Fibre", "Proteine", "Sare"], "values": ["511 kJ", "120 kcal", "77 kJ", "18 kcal", "1%", "0,1 g", "28,9 g", "4,3 g", "2%", "26 g", "3,9 g", "4%", "0,3 g", "0,8 g", "0,1 g", "2,30 g", "0,35 g", "6%", "100 g", "15 g"] },
+        { "kind": "other", "lang": "ro", "text": "RO Condiții de păstrare: A se păstra într-un loc uscat și răcoros, ferit de acțiunea razelor solare. După deschidere, a se păstra la frigider și a se consuma în maximum 8 săptămâni." },
+        { "kind": "origin", "lang": "ro", "text": "Produs și ambalat în UE pentru: MEGA IMAGE S.R.L., B-dul Timișoara nr. 26, Centrul Comercial Plaza România, etaj 2, sector 6, București, România, Tel: 021/224.66.77." }
+      ]
+    },
+    {
+      "file": "ro-07-drajeuri-orez-a.jpg",
+      "product": "drajeuri-orez",
+      "note": "Photo saved sideways (the app must turn it).",
+      "blocks": [
+        { "kind": "nutrition", "lang": "ro", "labels": ["Declarație nutrițională", "Valoarea energetică", "Grăsimi", "din care acizi grași saturați", "Glucide", "din care zaharuri", "Proteine", "Sare"], "values": ["2034 kJ", "485 kcal", "773 kJ", "184 kcal", "21 g", "8.0 g", "14 g", "5.4 g", "68 g", "26 g", "57 g", "22 g", "4.3 g", "1.6 g", "0.35 g", "0.13 g", "38 g", "100 g"] },
+        { "kind": "nutrition", "lang": "hu", "labels": ["Átlagos tápérték tartalom", "Energia", "Zsír", "amelyből telített zsírsavak", "Szénhidrát", "amelyből cukrok", "Fehérje", "Só"], "values": [] }
+      ]
+    },
+    {
+      "file": "ro-08-drajeuri-orez-b.jpg",
+      "product": "drajeuri-orez",
+      "note": "Photo saved sideways; strong glare across the middle of the text.",
+      "blocks": [
+        { "kind": "ingredients", "lang": "ro", "text": "Miez din orez crocant (16%) în ciocolată cu lapte (55%) cu glazură colorată de zahăr. Ingrediente: zahăr, masă de cacao, făină de orez (9.2%), lapte praf degresat, grăsime de sâmburi de palmier, unt de cacao, grăsime de palmier, amidon, permeat din zer (lapte), grăsimi din lapte, sirop de glucoză, unt de shea, extract de malț din orz, stabilizator (gumă arabică), sare, dextrină, emulsifiant (lecitină din soia), dextroză, agent de glazurare (ceară de carnauba), aromă, coloranți (E120, E170, E133, E100, E160a, E160e), ulei de sâmburi de palmier. (Poate conține: arahide, migdale, alune de pădure)." },
+        { "kind": "ingredients", "lang": "hu", "text": "Tejcsokoládés (55%) drazsé cukorbevonattal és ropogós rizzsel a közepén (16%). Összetevők: cukor, kakaómassza, rizsliszt (9.2%), sovány tejpor, pálmamag zsír, kakaóvaj, pálmazsír, keményítő, savó permeátum (tej), tejzsír, glükózszirup, shea vaj, árpamaláta kivonat, stabilizátor (gumiarábikum), étkezési só, dextrin, emulgeálószer (szójalecitin), dextróz, fényezőanyag (karnaubaviasz), aroma, színezékek (E120, E170, E133, E100, E160a, E160e), pálmamag olaj. (Tartalmazhatja a következőket: földimogyoró, mandula, mogyoró)." },
+        { "kind": "other", "lang": "ro", "text": "Ciocolata cu lapte conține și alte grăsimi vegetale pe lângă unt de cacao." },
+        { "kind": "nutrition", "lang": "ro", "labels": ["Szénhidrát", "amelyből cukrok", "Fehérje"], "values": ["2034 kJ", "485 kcal", "773 kJ", "184 kcal", "21 g", "8.0 g", "14 g", "5.4 g", "68 g", "26 g", "57 g", "22 g", "4.3 g", "1.6 g", "0.35 g", "0.13 g"] }
+      ]
+    },
+    {
+      "file": "ro-09-bomboane-fructe-iaurt.jpg",
+      "product": "bomboane-fructe-iaurt",
+      "note": "The left edge of every line is cut by the fold of the bag.",
+      "blocks": [
+        { "kind": "ingredients", "lang": "ro", "text": "BOMBOANE GUMATE CU AROME DE FRUCTE ȘI IAURT, ÎN GLAZURĂ CANTĂ DE ZAHĂR. INGREDIENTE: ZAHĂR, SIROP DE GLUCOZĂ, GRĂSIME ALMIER, ACIDIFIANT (ACID CITRIC), DEXTRINĂ, ACIDIFIANT (ACID C), AROME, MALTODEXTRINĂ, AMIDON MODIFICAT, SARE, CORECTOR CIDITATE (CITRAT TRISODIC), AGENT DE GLAZURARE (CEARĂ DE AUBA), COLORANȚI (E153, E162, E163, E100, E132, E160a), CENTRAȚI (CARTOFI DULCI, RIDICHE). POTRIVIT PENTRU VEGANI." },
+        { "kind": "ingredients", "lang": "cs", "text": "ŽVÝKACÍ BONBÓNY V KŘUPAVÉ CROVÉ KRUSTĚ S OVOCNÝMI A JOGURTOVÝMI PŘÍCHUTĚMI. SLOŽENÍ: CR, GLUKÓZOVÝ SIRUP, PALMOVÝ TUK, KYSELINA (KYSELINA CITRONOVÁ), TRIN, KYSELINA (KYSELINA JABLEČNÁ), AROMATA, MALTODEXTRIN, DIFIKOVANÝ ŠKROB, JEDLÁ SŮL, REGULÁTOR KYSELOSTI (CITRONAN NÝ), LEŠTICÍ LÁTKA (KARNAUBSKÝ VOSK), BARVIVA (E153, E162, E163, E132, E160a), KONCENTRÁTY (HLÍZY BATÁTY, ŘEDKEV). VHODNÉ PRO" },
+        { "kind": "ingredients", "lang": "sk", "text": "ŽUVAČIE CUKRÍKY V CHRUMKAVEJ CUKROVEJ VRSTVE S NÝMI A JOGURTOVÝMI PRÍCHUŤAMI. ZLOŽENIE: CUKOR, GLUKÓZOVÝ PALMOVÝ TUK, KYSELINA (KYSELINA CITRÓNOVÁ), DEXTRÍN," },
+        { "kind": "origin", "lang": "ro", "text": "MARS ROMANIA SRL, EXPO BUSINESS PARK, STRADA AVIATOR POPIȘTEANU NR. 54A, CLADIREA 1, ETAJUL 5, SECTOR 1, BUCUREȘTI, 012095, ROMÂNIA." },
+        { "kind": "nutrition", "lang": "ro", "labels": ["DECLARAȚIE NUTRIȚIONALĂ", "VALOAREA ENERGETICĂ", "GRĂSIMI", "DIN CARE ACIZI GRAȘI SATURAȚI", "GLUCIDE", "DIN CARE ZAHARURI", "PROTEINE", "SARE"], "values": ["1692 kJ", "558 kJ", "399 kcal", "132 kcal", "4.3 g", "1.4 g", "2.5 g", "0.8 g", "90 g", "30 g", "74 g", "24 g", "0 g", "0 g", "0.08 g", "100 g", "33 g"] }
+      ]
+    },
+    {
+      "file": "ro-10-batoane-ciocolata-lapte.jpg",
+      "product": "batoane-ciocolata-lapte",
+      "blocks": [
+        { "kind": "ingredients", "lang": "ro", "text": "Batoane de ciocolată cu lapte, cu cremă de lapte (60%), ambalate individual. Ingrediente: ciocolată cu LAPTE 40% (zahăr, LAPTE praf integral 23%, unt de cacao, masă de cacao, emulgator: lecitină (SOIA); vanilină), zahăr, LAPTE praf degresat (18%), ulei de palmier, UNT deshidratat, emulgator: lecitină (SOIA); vanilină. Substanță uscată de cacao: 30% minimum. Total lactate: 33% - Total constituenți cacao: 13%." },
+        { "kind": "origin", "lang": "ro", "text": "Ferrero România S.R.L. - Str. Barbu Văcărescu nr. 201, Globalworth Tower, et. 12, sector 2, București. Importat în Republica Moldova de ICS Trigor AVD S.R.L. - Str. Otovasca nr. 17, Chișinău. Telefon +373 22 421413. Produs de Ferrero oHG mbH, Michele-Ferrero-Str.1, D-35260 Stadtallendorf, Germania." },
+        { "kind": "ingredients", "lang": "bg", "text": "Млечен шоколад с млечен пълнеж (60%). Съставки: МЛЕЧЕН шоколад 40% (захар, пълномаслено МЛЯКО на прах, какаово масло, какаова маса, емулгатор: лецитини (СОЯ); ванилин), захар, обезмаслено МЛЯКО на прах (18%), палмово масло, дехидратирани МЛЕЧНИ мазнини, емулгатор: лецитини (СОЯ), ванилин. Общо млечни компоненти: 33% - Общо какаови компоненти: 13%." },
+        { "kind": "ingredients", "lang": "hu", "text": "Tejcsokoládé szelet tejes krémmel (60%) töltve. Összetevők: TEJCSOKOLÁDÉ 40% (cukor, teljes TEJPOR, kakaóvaj, kakaómassza, emulgeálószer: lecitinek (SZÓJA); aroma (vanillin)), cukor, sovány TEJPOR (18%), pálmaolaj, dehidratált VAJ, emulgeálószer: lecitinek (SZÓJA); aroma (vanillin). Összes tej összetevő: 33% - Összes kakaó összetevő: 13%." },
+        { "kind": "nutrition", "lang": "ro", "labels": ["Valori nutriționale", "Valoare energetică", "Grăsimi", "din care acizi grași saturați", "Glucide", "din care zaharuri", "Proteine", "Sare"], "values": ["2360/566", "296/71", "35,0", "4,4", "22,6", "2,8", "53,5", "6,7", "53,3", "6,7", "8,7", "1,1", "0,313", "0,039", "100 g", "12,5 g"] }
+      ]
+    },
+    {
+      "file": "sr-01-ciocolata-alba.jpg",
+      "product": "ciocolata-alba",
+      "note": "Serbian (Latin) and Greek ingredients; only the nutrition table is also in Romanian.",
+      "blocks": [
+        { "kind": "ingredients", "lang": "sr", "text": "Bela čokolada. Sastojci: šećer, punomasno mleko u prahu (EU i van-EU-a), kakao maslac (van-EU-a), emulgator: sojin lecitin, aroma vanile. Može da sadrži u tragovima jezgrasto voće." },
+        { "kind": "origin", "lang": "sr", "text": "Proizvođač: CEMOI chocolatier Ets de Bourbourg, Rte de Loon Plage, 59630 Bourbourg, Francuska. Uvoznik/Stavlja u promet u RS: Delhaize Serbia d.o.o, Jurija Gagarina 14, 11 070 Novi Beograd, Republika Srbija." },
+        { "kind": "other", "lang": "sr", "text": "Najbolje upotrebiti do/lot broj: označeno na poleđini pakovanja. Uslovi čuvanja: čuvati na hladnom, tamnom i suvom mestu." },
+        { "kind": "ingredients", "lang": "el", "text": "Λευκή σοκολάτα. Συστατικά: ζάχαρη, πλήρες γάλα σε σκόνη, βούτυρο κακάο, γαλακτωματοποιητής: λεκιθίνη σόγιας, φυσικό άρωμα βανίλιας. Μπορεί να περιέχει ίχνη από καρπούς με κέλυφος." },
+        { "kind": "nutrition", "lang": "ro", "labels": ["Valori nutriționale medii per 100 g", "Valoare energetică", "Grăsimi", "din care acizi grași saturați", "Glucide", "din care zaharuri", "Proteine", "Sare"], "values": ["2302 kJ", "551 kcal", "33 g", "20 g", "55 g", "55 g", "8,0 g", "0,28 g"] }
+      ]
+    },
+    {
+      "file": "ro-11-ciocolata-neagra-alune.jpg",
+      "product": "ciocolata-neagra-alune",
+      "blocks": [
+        { "kind": "ingredients", "lang": "ro", "text": "Ciocolată neagră (60%), umplută cu cremă (37%) de alune de pădure și bucăți de alune de pădure. Ingrediente: masă de cacao, zahăr, ulei de palmier, ALUNE DE PĂDURE 10%, pudră de cacao cu conținut redus de grăsime 3,5%, unt de cacao, zer praf (LAPTE), materie grasă LACTATĂ anhidră, emulgator: lecitină (SOIA); vanilină. Total constituenți cacao: 45,5%, minimum 70% în învelișul de ciocolată neagră. Poate conține MIGDALE, NUCI, NUCI CAJU, NUCI PECAN, NUCI DE BRAZILIA, FISTIC și NUCI DE MACADAMIA." },
+        { "kind": "ingredients", "lang": "bg", "text": "Тъмен шоколад (60%) с лешников пълнеж (37%) и парченца лешник. Съставки: какаова маса, захар, палмово масло, ЛЕШНИЦИ (10%), нискомаслено какао на прах (3,5%), какаово масло, суроватка на прах (МЛЯКО), дехидратирани МЛЕЧНИ мазнини, емулгатор: лецитини (СОЯ); ванилин. Общо какаови компоненти: 45,5 % - В тъмния шоколад: минимум 70%. Може да съдържа БАДЕМИ, ОРЕХИ, КАШУ, ПЕКАНОВИ ЯДКИ, БРАЗИЛСКИ ОРЕХИ, ШАМФЪСТЪК и ОРЕХИ МАКАДАМИЯ." },
+        { "kind": "ingredients", "lang": "hu", "text": "Minőségi csokoládé (60%) mogyorós töltelékkel (37%) és mogyoródarabkákkal Összetevők: kakaómassza, cukor, pálmaolaj, MOGYORÓ (10%), zsírszegény kakaópor (3,5%), kakaóvaj, TEJSAVÓPOR, vízmentes TEJZSÍR, emulgeálószer: lecitinek (SZÓJA); aroma (vanillin). Összes kakaó összetevő: 45,5%. - A minőségi csokoládéban a kakaó szárazanyag legalább 70%. MANDULÁT, DIÓT, KESUDIÓT, PEKÁNDIÓT, BRAZIL DIÓT, PISZTÁCIÁT és MAKADÁMIA DIÓT tartalmazhat." },
+        { "kind": "nutrition", "lang": "ro", "labels": ["Valori nutriționale", "Valoare energetică", "Grăsimi", "din care acizi grași saturați", "Glucide", "din care zaharuri", "Proteine", "Sare"], "values": ["2520/608", "453/109", "46,3", "8,3", "24,2", "4,4", "35,5", "6,4", "32,1", "5,8", "8,1", "1,5", "0,046", "0,008", "18 g"] },
+        { "kind": "origin", "lang": "ro", "text": "Produs de Ferrero Polska Sp. z o.o., ul. Wiertnicza 126, 02-952 Warszawa, Polonia." }
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "name": "taitei-instant",
+      "photos": ["ro-04-taitei-instant-c.jpg", "ro-03-taitei-instant-b.jpg"],
+      "lang": "ro",
+      "text": "Ingrediente: tăiței 73,3% (făină de GRÂU, ulei de floarea soarelui, sare, agenți de afânare (carbonați de potasiu, carbonați de sodiu), zahăr, amidon din cartofi, condimente (usturoi, ardei roșu iute 0,3%, boia de ardei dulce 0,2%, ghimbir, ardei iute jalapeno 0,1%, coriandru), sare, ardei gras roșu, roșii, extract de drojdie, praz 0,2%, ulei de floarea soarelui, colorant extract de ardei roșu, acidifiant acid citric. Poate conține: ȚELINĂ, OU, LAPTE, MUȘTAR, SEMINȚE DE SUSAN, SOIA."
+    }
+  ]
+}

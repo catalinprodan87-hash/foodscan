@@ -16,6 +16,7 @@
     "bench:ocr": "node bench/ocr/run.mjs",
     "bench:labels": "node bench/ocr/make-labels.mjs",
     "bench:barcodes": "node bench/barcode/run.mjs",
+    "bench:real": "node bench/real/run.mjs",
     "bench:barcodes:make": "node bench/barcode/make-images.mjs"
   },
   "dependencies": {

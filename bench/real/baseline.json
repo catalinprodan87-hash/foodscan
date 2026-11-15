@@ -1,0 +1,176 @@
+{
+ "date": "2026-11-15",
+ "throttle": 1,
+ "detMaxSide": 1920,
+ "photos": 20,
+ "byLang": {
+  "bg": {
+   "blocks": 6,
+   "chars": 1838,
+   "cerStrict": 88.7,
+   "cerFolded": 88.7,
+   "werStrict": 98.5,
+   "werFolded": 98.5
+  },
+  "cs": {
+   "blocks": 1,
+   "chars": 393,
+   "cerStrict": 60.3,
+   "cerFolded": 55.7,
+   "werStrict": 96,
+   "werFolded": 94
+  },
+  "de": {
+   "blocks": 4,
+   "chars": 865,
+   "cerStrict": 6.1,
+   "cerFolded": 4.6,
+   "werStrict": 45.7,
+   "werFolded": 35.9
+  },
+  "el": {
+   "blocks": 1,
+   "chars": 179,
+   "cerStrict": 87.2,
+   "cerFolded": 87.2,
+   "werStrict": 100,
+   "werFolded": 100
+  },
+  "en": {
+   "blocks": 1,
+   "chars": 267,
+   "cerStrict": 48.3,
+   "cerFolded": 48.3,
+   "werStrict": 71.1,
+   "werFolded": 71.1
+  },
+  "fr": {
+   "blocks": 2,
+   "chars": 1017,
+   "cerStrict": 45.5,
+   "cerFolded": 43.9,
+   "werStrict": 77.3,
+   "werFolded": 72.7
+  },
+  "hr": {
+   "blocks": 3,
+   "chars": 1014,
+   "cerStrict": 74.7,
+   "cerFolded": 74.4,
+   "werStrict": 97.9,
+   "werFolded": 97.2
+  },
+  "hu": {
+   "blocks": 3,
+   "chars": 1300,
+   "cerStrict": 26.6,
+   "cerFolded": 18.5,
+   "werStrict": 87.8,
+   "werFolded": 63.9
+  },
+  "it": {
+   "blocks": 2,
+   "chars": 630,
+   "cerStrict": 37.8,
+   "cerFolded": 37.6,
+   "werStrict": 66,
+   "werFolded": 64.9
+  },
+  "pl": {
+   "blocks": 1,
+   "chars": 303,
+   "cerStrict": 16.2,
+   "cerFolded": 14.9,
+   "werStrict": 82.1,
+   "werFolded": 79.5
+  },
+  "ro": {
+   "blocks": 20,
+   "chars": 5021,
+   "cerStrict": 47.7,
+   "cerFolded": 45.2,
+   "werStrict": 80.7,
+   "werFolded": 74.6
+  },
+  "sk": {
+   "blocks": 1,
+   "chars": 157,
+   "cerStrict": 28.7,
+   "cerFolded": 21.7,
+   "werStrict": 85,
+   "werFolded": 75
+  },
+  "sr": {
+   "blocks": 3,
+   "chars": 508,
+   "cerStrict": 12,
+   "cerFolded": 10,
+   "werStrict": 52.1,
+   "werFolded": 47.9
+  }
+ },
+ "byKind": {
+  "ingredients": {
+   "blocks": 33,
+   "chars": 10890,
+   "cerStrict": 49.2,
+   "cerFolded": 46.9,
+   "werStrict": 82.4,
+   "werFolded": 77
+  },
+  "origin": {
+   "blocks": 6,
+   "chars": 1042,
+   "cerStrict": 33.8,
+   "cerFolded": 32.1,
+   "werStrict": 71.8,
+   "werFolded": 66
+  },
+  "other": {
+   "blocks": 9,
+   "chars": 1560,
+   "cerStrict": 54.6,
+   "cerFolded": 52.1,
+   "werStrict": 83.4,
+   "werFolded": 76.7
+  }
+ },
+ "all": {
+  "blocks": 48,
+  "chars": 13492,
+  "cerStrict": 48.6,
+  "cerFolded": 46.3,
+  "werStrict": 81.7,
+  "werFolded": 76
+ },
+ "tables": {
+  "labels": 93,
+  "labelsFound": 40,
+  "values": 158,
+  "valuesFound": 104,
+  "labelRecall": 43,
+  "valueRecall": 65.8
+ },
+ "app": {
+  "photos": 18,
+  "cerFolded": 49.3,
+  "cerStrict": 50.5,
+  "foundStart": 5
+ },
+ "timeMs": {
+  "allTextMedian": 9282,
+  "allTextMax": 22342,
+  "appMedian": 15270,
+  "appMax": 28265
+ },
+ "pairs": [
+  {
+   "name": "taitei-instant",
+   "singles": [
+    56.9,
+    63
+   ],
+   "merged": 55.4
+  }
+ ]
+}
