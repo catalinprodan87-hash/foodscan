@@ -1,8 +1,9 @@
 import { useMemo, useRef, useState } from 'react';
 import { t, pick } from '../lib/i18n.js';
+import { ALLERGENS } from '../data/allergens.js';
 import { presetsForType } from '../data/avoidPresets.js';
 import {
-  addCustom, updateCustom, removeCustom, setPreset, exportAvoidList, importAvoidList, previewCounts,
+  addCustom, updateCustom, removeCustom, setPreset, exportAvoidList, importAvoidList, previewCounts, setWatchedAllergen,
 } from '../lib/avoidList.js';
 
 const TYPES = ['food', 'cosmetic', 'household'];
@@ -138,6 +139,27 @@ export default function AvoidListView({ lang, avoid, onChange, history, notify }
           </ul>
         </section>
       ))}
+
+      <section className="card" aria-labelledby="allergens-title">
+        <h2 id="allergens-title" className="card-title">🥜 {t(lang, 'allergensWatchTitle')}</h2>
+        <p className="muted small">{t(lang, 'allergensWatchHint')}</p>
+        <ul className="toggle-list allergen-toggles">
+          {ALLERGENS.map((a) => (
+            <li key={a.id}>
+              <label className="toggle" htmlFor={`allergen-${a.id}`}>
+                <input
+                  id={`allergen-${a.id}`}
+                  type="checkbox"
+                  checked={(avoid.allergens || []).includes(a.id)}
+                  onChange={(e) => onChange(setWatchedAllergen(avoid, a.id, e.target.checked))}
+                />
+                <span className="switch" aria-hidden="true" />
+                <span className="toggle-text"><span>{pick(a.name, lang)}</span></span>
+              </label>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section className="card" aria-labelledby="custom-title">
         <h2 id="custom-title" className="card-title">✏️ {t(lang, 'customTitle')}</h2>

@@ -333,7 +333,7 @@ export default function App() {
       <Result
         lang={lang} result={historyResult} text={historyOpen.product ? historyOpen.product.ingredientsText || historyOpen.text : historyOpen.text}
         typeAuto={false} product={historyOpen.product} barcode={historyOpen.barcode} fromPhoto={historyOpen.fromPhoto}
-        onBack={() => setHistoryOpen(null)} backLabel="backToHistory" notify={notify}
+        onBack={() => setHistoryOpen(null)} backLabel="backToHistory" notify={notify} watchedAllergens={avoid.allergens}
       />
     ) : (
       <Suspense fallback={<Loading />}>
@@ -397,6 +397,7 @@ export default function App() {
         text={submitted.text?.trim() ? submitted.text : submitted.product?.ingredientsText || ''}
         product={submitted.product} barcode={submitted.barcode} fromPhoto={submitted.fromPhoto} onBack={goHome}
         saved={submitted.saved} onRetake={retakeSaved} onForget={() => forgetSaved(submitted.barcode)}
+        watchedAllergens={avoid.allergens}
       />
     );
   } else {

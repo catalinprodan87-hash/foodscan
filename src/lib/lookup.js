@@ -27,7 +27,7 @@ const COMMON_FIELDS = [
   'brands', 'quantity', 'image_front_small_url',
   'ingredients_text_ro', 'ingredients_text', 'ingredients_text_en',
 ];
-const FOOD_FIELDS = ['additives_tags', 'nova_group', 'nutriscore_grade', 'nutrient_levels', 'nutriments'];
+const FOOD_FIELDS = ['additives_tags', 'nova_group', 'nutriscore_grade', 'nutrient_levels', 'nutriments', 'allergens_tags', 'traces_tags', 'ingredients_analysis_tags'];
 
 /** Open *Facts `product_type` values → app product types. */
 const OFF_PRODUCT_TYPES = { food: 'food', petfood: 'food', beauty: 'cosmetic', product: 'household' };
@@ -146,6 +146,9 @@ export function mapProduct(raw, type, code) {
   if (type === 'food') {
     product.nutrition = mapNutrition(p);
     product.additiveTags = Array.isArray(p.additives_tags) ? p.additives_tags : [];
+    product.allergenTags = Array.isArray(p.allergens_tags) ? p.allergens_tags : [];
+    product.traceTags = Array.isArray(p.traces_tags) ? p.traces_tags : [];
+    product.analysisTags = Array.isArray(p.ingredients_analysis_tags) ? p.ingredients_analysis_tags : [];
     const nova = Number(p.nova_group);
     product.nova = nova >= 1 && nova <= 4 ? nova : null;
     product.nutriscore = typeof p.nutriscore_grade === 'string' && /^[a-e]$/i.test(p.nutriscore_grade)
@@ -163,6 +166,9 @@ export function analyzeInput(product, pastedText) {
     input.additiveTags = product.additiveTags;
     input.nova = product.nova;
     input.nutriscore = product.nutriscore;
+    input.allergenTags = product.allergenTags || [];
+    input.traceTags = product.traceTags || [];
+    input.analysisTags = product.analysisTags || [];
   }
   return input;
 }

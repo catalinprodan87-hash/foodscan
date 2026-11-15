@@ -891,3 +891,11 @@ main:focus { outline: none; }
 .part-remove { position: absolute; top: -6px; right: -6px; width: 28px; height: 28px; border-radius: 50%; border: 0; background: var(--high); color: #fff; font-size: 1.1rem; line-height: 1; cursor: pointer; }
 .add-photo { margin-top: 10px; }
 .add-photo p { margin: 4px 0 0; }
+
+/* v2.5: allergens (information), diet chips, summary line */
+.summary-line { margin: -4px 4px 0; font-weight: 600; font-size: 0.92rem; color: var(--muted); }
+.allergen-card p { margin: 0 0 6px; }
+.allergen-card.has-watched { box-shadow: inset 4px 0 0 var(--medium), var(--shadow); }
+.allergen.watched { color: var(--medium); font-weight: 700; }
+.diet-chips { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 8px 0; padding: 0; }
+.diet-chips li { padding: 3px 10px; border-radius: 999px; background: var(--bg); font-size: 0.82rem; }

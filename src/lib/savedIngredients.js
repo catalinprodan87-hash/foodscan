@@ -14,7 +14,7 @@ const LS_KEY = 'ingrediscan:savedIngredients';
 
 // Product fields worth keeping (the database's own ingredients are not needed).
 const PRODUCT_FIELDS = ['code', 'productType', 'name', 'brands', 'quantity', 'image', 'source', 'url',
-  'additiveTags', 'nova', 'nutriscore', 'nutrition'];
+  'additiveTags', 'nova', 'nutriscore', 'nutrition', 'allergenTags', 'traceTags', 'analysisTags'];
 
 function productSnapshot(p) {
   if (!p) return null;

@@ -1,0 +1,18 @@
+{
+ "_about": "Open Food Facts allergen tags that the ingredient text does not support (reviewed by hand, 15 Nov 2026). Excluded from the recall test; a NEW miss fails it and needs a look.",
+ "reviewed": {
+  "5053990101573": {
+   "ids": [
+    "soy"
+   ],
+   "reason": "Open Food Facts tags soy; the ingredient list (French) names none."
+  },
+  "5941466022326": {
+   "ids": [
+    "eggs",
+    "milk"
+   ],
+   "reason": "Open Food Facts tags eggs and milk; the ingredient list names neither (egg-free sauce)."
+  }
+ }
+}

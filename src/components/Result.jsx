@@ -1,5 +1,6 @@
 import PhotoButton from './PhotoButton.jsx';
 import ReportProblem from './ReportProblem.jsx';
+import { ALLERGENS_BY_ID } from '../data/allergens.js';
 import { t, pick } from '../lib/i18n.js';
 import { normalize } from '../lib/analyze.js';
 import AdditiveList from './AdditiveList.jsx';
@@ -237,15 +238,73 @@ function SavedNote({ lang, saved, onRetake, onForget }) {
   );
 }
 
+const allergenName = (id, lang) => pick(ALLERGENS_BY_ID[id].short, lang);
+
+/**
+ * Allergens: information only (never in the verdict). Says what the label
+ * (or the database) mentions; never that a product is free of an allergen.
+ */
+function AllergenCard({ lang, allergens, diet, watched = [], fromPhoto }) {
+  if (!allergens) return null;
+  const { contains, traces } = allergens;
+  const names = (list) => list.map((a) => (
+    <span key={a.id} className={`allergen${watched.includes(a.id) ? ' watched' : ''}`}>
+      {watched.includes(a.id) && <span aria-hidden="true">⚠ </span>}{allergenName(a.id, lang)}
+      {watched.includes(a.id) && <span className="sr-only"> ({t(lang, 'allergenWatched')})</span>}
+      {!a.sources.includes('label') && <span className="muted small"> ({t(lang, 'allergenFromDb')})</span>}
+    </span>
+  )).reduce((acc, el, i) => (i ? [...acc, ', ', el] : [el]), []);
+  const watchedFound = [...contains, ...traces].some((a) => watched.includes(a.id));
+  return (
+    <section className={`card allergen-card${watchedFound ? ' has-watched' : ''}`} aria-labelledby="allergens-h">
+      <h3 id="allergens-h" className="card-title">{t(lang, 'allergensTitle')}</h3>
+      {contains.length > 0 && <p>{t(lang, 'allergensContains')} <strong>{names(contains)}</strong>.</p>}
+      {traces.length > 0 && <p>{t(lang, 'allergensTraces')} {names(traces)}.</p>}
+      {!contains.length && !traces.length && <p>{t(lang, 'allergensNone')}</p>}
+      <DietChips lang={lang} diet={diet} />
+      <p className="muted small">{t(lang, 'allergensNote')}{fromPhoto ? ` ${t(lang, 'allergensPhotoNote')}` : ''}</p>
+    </section>
+  );
+}
+
+function DietChips({ lang, diet }) {
+  if (!diet) return null;
+  const chips = [];
+  const src = (d) => (d.source === 'database' ? t(lang, 'dietFromDb') : t(lang, 'dietFromLabel'));
+  if (diet.vegan) chips.push({ key: 'vegan', icon: '🌱', text: t(lang, `vegan_${diet.vegan.status}`), src: src(diet.vegan) });
+  if (diet.vegetarian && diet.vegan?.status !== 'yes') chips.push({ key: 'veg', icon: '🥕', text: t(lang, `vegetarian_${diet.vegetarian.status}`), src: src(diet.vegetarian) });
+  if (diet.palm) chips.push({ key: 'palm', icon: '🌴', text: t(lang, `palm_${diet.palm.status}`), src: src(diet.palm) });
+  if (!chips.length) return null;
+  return (
+    <ul className="diet-chips">
+      {chips.map((c) => <li key={c.key}><span aria-hidden="true">{c.icon} </span>{c.text} <span className="muted">· {c.src}</span></li>)}
+    </ul>
+  );
+}
+
+/** One line at the top: "2 de evitat · alergeni: lapte · NOVA 4". */
+export function summaryParts(result, lang) {
+  const parts = [];
+  if (result.avoidHits?.length) parts.push(t(lang, 'sumAvoid', { n: result.avoidHits.length }));
+  if (result.counts?.high) parts.push(t(lang, 'sumHigh', { n: result.counts.high }));
+  if (result.allergens?.contains?.length) {
+    const ids = result.allergens.contains.map((a) => a.id);
+    parts.push(t(lang, 'sumAllergens', { list: ids.slice(0, 3).map((id) => allergenName(id, lang)).join(', ') + (ids.length > 3 ? '…' : '') }));
+  }
+  if (result.processing?.nova) parts.push(`NOVA ${result.processing.nova}`);
+  return parts;
+}
+
 export default function Result({
   lang, result, text, typeAuto, product, barcode, fromPhoto, onBack, backLabel = 'back', notify,
-  saved, onRetake, onForget,
+  saved, onRetake, onForget, watchedAllergens = [],
 }) {
   const food = isFood(result);
   return (
     <div className="result">
       <h1 className="sr-only page-title" tabIndex={-1}>{product?.name || t(lang, 'verdict_' + result.verdict)}</h1>
       <ProductHeader lang={lang} product={product} barcode={barcode} />
+      {summaryParts(result, lang).length > 0 && <p className="summary-line">{summaryParts(result, lang).join(' · ')}</p>}
       <TypeBadge lang={lang} type={result.productType} auto={typeAuto} source={product?.source} />
       {fromPhoto && (
         <p className="photo-label" title={t(lang, 'readFromPhotoHint')}>
@@ -255,6 +314,7 @@ export default function Result({
       )}
       {saved && <SavedNote lang={lang} saved={saved} onRetake={onRetake} onForget={onForget} />}
       <VerdictBanner lang={lang} result={result} />
+      {food && <AllergenCard lang={lang} allergens={result.allergens} diet={result.diet} watched={watchedAllergens} fromPhoto={fromPhoto} />}
       <SafetyTips lang={lang} tips={result.safetyTips} />
       {food && <ScoreTiles lang={lang} processing={result.processing} why={result.novaWhy} grade={result.nutriscore} nutrition={product?.nutrition} />}
       <AvoidHits lang={lang} hits={result.avoidHits} />

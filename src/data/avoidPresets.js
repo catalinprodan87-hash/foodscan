@@ -187,5 +187,6 @@ export function defaultAvoidState() {
   return {
     presets: Object.fromEntries(AVOID_PRESETS.map((p) => [p.id, p.defaultOn])),
     custom: [],
+    allergens: [], // EU allergens to highlight (information only, never in the verdict)
   };
 }

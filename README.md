@@ -58,6 +58,14 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
+### Allergens, vegan, palm oil (v2.5) – information only
+
+- **Allergens** (`src/data/allergens.js`, `src/lib/allergens.js`): the 14 groups of EU Regulation 1169/2011 Annex II, with Romanian and English label words. Text after "Poate conține (urme de)…" / "May contain…" / "Produs într-o fabrică care procesează…" counts as **possible traces**, kept apart from what the product contains. Not counted: cocoa butter, coconut, plant drinks as milk; wheat glucose syrup, dextrose and maltodextrin, and refined soybean oil (Annex II exemptions); "fără …" mentions; "peste" (= over) and "cod" (= code). Sulphites also from E220–E228. Open Food Facts' `allergens_tags` / `traces_tags` are merged, with the source shown.
+- Shown in a card under the verdict: "Eticheta menționează: …", "Urme posibile: …"; with nothing found: "Nu am găsit alergeni în textul citit. Verifică eticheta – alergenii sunt scriși îngroșat." **Never** "fără alergeni", and allergens **never change the verdict**. Lista mea → *Alergeni de evidențiat* marks the ones to highlight with ⚠. A test checks the RO/EN texts for promises of safety.
+- **Vegan / vegetarian / palm oil** chips (`src/lib/diet.js`): Open Food Facts' ingredient analysis when it has one, otherwise a cautious reading of the ingredients ("după ingrediente"; no animal ingredient seen is "nu am găsit ingrediente de origine animală", not "vegan").
+- A one-line summary at the top of the result: "2 din lista ta · alergeni: lapte, soia · NOVA 4".
+- **Golden corpus test** (`tests/corpus.test.js`): the analysis of all 474 corpus lists against a snapshot (`UPDATE_SNAPSHOTS=1 npm test` to accept changes), unknown E-codes listed, allergen recall against Open Food Facts' own tags.
+
 ### Your data, backup, problem reports (v2.1)
 
 - **Despre → Datele tale**: whether the browser keeps the app's data under storage pressure (the app asks with `navigator.storage.persist()` after the first saved analysis), space used, **download the text reading engine now** (on Wi-Fi), **backup** of history + remembered ingredients + avoid list in one JSON file (`src/lib/backup.js`; restoring adds new / newer items and replaces the avoid list after a preview), and **delete all data** (history, remembered ingredients, settings, cached lookups; the OCR engine is kept).
@@ -182,6 +190,8 @@ Checked on real data: the Kaufland tomato paste 5949069402286 is in Open Food Fa
 │   ├── crop.test.js           # Text blocks, crop suggestion, uncertain words
 │   ├── merge.test.js          # Merging photos of one label
 │   ├── corpus-words.test.js   # Word clean-up on real Romanian ingredient lists
+│   ├── allergens.test.js      # EU 14 allergens, traces, exemptions, diet, wording
+│   ├── corpus.test.js         # Golden corpus snapshot, allergen recall vs Open Food Facts
 │   └── scores.test.js         # NOVA explanations, Nutri-Score facts, restrictions outside the EU
 ├── e2e/                       # Browser tests (Playwright, API mocked): paste, barcode flows, remembered
 │                              # ingredients offline, history, avoid list, RO/EN, one real OCR smoke test

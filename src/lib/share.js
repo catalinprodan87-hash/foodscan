@@ -5,6 +5,7 @@
 import { t, pick } from './i18n.js';
 import { sourceFor, SOURCE_NAMES } from './lookup.js';
 import { REGIONS, regionShort } from '../data/restrictions.js';
+import { ALLERGENS_BY_ID } from '../data/allergens.js';
 
 /**
  * Open *Facts "add a product" page for a barcode (the site's search-or-add
@@ -52,6 +53,14 @@ export function shareSummary(result, { lang = 'ro', product = null, barcode = nu
   }
   if (result.avoidHits.length) {
     lines.push(`${t(lang, 'avoidTitle')}: ${result.avoidHits.map((h) => pick(h.label, lang)).join(', ')}`);
+  }
+  const al = result.allergens;
+  if (food && al && (al.contains.length || al.traces.length)) {
+    const names = (list) => list.map((a) => pick(ALLERGENS_BY_ID[a.id].short, lang)).join(', ');
+    const parts = [];
+    if (al.contains.length) parts.push(names(al.contains));
+    if (al.traces.length) parts.push(`${t(lang, 'allergensTraces')} ${names(al.traces)}`);
+    lines.push(`${t(lang, 'allergensTitle')} (${t(lang, 'shareInfoOnly')}): ${parts.join('; ')}`);
   }
   if (food && result.processing?.nova) lines.push(`NOVA ${result.processing.nova}`);
   if (result.nutriscore) lines.push(`Nutri-Score ${result.nutriscore.toUpperCase()}`);

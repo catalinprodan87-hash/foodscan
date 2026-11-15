@@ -54,6 +54,9 @@ export function makeEntry(request, result, now = new Date()) {
         nova: p.nova ?? null,
         nutriscore: p.nutriscore ?? null,
         nutrition: p.nutrition ?? null,
+        allergenTags: p.allergenTags || [],
+        traceTags: p.traceTags || [],
+        analysisTags: p.analysisTags || [],
       }
       : null,
     confidence: request.fromPhoto ? request.confidence ?? null : null,
@@ -81,6 +84,9 @@ export function entryRequest(entry) {
       nova: entry.db.nova,
       nutriscore: entry.db.nutriscore,
       nutrition: entry.db.nutrition ?? null,
+      allergenTags: entry.db.allergenTags || [],
+      traceTags: entry.db.traceTags || [],
+      analysisTags: entry.db.analysisTags || [],
     }
     : null;
   return {
@@ -102,6 +108,9 @@ export function entryAnalyzeInput(entry) {
     input.additiveTags = entry.db.additiveTags;
     input.nova = entry.db.nova;
     input.nutriscore = entry.db.nutriscore;
+    input.allergenTags = entry.db.allergenTags || [];
+    input.traceTags = entry.db.traceTags || [];
+    input.analysisTags = entry.db.analysisTags || [];
   }
   return input;
 }

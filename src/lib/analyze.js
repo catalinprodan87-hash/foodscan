@@ -7,6 +7,8 @@ import { AVOID_PRESETS, defaultAvoidState, normalizeCustomEntry } from '../data/
 import { NONFOOD_INGREDIENTS, NONFOOD_BY_CODE } from '../data/nonFoodIngredients.js';
 import { PRODUCT_TYPE_BY_ID } from '../data/productCategories.js';
 import { restrictionsFor, worstLevel } from '../data/restrictions.js';
+import { findAllergens } from './allergens.js';
+import { dietInfo } from './diet.js';
 
 /** EU rating + rules elsewhere → the worst level, with where it comes from. */
 function rated(euLevel, code) {
@@ -640,6 +642,11 @@ export function analyze(input = {}, avoidState) {
   // 2. Avoid list.
   const avoidHits = findAvoidHits(text, avoidState, additives.map((x) => x.code), 'food');
 
+  // 2b. Allergens (EU 14) and diet – information only, never in the verdict.
+  const codes = additives.map((x) => x.code);
+  const allergens = findAllergens(text, { codes: additives.map((x) => ({ code: x.code, matches: x.matches })), offAllergens: input.allergenTags || [], offTraces: input.traceTags || [] });
+  const diet = dietInfo(text, { analysisTags: input.analysisTags || [], codes });
+
   // 3. Processing level.
   const dbNova = Number(input.nova);
   const est = estimateNova(text, additives);
@@ -687,6 +694,7 @@ export function analyze(input = {}, avoidState) {
   else verdict = 'ok';
 
   return {
+    allergens, diet,
     productType, verdict, reasons, items: additives, additives, avoidHits, processing, novaWhy, nutriscore, counts,
     restrictedElsewhere, safetyTips: [],
   };

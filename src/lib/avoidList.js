@@ -3,6 +3,7 @@
  * "how many history items would this flag" preview. Pure, unit-tested.
  */
 import { AVOID_PRESETS, defaultAvoidState, normalizeCustomEntry } from '../data/avoidPresets.js';
+import { ALLERGENS_BY_ID } from '../data/allergens.js';
 import { analyze } from './analyze.js';
 import { entryAnalyzeInput } from './history.js';
 
@@ -27,7 +28,14 @@ export function sanitizeAvoidState(raw) {
     seen.add(id);
     custom.push({ ...entry, id });
   }
-  return { presets, custom };
+  const allergens = [...new Set((Array.isArray(raw.allergens) ? raw.allergens : []).filter((id) => ALLERGENS_BY_ID[id]))];
+  return { presets, custom, allergens };
+}
+
+/** Watch / stop watching an allergen (highlighted on results; information only). */
+export function setWatchedAllergen(state, id, on) {
+  const list = (state.allergens || []).filter((x) => x !== id);
+  return { ...state, allergens: on ? [...list, id] : list };
 }
 
 /** "soia / soy" → ['soia', 'soy'] */
