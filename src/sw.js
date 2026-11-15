@@ -11,11 +11,16 @@ import { CacheFirst, NetworkFirst } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 import { clientsClaim } from 'workbox-core';
-import { SHARE_CACHE, SHARE_PHOTO, SHARE_TEXT } from './lib/shareTarget.js';
+import { SHARE_CACHE, SHARE_TEXT, SHARE_MAX_FILES, sharePhotoKey } from './lib/shareTarget.js';
 
-// "Reîncarcă" in the update banner (registerSW → updateSW(true)).
+/* global __BUILD_ID__ */
+const VERSION = typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : 'dev';
+
+// "Reîncarcă" in the update banner (registerSW → updateSW(true)); the app asks the
+// waiting worker its version first, to say afterwards whether the update worked.
 self.addEventListener('message', (e) => {
   if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
+  if (e.data && e.data.type === 'GET_VERSION') e.ports?.[0]?.postMessage(VERSION);
 });
 clientsClaim(); // the first install controls the page at once (OCR caching)
 
@@ -48,12 +53,14 @@ async function receiveShare(request) {
   const back = new URL('./?share=1', self.registration.scope).href;
   try {
     const form = await request.formData();
+    // A fresh cache: nothing left over from an earlier share.
+    await caches.delete(SHARE_CACHE);
     const cache = await caches.open(SHARE_CACHE);
-    await cache.delete(SHARE_PHOTO);
-    await cache.delete(SHARE_TEXT);
-    const file = form.getAll('photo').find((f) => f && typeof f === 'object' && /^image\//.test(f.type));
-    if (file) {
-      await cache.put(SHARE_PHOTO, new Response(file, { headers: { 'content-type': file.type, 'x-file-name': encodeURIComponent(file.name || 'photo') } }));
+    const files = form.getAll('photo').filter((f) => f && typeof f === 'object' && /^image\//.test(f.type)).slice(0, SHARE_MAX_FILES);
+    if (files.length) {
+      await Promise.all(files.map((f, i) => cache.put(sharePhotoKey(i), new Response(f, {
+        headers: { 'content-type': f.type, 'x-file-name': encodeURIComponent(f.name || `photo-${i + 1}.jpg`) },
+      }))));
     } else {
       const text = [form.get('text'), form.get('title')].filter((x) => typeof x === 'string' && x.trim()).join('\n');
       if (text) await cache.put(SHARE_TEXT, new Response(text.slice(0, 20000), { headers: { 'content-type': 'text/plain;charset=utf-8' } }));

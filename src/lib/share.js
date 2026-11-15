@@ -3,30 +3,8 @@
  * in the ingredients text. Pure, unit-tested.
  */
 import { t, pick } from './i18n.js';
-import { sourceFor, SOURCE_NAMES } from './lookup.js';
 import { REGIONS, regionShort } from '../data/restrictions.js';
 import { ALLERGENS_BY_ID } from '../data/allergens.js';
-
-/**
- * Open *Facts "add a product" page for a barcode (the site's search-or-add
- * form: it opens the add page when the barcode is unknown).
- */
-export function addProductUrl(type, code) {
-  const base = sourceFor(type) || sourceFor('food');
-  return `${base}/cgi/product.pl?type=search_or_add&action=process&code=${encodeURIComponent(code)}`;
-}
-
-/** Open *Facts edit page of an existing product (to add its ingredients). */
-export function editProductUrl(type, code) {
-  const base = sourceFor(type) || sourceFor('food');
-  return `${base}/cgi/product.pl?type=edit&code=${encodeURIComponent(code)}`;
-}
-
-export function addProductLinks(code, firstType = 'food') {
-  const order = ['food', 'cosmetic', 'household'];
-  const types = [firstType, ...order.filter((x) => x !== firstType)].filter((x) => order.includes(x));
-  return types.map((type) => ({ type, name: SOURCE_NAMES[type], url: addProductUrl(type, code) }));
-}
 
 const FLAGGED = ['high', 'medium'];
 

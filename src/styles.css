@@ -764,9 +764,8 @@ main:focus { outline: none; }
 .hl-legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .hl-legend .hl { cursor: default; text-decoration: none; }
 .result-actions { justify-content: center; }
-.add-product .btn { margin-top: 4px; text-decoration: none; text-align: center; display: block; line-height: 24px; }
-.add-product .other-sources a, .link-list a { color: var(--teal); }
-@media (prefers-color-scheme: dark) { .add-product .other-sources a, .link-list a { color: #5eead4; } }
+.link-list a { color: var(--teal); }
+@media (prefers-color-scheme: dark) { .link-list a { color: #5eead4; } }
 
 /* About */
 .link-list { margin: 6px 0; padding-left: 18px; }
@@ -871,9 +870,6 @@ main:focus { outline: none; }
 .retry-card { padding: 12px 16px; }
 
 /* v2.1: report a problem */
-.report-problem summary { cursor: pointer; font-weight: 600; color: var(--muted); min-height: 32px; }
-.report-problem[open] summary { margin-bottom: 8px; color: var(--text); }
-.report-problem textarea { width: 100%; font: 0.8rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 
 /* v2.2: automatic orientation note */
 .auto-orient, .photo-note { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; }
@@ -978,3 +974,6 @@ main:focus { outline: none; }
 /* Large text: tiles stack (rem-based minimum) and long words break instead of widening the page. */
 .score-tiles { grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr)); }
 .score-tile, .score-tile * { overflow-wrap: anywhere; }
+.disclaimer-note { margin: 16px 0; }
+.whats-new { border: 2px solid var(--teal); }
+.whats-new ul { padding-left: 20px; margin: 4px 0 10px; }

@@ -23,13 +23,25 @@ async function shareInto(page, { file, text }) {
     form.action = './share-target';
     form.enctype = 'multipart/form-data';
     form.id = 'share-form';
-    form.innerHTML = '<input type="file" name="photo"><input type="hidden" name="text">';
+    form.innerHTML = '<input type="file" name="photo" multiple><input type="hidden" name="text">';
     form.querySelector('[name=text]').value = shared || '';
     document.body.appendChild(form);
   }, { text });
   if (file) await page.setInputFiles('#share-form input[type=file]', file);
   await Promise.all([page.waitForURL(/\?share=1|\/$/), page.evaluate(() => document.getElementById('share-form').submit())]);
 }
+
+test('two photos shared at once: both are read and merged', async ({ page }) => {
+  await page.goto('./');
+  await swReady(page);
+  await shareInto(page, { file: ['bench/ocr/images/tomato-flat.png', 'bench/ocr/images/biscuits-flat.png'] });
+  test.setTimeout(120_000);
+  await expect(page.locator('.crop-box img')).toBeVisible();
+  await page.click('text=Sari peste, citește toată poza');
+  await expect(page.locator('#ocr-text')).toBeVisible({ timeout: 60_000 });
+  await expect(page.locator('.photo-parts li')).toHaveCount(2, { timeout: 60_000 });
+  expect(new URL(page.url()).search).toBe('');
+});
 
 test('a photo shared from another app opens the photo flow', async ({ page }) => {
   await page.goto('./');
@@ -99,6 +111,7 @@ for (const how of ['next visit', 'hourly check']) test(`a new version shows "Re�
     await expect(page.locator('.update-banner')).toBeVisible({ timeout: 15_000 });
     await Promise.all([page.waitForEvent('load'), page.locator('.update-banner button').click()]);
     await expect(page.locator('.update-banner')).toHaveCount(0);
+    await expect(page.locator('.toast')).toContainText('Actualizare reușită – v');
     expect(await page.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => !r.waiting))).toBe(true);
   } finally {
     server.close();

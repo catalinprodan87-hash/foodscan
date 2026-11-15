@@ -58,6 +58,13 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
+### Update feedback, sharing, a quieter disclaimer (v3.0)
+
+- After "Reîncarcă" the app says **"Actualizare reușită – v…"** once the new version runs, or **"Actualizarea nu a reușit – încearcă din nou"** if no new version took over within 15 s. Builds are compared by version + build time, so a redeploy of the same version counts too. "Ce e nou în v3.x" appears once after each update.
+- **Share → IngrediScan** accepts several photos at once (they are read and merged, up to 3). About explains how it works on Android (and that a reinstall refreshes the share list), and that iPhone does not support it.
+- The disclaimer is no longer a footer on every page: it is on the first-run slides and About, and one short line under each result (in full when something high-risk is flagged).
+- Removed: "Raportează o problemă" and the cards that sent products to Open Food Facts. The "Vezi pe Open … Facts" link stays.
+
 ### Share a photo into the app (v2.9)
 
 - On Android, with IngrediScan installed: in Gallery / Photos / Camera, **Share → IngrediScan** opens the photo straight in the crop-and-read step. Shared text (e.g. an ingredient list copied from a website) goes into the ingredients box.
@@ -97,11 +104,10 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - A one-line summary at the top of the result: "2 din lista ta · alergeni: lapte, soia · NOVA 4".
 - **Golden corpus test** (`tests/corpus.test.js`): the analysis of all 474 corpus lists against a snapshot (`UPDATE_SNAPSHOTS=1 npm test` to accept changes), unknown E-codes listed, allergen recall against Open Food Facts' own tags (267/267 on the 275 lists tagged so far; tags the ingredient text does not support are reviewed by hand in `bench/corpus/tag-review.json`).
 
-### Your data, backup, problem reports (v2.1)
+### Your data and backup (v2.1)
 
 - **Despre → Datele tale**: whether the browser keeps the app's data under storage pressure (the app asks with `navigator.storage.persist()` after the first saved analysis), space used, **download the text reading engine now** (on Wi-Fi), **backup** of history + remembered ingredients + avoid list in one JSON file (`src/lib/backup.js`; restoring adds new / newer items and replaces the avoid list after a preview), and **delete all data** (history, remembered ingredients, settings, cached lookups; the OCR engine is kept).
 - **Privacy** section listing exactly what leaves the phone (only the barcode, to Open *Facts) and what stays.
-- **Raportează o problemă** on the photo review and result screens: an editable plain-text report (version, browser, screen, the last 20 lookup / OCR timings kept locally, OCR text) shared by the user through the share sheet (WhatsApp, e-mail…) or copied. Never a photo, never sent automatically (`src/lib/diagnostics.js`).
 - **⟳ Rotește** in the crop step turns the photo 90° per tap (for photos the camera saved sideways or upside down). The crop frame now always has the photo's exact shape (tall photos were letterboxed, so the crop could miss the chosen area).
 - Credits and licences: [`NOTICE.md`](NOTICE.md).
 
@@ -128,7 +134,7 @@ Checked on real data: the Kaufland tomato paste 5949069402286 is in Open Food Fa
 - **Istoric** (`src/lib/history.js`): every analysis is saved on the phone (IndexedDB, localStorage fallback): barcode, name, brand, image URL, product type, source (barcode / photo / paste), ingredients text, database fields (NOVA, Nutri-Score, additive tags, link), verdict, date. Last 200 kept; the same barcode (or the same text and type) replaces the older entry. Search by name / brand / barcode, filter by type and verdict. Opening an entry re-runs `analyze()` with the **current** avoid list, and the list's verdict icons follow it too. Swipe left or long-press to delete (with undo); "Șterge tot" asks first.
 - **Lista mea** (`src/lib/avoidList.js`): presets grouped by product type with the types each applies to; custom entries with alternative spellings ("soia / soy") limited to chosen product types; edit / delete; "would flag N from your history" previews; export / import as JSON (`ingrediscan-avoid-list`, version 1). Older saved lists (plain strings) are upgraded automatically.
 - **Install & updates:** "Instalează aplicația" button from `beforeinstallprompt` (hidden once installed); a one-time Share → Add to Home Screen hint on iPhone; service worker in **prompt** mode – a new deploy shows "Versiune nouă disponibilă — Reîncarcă" instead of reloading mid-scan (checked hourly while open).
-- **Result:** ingredients text with flagged words highlighted by level (tap → jumps to and opens the explanation); "Distribuie" via the Web Share API, falling back to copying a text summary; "Adaugă produsul în Open … Facts" for barcodes the databases don't know.
+- **Result:** ingredients text with flagged words highlighted by level (tap → jumps to and opens the explanation); "Distribuie" via the Web Share API, falling back to copying a text summary.
 - **Polish:** first-run slides (what it does, disclaimer, camera note), "Despre" page (sources, regulations cited, database review dates in `src/data/meta.js`, version), dark mode following the system with WCAG AA contrast checked by a test, offline banner, error boundary with "Reîncarcă", skip link, focus moved to each new screen's heading, labelled controls.
 - **First load:** about 114 KB gzipped (HTML 0.5 + CSS 5.7 + JS 107: React ≈ 45, ingredient databases ≈ 33, translations ≈ 10, engine ≈ 9). Scanner (118 KB), OCR (≈ 8 MB, first photo only), History / List / About / first-run screens (≈ 2 KB each) load on demand.
 
@@ -163,7 +169,6 @@ Checked on real data: the Kaufland tomato paste 5949069402286 is in Open Food Fa
 │   │   ├── AvoidListView.jsx  # Presets per type, custom entries, export / import
 │   │   ├── AboutView.jsx      # Privacy, your data, sources, regulations, review dates, disclaimer
 │   │   ├── SettingsCard.jsx   # Storage status, OCR download, backup / restore, delete all
-│   │   ├── ReportProblem.jsx  # Editable problem report, shared by the user
 │   │   ├── Onboarding.jsx     # First-run slides
 │   │   ├── Banners.jsx        # Update, offline, install (Android / iPhone), toast
 │   │   ├── ResultExtras.jsx   # Highlighted ingredients, share, add-product links
@@ -180,8 +185,7 @@ Checked on real data: the Kaufland tomato paste 5949069402286 is in Open Food Fa
 │   │   ├── IngredientInput.jsx
 │   │   ├── AvoidSettings.jsx  # Toggle avoid-list presets (per product type)
 │   │   ├── Result.jsx         # Type badge, verdict, safety tip, NOVA card, avoid hits
-│   │   ├── AdditiveList.jsx   # Expandable items with risk pills (grouped for non-food)
-│   │   └── Disclaimer.jsx
+│   │   └── AdditiveList.jsx   # Expandable items with risk pills (grouped for non-food)
 │   ├── data/
 │   │   ├── additives.js       # E-number database (food)
 │   │   ├── nonFoodIngredients.js # Cosmetic + household ingredient database

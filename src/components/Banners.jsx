@@ -1,20 +1,36 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { t } from '../lib/i18n.js';
 import { useInstallPrompt, useNeedRefresh, useOnline } from '../lib/hooks.js';
 import { promptInstall } from '../lib/installPrompt.js';
-import { applyUpdate } from '../lib/pwa.js';
+import { applyUpdate, onUpdateFailed } from '../lib/pwa.js';
 import { installMode, isIos, isStandalone } from '../lib/install.js';
 import { getFlag, setFlag } from '../lib/storage.js';
 
 /** "Versiune nouă disponibilă — Reîncarcă" */
 export function UpdateBanner({ lang }) {
   const need = useNeedRefresh();
+  const [busy, setBusy] = useState(false);
+  useEffect(() => onUpdateFailed(() => setBusy(false)), []);
   if (!need) return null;
+  const go = () => { setBusy(true); applyUpdate(); };
   return (
     <div className="update-banner" role="status">
-      <span>✨ {t(lang, 'updateAvailable')}</span>
-      <button type="button" className="btn small-btn" onClick={applyUpdate}>{t(lang, 'reload')}</button>
+      <span>✨ {t(lang, busy ? 'updating' : 'updateAvailable')}</span>
+      <button type="button" className="btn small-btn" onClick={go} disabled={busy}>{t(lang, 'reload')}</button>
     </div>
+  );
+}
+
+/** "Ce e nou în v3.x", once after an update. */
+export function WhatsNew({ lang, version, items, onClose }) {
+  return (
+    <section className="card whats-new" aria-labelledby="whats-new-h">
+      <h2 id="whats-new-h" className="card-title">🎉 {t(lang, 'whatsNewTitle', { version })}</h2>
+      <ul className="small">
+        {items.map((x) => <li key={x}>{x}</li>)}
+      </ul>
+      <button type="button" className="btn ghost small-btn" onClick={onClose}>{t(lang, 'whatsNewOk')}</button>
+    </section>
   );
 }
 

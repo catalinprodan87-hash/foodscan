@@ -1,12 +1,12 @@
+import { useState } from 'react';
 import PhotoButton from './PhotoButton.jsx';
-import ReportProblem from './ReportProblem.jsx';
 import HelpButton from './HelpButton.jsx';
 import { ALLERGENS_BY_ID } from '../data/allergens.js';
 import { t, pick } from '../lib/i18n.js';
 import { normalize } from '../lib/analyze.js';
 import AdditiveList from './AdditiveList.jsx';
 import ProductHeader from './ProductHeader.jsx';
-import { IngredientsText, ShareButton, AddProductLinks, CompleteProductCard } from './ResultExtras.jsx';
+import { IngredientsText, ShareButton } from './ResultExtras.jsx';
 
 const VERDICT_ICON = { bad: '✕', warn: '!', ok: '✓', unknown: '?' };
 
@@ -298,6 +298,30 @@ export function summaryParts(result, lang) {
   return parts;
 }
 
+/**
+ * One short line under a result, with the full disclaimer a tap away. Shown in
+ * full straight away when something of high concern is flagged.
+ */
+export function DisclaimerNote({ lang, type = 'food', high = false }) {
+  const [open, setOpen] = useState(high);
+  const suffix = type === 'food' ? '' : '_nonfood';
+  return (
+    <aside className="disclaimer disclaimer-note" aria-label={t(lang, 'disclaimerTitle')}>
+      {open ? (
+        <>
+          <p>{t(lang, 'disclaimer' + suffix)}</p>
+          <p className="muted small">{t(lang, 'footerSources' + suffix)}</p>
+        </>
+      ) : (
+        <p className="small">
+          {t(lang, 'disclaimerShort')}{' '}
+          <button type="button" className="link-btn" aria-expanded="false" onClick={() => setOpen(true)}>{t(lang, 'disclaimerMore')}</button>
+        </p>
+      )}
+    </aside>
+  );
+}
+
 export default function Result({
   lang, result, text, typeAuto, product, barcode, fromPhoto, onBack, backLabel: backLabelProp, notify,
   saved, onRetake, onForget, watchedAllergens = [], profiles, onProfile,
@@ -332,15 +356,13 @@ export default function Result({
       <AvoidHits lang={lang} hits={result.avoidHits} />
       <AdditiveList lang={lang} additives={result.items} grouped={!food} />
       <IngredientsText lang={lang} text={text} result={result} />
-      {barcode && !product && <AddProductLinks lang={lang} code={barcode} type={result.productType} />}
-      <CompleteProductCard lang={lang} product={product} text={text} notify={notify} />
       <div className="actions result-actions">
         <ShareButton lang={lang} result={result} product={product} barcode={barcode} text={text} notify={notify} />
       </div>
+      <DisclaimerNote key={result.productType} lang={lang} type={result.productType} high={result.items.some((i) => i.level === 'high')} />
       <button type="button" className="btn primary block" onClick={onBack}>
         {t(lang, backLabel)}
       </button>
-      <ReportProblem lang={lang} screen="result" product={product ? { name: product.name, code: product.code || barcode } : (barcode ? { code: barcode } : null)} />
     </div>
   );
 }

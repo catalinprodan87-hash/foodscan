@@ -7,7 +7,6 @@ import {
 } from '../src/lib/backup.js';
 import { exportAvoidList } from '../src/lib/avoidList.js';
 import { defaultAvoidState } from '../src/data/avoidPresets.js';
-import { recordTiming, getTimings, buildReport, TIMINGS_MAX } from '../src/lib/diagnostics.js';
 import { rotatedSize, fitSize } from '../src/lib/imagePrep.js';
 
 const memory = () => {
@@ -92,29 +91,6 @@ describe('backup', () => {
     const nav = { storage: { persisted: async () => false, persist: async () => true, estimate: async () => ({ usage: 5, quota: 10 }) } };
     assert.equal(await requestPersistence(nav), true);
     assert.deepEqual(await storageStatus(nav), { persisted: false, usage: 5, quota: 10 });
-  });
-});
-
-describe('diagnostics', () => {
-  test('keeps only the last 20 timings', () => {
-    const ls = memory();
-    for (let i = 0; i < 25; i++) recordTiming('lookup', i, true, `n${i}`, { ls });
-    const list = getTimings({ ls });
-    assert.equal(list.length, TIMINGS_MAX);
-    assert.equal(list[0].detail, 'n5');
-    assert.equal(list.at(-1).ms, 24);
-  });
-
-  test('the report has version, device, timings and OCR text, and no image data', () => {
-    const r = buildReport({
-      version: '2.1.0', userAgent: 'TestPhone', lang: 'ro', screen: 'photo-review',
-      timings: [{ phase: 'ocr', ms: 4200, ok: true, detail: 'crop', at: '2026-11-15T10:00:00.000Z' }],
-      ocr: { confidence: 61, text: 'Ingrediente: zahar, apa' }, product: { name: 'Biscuiți', code: '5940000000007' },
-    });
-    for (const s of ['2.1.0', 'TestPhone', 'photo-review', 'ocr 4200 ms ok', 'Ingrediente: zahar', '5940000000007', 'Ce s-a întâmplat']) {
-      assert.ok(r.includes(s), s);
-    }
-    assert.ok(!/data:image|base64/.test(r));
   });
 });
 

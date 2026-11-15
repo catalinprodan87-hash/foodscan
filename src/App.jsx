@@ -2,17 +2,15 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import Header from './components/Header.jsx';
 import Home from './components/Home.jsx';
 import Result from './components/Result.jsx';
-import Disclaimer from './components/Disclaimer.jsx';
 import { LookupLoading, NotFound, NoIngredients, LookupFailed, InStore } from './components/LookupViews.jsx';
 import { analyze, detectProductType } from './lib/analyze.js';
 import { lookupProduct, analyzeInput, isInStoreCode, createNotFoundCache } from './lib/lookup.js';
-import { recordTiming } from './lib/diagnostics.js';
 import { createRepeatFilter, addScan, updateScan } from './lib/shopping.js';
 import { vibrate } from './lib/camera.js';
 import { summaryParts } from './components/Result.jsx';
 import { buildBackup, backupFileName, historyToRestore, mergeSaved, clearLocalData, requestPersistence } from './lib/backup.js';
 import { buildRequest } from './lib/request.js';
-import { detectLang, t } from './lib/i18n.js';
+import { detectLang, t, pick } from './lib/i18n.js';
 import { getLang, setLang as saveLang, getProfiles, setProfiles as saveProfiles, getFlag, setFlag } from './lib/storage.js';
 import { activeAvoid, updateActive, addProfile, setActive } from './lib/profiles.js';
 import { decodeList } from './lib/shareList.js';
@@ -20,7 +18,15 @@ import { isShareLaunch, takeShared } from './lib/shareTarget.js';
 import { createHistoryStore, makeEntry, entryRequest, entryTitle } from './lib/history.js';
 import { createSavedStore, savedFromRequest, requestFromSaved } from './lib/savedIngredients.js';
 import TabBar from './components/TabBar.jsx';
-import { UpdateBanner, OfflineBanner, InstallCard, Toast } from './components/Banners.jsx';
+import { UpdateBanner, OfflineBanner, InstallCard, Toast, WhatsNew } from './components/Banners.jsx';
+import { checkAfterStart } from './lib/updateStatus.js';
+import { onUpdateFailed } from './lib/pwa.js';
+import { WHATS_NEW, shortVersion } from './data/whatsNew.js';
+
+/* global __APP_VERSION__ */
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
+/* global __BUILD_ID__ */
+const BUILD_ID = typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : 'dev';
 
 // The scanner (and the zxing decoder) is only downloaded when it is opened.
 const ScannerOverlay = lazy(() => import('./components/ScannerOverlay.jsx'));
@@ -71,6 +77,7 @@ export default function App() {
   const [onboarded, setOnboarded] = useState(() => getFlag('onboarded'));
   const [toast, setToast] = useState(null);
   const [glossary, setGlossary] = useState(null); // term id while the glossary is open
+  const [news, setNews] = useState(null); // version whose "what's new" is shown
   const [incoming, setIncoming] = useState(null); // { name, avoid } from an #import= link, or { error }
   const [scanFirst, setScanFirstState] = useState(() => getFlag('scanFirst'));
   const abortRef = useRef(null);
@@ -88,6 +95,16 @@ export default function App() {
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
+
+  // After "Reîncarcă": did the update work? And "what's new" once per version.
+  useEffect(() => {
+    const { outcome, news: v } = checkAfterStart({ build: BUILD_ID, version: APP_VERSION }, getFlag('onboarded'));
+    const l = getLang() || detectLang();
+    if (outcome === 'success') notify(t(l, 'updateOk', { version: APP_VERSION }));
+    if (outcome === 'failed') notify(t(l, 'updateFailed'));
+    if (v && WHATS_NEW[v]) setNews(v);
+    return onUpdateFailed(() => notify(t(getLang() || detectLang(), 'updateFailed')));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // "?" buttons anywhere open the glossary.
   useEffect(() => {
@@ -121,10 +138,10 @@ export default function App() {
     if (isShareLaunch()) {
       try { window.history.replaceState(null, '', window.location.pathname + window.location.hash); } catch { /* ignore */ }
       takeShared().then((shared) => {
-        if (shared?.file) {
+        if (shared?.files?.length) {
           setFlag('onboarded');
           setOnboarded(true);
-          setPhoto({ file: shared.file, product: null, barcode: null });
+          setPhoto({ file: shared.files[0], queued: shared.files.slice(1), product: null, barcode: null });
         } else if (shared?.text) {
           setText(shared.text);
           notify(t(getLang() || detectLang(), 'shareTextReady'));
@@ -298,14 +315,12 @@ export default function App() {
 
     setLookup({ status: 'loading', code });
     let res;
-    const t0 = performance.now();
     try {
       res = await lookupProduct(code, { productType: chosenType, signal: ctrl.signal });
     } catch {
       return; // aborted by the user
     }
     if (ctrl.signal.aborted) return;
-    recordTiming('lookup', performance.now() - t0, res.status !== 'error', `${res.status} ${res.tried?.join('>') || ''}`);
     if (res.status === 'not_found') notFoundRef.current.add(code);
     if (res.status === 'found' && res.product.hasIngredients) {
       setLookup(null);
@@ -331,9 +346,7 @@ export default function App() {
     if (saved) return { state: 'saved', request: requestFromSaved(saved) };
     if (isInStoreCode(code)) return { state: 'in_store' };
     if (notFoundRef.current.has(code)) return { state: 'not_found' };
-    const t0 = performance.now();
     const res = await lookupProduct(code, { productType: chosenType });
-    recordTiming('lookup', performance.now() - t0, res.status !== 'error', `shop ${res.status}`);
     if (res.status === 'found' && res.product.hasIngredients) {
       return { state: 'found', request: { text: '', type: res.product.productType, auto: false, product: res.product, barcode: code } };
     }
@@ -420,7 +433,7 @@ export default function App() {
 
   // Photo of the ingredients: keeps the barcode context of the current screen.
   const startPhoto = (file) => {
-    setPhoto((prev) => (prev ? { ...prev, file } : { file, ...lookupContext() }));
+    setPhoto((prev) => (prev ? { ...prev, file, queued: [] } : { file, ...lookupContext() }));
     setLookup(null);
     setSubmitted(null);
     scrollTop();
@@ -505,7 +518,7 @@ export default function App() {
     screen = (
       <Suspense fallback={<section className="card ocr-progress" aria-busy="true"><div className="spinner" aria-hidden="true" /></section>}>
         <PhotoFlow
-          lang={lang} file={photo.file} product={photo.product} barcode={photo.barcode}
+          lang={lang} file={photo.file} queued={photo.queued} product={photo.product} barcode={photo.barcode}
           onAnalyze={analyzePhotoText} onRetake={startPhoto} onCancel={goHome}
         />
       </Suspense>
@@ -568,8 +581,6 @@ export default function App() {
     }
   }, [screenKey]);
 
-  const footerType = (tab === 'history' && historyResult?.productType)
-    || result?.productType || lookup?.product?.productType || photo?.product?.productType || type;
 
   return (
     <div className="app">
@@ -579,10 +590,10 @@ export default function App() {
       <Header lang={lang} onLang={changeLang} />
       {tab === 'scan' && !photo && !lookup && !result && <InstallCard lang={lang} />}
       <main id="main" ref={mainRef} tabIndex={-1}>
+        {news && <WhatsNew lang={lang} version={shortVersion(news)} items={pick(WHATS_NEW[news], lang)} onClose={() => setNews(null)} />}
         {incoming && <ImportCard lang={lang} incoming={incoming} full={profiles.profiles.length >= 8} onAdd={addIncoming} onClose={closeIncoming} />}
         {screen}
       </main>
-      {tab !== 'about' && <Disclaimer lang={lang} type={footerType} />}
       <TabBar lang={lang} tab={tab} onTab={changeTab} badge={0} />
       <Toast toast={toast} onClose={() => setToast(null)} />
       {!onboarded && (

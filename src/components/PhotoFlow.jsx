@@ -7,8 +7,6 @@ import { readIngredients, wordsToCheck } from '../lib/readPhoto.js';
 import CropBox from './CropBox.jsx';
 import PhotoButton from './PhotoButton.jsx';
 import ProductHeader from './ProductHeader.jsx';
-import ReportProblem from './ReportProblem.jsx';
-import { recordTiming } from '../lib/diagnostics.js';
 
 const DEFAULT_RECT = { x: 0.04, y: 0.15, w: 0.92, h: 0.55 };
 const ORIENT_LIMIT_MS = 3000; // after the engine is ready; then the photo stays as it is
@@ -20,7 +18,10 @@ const mb = (n) => (n / 1048576).toFixed(1);
  * Photo → (optional crop) → on-device OCR → editable review → analyse.
  * Steps: loading | crop | reading | review | error
  */
-export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onRetake, onCancel }) {
+export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onRetake, onCancel, queued = [] }) {
+  // More photos shared together with `file` (Share → IngrediScan): read and merged after the first one.
+  const queueRef = useRef(queued.slice(0, MAX_PHOTOS - 1));
+  const skipped = Math.max(0, queued.length - (MAX_PHOTOS - 1));
   const [step, setStep] = useState('loading');
   const [preview, setPreview] = useState(null); // data URL of the oriented photo
   const [rect, setRect] = useState(DEFAULT_RECT);
@@ -109,10 +110,8 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
       ]);
       if (!current()) return;
       if (!o) {
-        recordTiming('orient', ORIENT_LIMIT_MS, false, 'time limit');
         setAuto({ state: 'off' });
       } else {
-        recordTiming('orient', o.ms, true, `${o.method} turns ${o.turns}`);
         orientChecked.current = o.method !== 'none';
         if (o.turns && imgRef.current === img) {
           turnPhoto(o.turns);
@@ -133,11 +132,9 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
       if (!current() || userCropped.current) { setSuggest({ state: 'off' }); return; }
       orientToken.current = null;
       if (s && s !== 'late') {
-        recordTiming('crop', s.ms, true, `${s.kind} ${s.marker}`);
         setRect(s.rect);
         setSuggest({ state: 'done' });
       } else {
-        recordTiming('crop', SUGGEST_LIMIT_MS, s === null, s === 'late' ? 'time limit' : 'no heading found');
         setSuggest({ state: 'off' });
       }
     } catch {
@@ -154,7 +151,6 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
     setSuggest((x) => (x.state === 'done' ? x : { state: 'off' }));
     setStep('reading');
     setProgress({ phase: 'init', progress: 0 });
-    const t0 = performance.now();
     try {
       const canvas = prepareColour(imgRef.current, cropRect);
       const thumb = previewCanvas(canvas, 600).toDataURL('image/jpeg', 0.8);
@@ -170,14 +166,12 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
         orientationChecked: orientChecked.current || manualTurns.current > 0,
       });
       if (!alive.current) return;
-      recordTiming('ocr', performance.now() - t0, true, `${cropRect ? 'crop' : 'whole'} ${canvas.width}×${canvas.height} conf ${best.confidence} lines ${best.lines} tries ${best.tries}`);
       setReview({
         text: best.text, rawText: best.rawText, confidence: best.confidence, thumb, foundStart: best.foundStart, retried: best.retried, uncertain: best.uncertain,
         parts: [{ raw: best.rawText, thumb, confidence: best.confidence, uncertain: best.uncertain }],
       });
       setStep('review');
     } catch (err) {
-      recordTiming('ocr', performance.now() - t0, false, String(err?.message || err).slice(0, 60));
       setError(navigator.onLine === false ? 'ocrErrorOffline' : 'ocrError');
       setStep('error');
     }
@@ -208,7 +202,6 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
   // cropped to the ingredients when a heading is found, read, and merged with the others.
   const addPhoto = async (file) => {
     setReview((r) => ({ ...r, adding: true, addError: null }));
-    const t0 = performance.now();
     try {
       let image = await loadImage(file);
       const { detectOrientation, suggestCrop, recognize } = await import('../lib/ocr.js');
@@ -222,12 +215,17 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
       const thumb = previewCanvas(canvas, 600).toDataURL('image/jpeg', 0.8);
       const r = await readIngredients(canvas, { recognize, rotate: rotateImage, orientationChecked: true, shouldStop: () => !alive.current });
       if (!alive.current) return;
-      recordTiming('ocr', performance.now() - t0, true, `extra photo conf ${r.confidence}`);
       setReview((prev) => ({ ...prev, ...fromParts([...prev.parts, { raw: r.rawText, thumb, confidence: r.confidence, uncertain: r.uncertain }]), adding: false }));
     } catch {
       if (alive.current) setReview((prev) => ({ ...prev, adding: false, addError: true }));
     }
   };
+
+  // Shared photos: add the next one as soon as the previous read is done.
+  useEffect(() => {
+    if (step !== 'review' || !review || review.adding || !queueRef.current.length) return;
+    addPhoto(queueRef.current.shift());
+  }, [step, review]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const removePhoto = (index) => setReview((prev) => ({ ...prev, ...fromParts(prev.parts.filter((_, i) => i !== index)) }));
 
@@ -393,8 +391,8 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
             </div>
           )}
           {review.addError && <p className="small form-error" role="alert">{t(lang, 'addPhotoError')}</p>}
+          {skipped > 0 && <p className="muted small">{t(lang, 'sharedSkipped', { max: MAX_PHOTOS, n: skipped })}</p>}
         </form>
-        <ReportProblem lang={lang} screen="photo-review" ocr={{ confidence: review.confidence, text: review.rawText || review.text }} product={product} />
         <button type="button" className="btn ghost block" onClick={onCancel}>{t(lang, 'cancel')}</button>
       </div>
     );

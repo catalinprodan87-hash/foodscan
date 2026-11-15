@@ -234,19 +234,29 @@ The plan was split into smaller releases so each fits one session. The prompts a
 
 A11 (multithreading) remains an optional time-boxed spike (at most 2 evenings). It is adopted only if it gives at least 1.5× faster OCR with nothing broken.
 
-### v3: "connected"
+### v3: "your data, read better, scored" (agreed 2026-11-15)
 
-1. P5 custom domain, then P1 Play Store (TWA).
-2. C1 contributions to Open Facts, with login and consent.
-3. D4 automated freshness issues, then D2 cosmetics legal backbone (CosIng).
-4. F4 alternatives (Open Food Facts search) and F6 Green-Score.
-5. F8 recalls, reshaped: a list plus cautious brand matching. A small scheduled GitHub Action writes a static `recalls.json` to Pages, so there's still no server.
-6. T4 opt-in AI-vision fallback; T5 opt-in stats.
-7. C2 cloud sync and family list, **only if** sharing by link (F10) proves insufficient.
-8. O2 donations and grants.
+One release per session; each is tested, deployed on main and comes with a phone checklist.
+
+| Release | Content | Items |
+|---|---|---|
+| **v3.0 Clean-up, update feedback, share fix** ✅ | Remove "Raportează o problemă" and posting to Open Facts (keep "Vezi pe Open … Facts"); disclaimer out of the footer (first run, About, one line on results, in full when something high-risk is flagged); "Actualizare reușită / nu a reușit" after "Reîncarcă" plus "Ce e nou" once; share target audit, several photos at once, reinstall hint (Android), not-supported note (iPhone) | 7, 10, 1, 2 |
+| **v3.1 Measure text reading** | Corpus of real clear photos (RO, HU, BG, DE, IT, FR, PL): your photos in `tests/corpus/own/` plus Open Food Facts photos with CC BY-SA attribution; character and word error rate per language; time per photo (desktop and CPU-throttled as a mid-range proxy). No app change. Corpus never deployed. | 8 (part 1) |
+| **v3.2 Better reading models** | Newer PaddleOCR Latin recogniser (diacritics ș ț ă î â), Cyrillic recogniser loaded only for Bulgarian, higher detection resolution on clear photos. Keep only what measurably helps; report before/after, download size, time. | 8 (part 2) |
+| **v3.3 Your own ingredients text** | Per-barcode product record (text, source, original); automatic backup before migrating remembered ingredients and history; "Editează ingredientele" → "Re-analizează", "editat de tine", "Revino la textul original"; replace or complete database ingredients by photo or typing. An explicit edit wins; otherwise: Romanian from the database → your text → other languages. | 4, 6 (part 1) |
+| **v3.4 Photo sets per product** | Front / ingredients / nutrition / origin / other, classified from the text, one-tap type change; ingredients photo read first; cancel; text merged per type; "Adaugă poze" on the result; thumbnails (~160 px) in IndexedDB with a cap, not in backups. | 3, 5 |
+| **v3.5 Nutrition values** | Open Facts values and the nutrition-table photo; editable table with sanity checks; local Nutri-Score 2023 (general, drinks, fats/oils/nuts, cheese) marked "calculat de aplicație"; drinks inferred from ml + categories with a one-tap correction. | 12 |
+| **v3.6 Language and translation** | Language detection; term-by-term on-device translation from the Open Food Facts ingredient and additive taxonomies (ODbL credit in NOTICE and About); E-numbers and INCI kept; unknown words highlighted; "tradus automat din {limba}" with the original a tap away; the browser translator only to display unknown words, never for analysis; dictionary-based word correction for OCR. | 6 (part 2), 8 (part 3) |
+| **v3.7 Country of origin** | Origin data from Open Food Facts and photo text; supply chain ending in "Vândut în: {your country setting}" (default România); "De ce e bine / De ce nu e bine" from documented factors only; rules with sources in `src/data/origin.js`. No RASFF statistics, no ratings of countries. | 9 |
+| **v3.8 Overall score 1–100** | `docs/SCORING.md` first; weights as agreed; caps 49 (high concern) and 25 (banned in the EU); calibrated on ~30 real products and locked in a golden test; "date insuficiente" without an ingredients list; "scor ingrediente" for cosmetics and household; personal score as the big number, the general score for sharing, compare and other profiles; versioned formula. | 11 |
+
+Decisions (2026-11-15): measurement early; real photos from you and from Open Food Facts; thumbnails on the phone only; an explicit edit beats the Romanian database text; no RASFF statistics; personal score shown big; drinks inferred with a one-tap correction; the browser translator only for displaying unknown words.
+
+Earlier v3 ideas ("connected": custom domain and Play Store, contributions to Open Facts, recalls, alternatives, cloud sync, donations) moved to "Later / maybe".
 
 ### Later / maybe
 
+- Earlier v3 ideas: P5 custom domain and P1 Play Store; C1 contributions to Open Facts; D4/D2 data freshness and CosIng; F4 alternatives and F6 Green-Score; F8 recalls; T4 AI-vision fallback; C2 cloud sync; O2 donations.
 - A12 WebGPU: wait until the benchmark harness can run on a real phone.
 - C4 push notifications: needs F8 to be useful, plus a server.
 - P2 App Store wrapper: cost and review risk.

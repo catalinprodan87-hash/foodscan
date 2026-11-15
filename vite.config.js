@@ -26,6 +26,8 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
     __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
+    // Identifies one build (version + build time): tells whether an update really switched builds.
+    __BUILD_ID__: JSON.stringify(`${pkg.version}+${Date.now().toString(36)}`),
   },
   plugins: [
     react(),

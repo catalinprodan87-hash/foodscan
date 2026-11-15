@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { t } from '../lib/i18n.js';
-import { collectSpans, highlightSegments, shareSummary, addProductLinks, editProductUrl } from '../lib/share.js';
+import { collectSpans, highlightSegments, shareSummary } from '../lib/share.js';
 
 /** Ingredients text with flagged words highlighted; tap jumps to the explanation. */
 export function IngredientsText({ lang, text, result }) {
@@ -65,51 +65,5 @@ export function ShareButton({ lang, result, product, barcode, text, notify }) {
     <button type="button" className="btn ghost" onClick={share} disabled={busy}>
       <span aria-hidden="true">↗</span> {t(lang, 'share')}
     </button>
-  );
-}
-
-/**
- * The database knows the product but not its ingredients: the user has just
- * read or pasted them, so make it easy to add them for everyone.
- */
-export function CompleteProductCard({ lang, product, text, notify }) {
-  if (!product || product.hasIngredients || !product.code || !text?.trim()) return null;
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text.trim());
-      notify?.(t(lang, 'ingredientsCopied'));
-    } catch { /* clipboard not available */ }
-  };
-  return (
-    <section className="card add-product" aria-labelledby="complete-title">
-      <h3 id="complete-title" className="card-title">🤝 {t(lang, 'addProductTitle')}</h3>
-      <p className="small">{t(lang, 'completeText', { source: product.source })}</p>
-      <div className="actions">
-        <button type="button" className="btn ghost" onClick={copy}>📋 {t(lang, 'copyIngredients')}</button>
-        <a className="btn ghost" href={editProductUrl(product.productType, product.code)} target="_blank" rel="noopener noreferrer">
-          {t(lang, 'completeOn', { source: product.source })} ↗
-        </a>
-      </div>
-    </section>
-  );
-}
-
-/** "Adaugă produsul în Open … Facts" for barcodes the databases don't know. */
-export function AddProductLinks({ lang, code, type = 'food' }) {
-  if (!code) return null;
-  const [main, ...others] = addProductLinks(code, type);
-  return (
-    <section className="card add-product" aria-labelledby="add-product-title">
-      <h3 id="add-product-title" className="card-title">🤝 {t(lang, 'addProductTitle')}</h3>
-      <p className="small">{t(lang, 'addProductText')}</p>
-      <a className="btn ghost block" href={main.url} target="_blank" rel="noopener noreferrer">
-        {t(lang, 'addProductTo', { source: main.name })} ↗
-      </a>
-      <p className="small muted other-sources">
-        {others.map((o, i) => (
-          <span key={o.type}>{i > 0 && ' · '}<a href={o.url} target="_blank" rel="noopener noreferrer">{o.name}</a></span>
-        ))}
-      </p>
-    </section>
   );
 }

@@ -6,6 +6,8 @@ import { RESTRICTIONS } from '../data/restrictions.js';
 import { ALLERGENS } from '../data/allergens.js';
 import SettingsCard from './SettingsCard.jsx';
 import { openGlossary } from '../data/glossary.js';
+import { shareHintKind } from '../lib/shareTarget.js';
+import { isStandalone } from '../lib/install.js';
 
 const fmt = (iso, lang) => new Date(iso + 'T12:00:00Z').toLocaleDateString(lang === 'ro' ? 'ro-RO' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -40,6 +42,8 @@ export default function AboutView({ lang, onExport, onImport, onDeleteAll, scanF
           <li>{t(lang, 'privacyStays3')}</li>
         </ul>
       </section>
+
+      <ShareHint lang={lang} />
 
       <SettingsCard lang={lang} onExport={onExport} onImport={onImport} onDeleteAll={onDeleteAll} scanFirst={scanFirst} onScanFirst={onScanFirst} />
 
@@ -85,5 +89,18 @@ export default function AboutView({ lang, onExport, onImport, onDeleteAll, scanF
         <p className="small">{t(lang, 'disclaimer_nonfood')}</p>
       </section>
     </div>
+  );
+}
+
+/** How to share photos into the app – or why it is not possible on this phone. */
+function ShareHint({ lang }) {
+  const kind = shareHintKind({ standalone: isStandalone() });
+  if (!kind) return null;
+  return (
+    <section className="card share-hint" aria-labelledby="about-share">
+      <h2 id="about-share" className="card-title">📤 {t(lang, 'shareHintTitle')}</h2>
+      <p className="small">{t(lang, 'shareHint_' + kind)}</p>
+      {kind === 'android' && <p className="small">{t(lang, 'shareHintReinstall')}</p>}
+    </section>
   );
 }

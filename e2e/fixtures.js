@@ -2,7 +2,10 @@
  * Shared setup: onboarding skipped, Open *Facts API mocked per test, page
  * errors collected (a test fails if the page throws).
  */
+import { readFileSync } from 'node:fs';
 import { test as base, expect } from '@playwright/test';
+
+export const APP_VERSION = JSON.parse(readFileSync('package.json', 'utf8')).version;
 
 export const NUTELLA = {
   code: '3017620422003', product_name: 'Cremă de alune cu cacao', brands: 'Ferrero', quantity: '400 g',
@@ -39,7 +42,11 @@ export const test = base.extend({
     });
   }, { auto: true }],
   page: async ({ page, context }, use) => {
-    await context.addInitScript(() => localStorage.setItem('ingrediscan:flag:onboarded', 'true'));
+    await context.addInitScript((v) => {
+      localStorage.setItem('ingrediscan:flag:onboarded', 'true');
+      // "What's new" already seen for this version (its own test removes this).
+      if (!sessionStorage.getItem('e2e:keepNews')) localStorage.setItem('ingrediscan:lastVersion', JSON.stringify(v));
+    }, APP_VERSION);
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
     await use(page);
