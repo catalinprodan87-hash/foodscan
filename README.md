@@ -58,6 +58,13 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
+### Your own ingredients text (v3.3)
+
+- **Editează ingredientele** under any result opens the text; **Re-analizează** updates the result in place. For a barcode, your version is remembered: the next scan uses it, marked "Ingrediente editate de tine", with **Revino la textul original**.
+- **Products whose database ingredients are wrong, incomplete or in another language:** **Înlocuiește din poză** or **Completează din poză** (the photo's text is added after the database's).
+- **Which text is used:** your explicit edit or replacement always wins. Otherwise the database's Romanian list comes first, then the text you photographed or pasted earlier, then the database's other languages (`src/lib/ingredientText.js`).
+- **Data update:** remembered ingredients moved to a new format. Before that, the app keeps an automatic copy of all your data on the phone; download or delete it in About → Datele tale.
+
 ### Better text reading (v3.2)
 
 - **New reader:** PP-OCRv5 Latin recogniser with Romanian diacritics (ă â î ș ț), Hungarian, Polish, Czech and other letters. Each line is drawn twice as wide before reading, so the condensed fonts of food labels keep their thin letters, commas and spaces.

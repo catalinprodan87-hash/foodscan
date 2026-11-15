@@ -48,7 +48,7 @@ describe('remembered ingredients', () => {
     const again = requestFromSaved(savedFromRequest(req, NOW));
     assert.equal(again.barcode, PRODUCT.code);
     assert.equal(again.fromPhoto, true);
-    assert.deepEqual(again.saved, { date: NOW.toISOString(), source: 'photo' });
+    assert.deepEqual(again.saved, { date: NOW.toISOString(), source: 'photo', edited: false, hasOriginal: false });
     const second = analyze(analyzeInput(again.product, again.text));
     assert.equal(second.verdict, first.verdict);
     assert.equal(second.nutriscore, 'c');

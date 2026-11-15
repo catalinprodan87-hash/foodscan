@@ -977,3 +977,6 @@ main:focus { outline: none; }
 .disclaimer-note { margin: 16px 0; }
 .whats-new { border: 2px solid var(--teal); }
 .whats-new ul { padding-left: 20px; margin: 4px 0 10px; }
+.edited-note { border-color: var(--teal); }
+.edit-ingredients textarea { width: 100%; font: inherit; font-size: 0.95rem; line-height: 1.45; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); margin-bottom: 8px; }
+.edit-ingredients .actions { flex-wrap: wrap; }

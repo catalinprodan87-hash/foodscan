@@ -1,5 +1,17 @@
 /** "Ce e nou" shown once after updating to a version (RO + EN). Keep each list short. */
 export const WHATS_NEW = {
+  '3.3.0': {
+    ro: [
+      'Poți edita ingredientele sub orice rezultat și re-analiza pe loc; varianta ta se păstrează pentru acel cod de bare.',
+      'Dacă ingredientele din bază sunt greșite sau incomplete, le poți înlocui sau completa dintr-o poză.',
+      'Înainte de actualizarea datelor, aplicația a păstrat o copie automată (Despre → Datele tale).',
+    ],
+    en: [
+      'You can edit the ingredients under any result and analyse again in place; your version is kept for that barcode.',
+      'If the database\u2019s ingredients are wrong or incomplete, you can replace or complete them from a photo.',
+      'Before updating your data, the app kept an automatic copy (About → Your data).',
+    ],
+  },
   '3.2.0': {
     ro: [
       'Citirea textului din poze e mult mai bună: diacritice (ă â î ș ț) și fonturile înguste de pe etichete.',

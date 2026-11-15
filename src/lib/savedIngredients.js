@@ -13,10 +13,10 @@ export const SAVED_MAX = 1000;
 const LS_KEY = 'ingrediscan:savedIngredients';
 
 // Product fields worth keeping (the database's own ingredients are not needed).
-const PRODUCT_FIELDS = ['code', 'productType', 'name', 'brands', 'quantity', 'image', 'source', 'url',
+const PRODUCT_FIELDS = ['code', 'productType', 'name', 'brands', 'quantity', 'image', 'source', 'url', 'ingredientsLang',
   'additiveTags', 'nova', 'nutriscore', 'nutrition', 'allergenTags', 'traceTags', 'analysisTags', 'updated'];
 
-function productSnapshot(p) {
+export function productSnapshot(p) {
   if (!p) return null;
   const out = {};
   for (const k of PRODUCT_FIELDS) if (p[k] !== undefined) out[k] = p[k];
@@ -39,6 +39,9 @@ export function savedFromRequest(request, now = new Date()) {
     confidence: request.fromPhoto ? request.confidence ?? null : null,
     product: productSnapshot(request.product),
     date: now.toISOString(),
+    v: 2,
+    explicit: false, // remembered because the database had no ingredients (see ingredientText.js)
+    original: null,
   };
 }
 
@@ -56,7 +59,7 @@ export function requestFromSaved(saved, product = null) {
     barcode: saved.barcode,
     fromPhoto: saved.source === 'photo',
     confidence: saved.confidence ?? null,
-    saved: { date: saved.date, source: saved.source },
+    saved: { date: saved.date, source: saved.source, edited: !!saved.explicit, hasOriginal: !!saved.original },
   };
 }
 

@@ -221,6 +221,51 @@ export function AvoidHits({ lang, hits }) {
 }
 
 /** Ingredients remembered for this barcode (from the user's photo or text). */
+/** The ingredients are the user's own version: say so, with the way back. */
+function EditedNote({ lang, saved, onRevert }) {
+  return (
+    <section className="saved-note edited-note" aria-label={t(lang, 'editedTitle')}>
+      <p><span aria-hidden="true">✏️ </span>{t(lang, saved.source === 'photo' ? 'editedPhoto' : 'editedText')}</p>
+      {onRevert && saved.hasOriginal && (
+        <div className="saved-actions">
+          <button type="button" className="link-btn" onClick={onRevert}>↩ {t(lang, 'editRevert')}</button>
+        </div>
+      )}
+    </section>
+  );
+}
+
+/** "Editează ingredientele" → text box → "Re-analizează" (the result updates in place). */
+function EditIngredients({ lang, text, onEdit, onReplacePhoto, onCompletePhoto }) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(text);
+  if (!onEdit) return null;
+  if (!open) {
+    return (
+      <section className="card edit-ingredients" aria-labelledby="edit-ingr-h">
+        <h3 id="edit-ingr-h" className="card-title">{t(lang, onReplacePhoto ? 'editWrongDb' : 'editTitle')}</h3>
+        <div className="actions">
+          <button type="button" className="btn ghost small-btn" onClick={() => { setValue(text); setOpen(true); }}>✏️ {t(lang, 'editIngredients')}</button>
+          {onReplacePhoto && <PhotoButton lang={lang} onPhoto={onReplacePhoto} className="btn ghost small-btn" labelKey="editReplacePhoto" />}
+          {onCompletePhoto && <PhotoButton lang={lang} onPhoto={onCompletePhoto} className="btn ghost small-btn" labelKey="editCompletePhoto" />}
+        </div>
+        {onReplacePhoto && <p className="muted small">{t(lang, 'editDbHint')}</p>}
+      </section>
+    );
+  }
+  return (
+    <section className="card edit-ingredients" aria-labelledby="edit-ingr-h">
+      <h3 id="edit-ingr-h" className="card-title">✏️ {t(lang, 'editIngredients')}</h3>
+      <label htmlFor="edit-ingr-text" className="sr-only">{t(lang, 'editIngredients')}</label>
+      <textarea id="edit-ingr-text" rows={8} value={value} onChange={(e) => setValue(e.target.value)} spellCheck={false} />
+      <div className="actions">
+        <button type="button" className="btn primary" disabled={!value.trim() || value === text} onClick={() => { onEdit(value); setOpen(false); }}>{t(lang, 'reanalyze')}</button>
+        <button type="button" className="btn ghost" onClick={() => setOpen(false)}>{t(lang, 'cancel')}</button>
+      </div>
+    </section>
+  );
+}
+
 function SavedNote({ lang, saved, onRetake, onForget }) {
   const date = new Date(saved.date).toLocaleDateString(lang === 'ro' ? 'ro-RO' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   return (
@@ -325,6 +370,7 @@ export function DisclaimerNote({ lang, type = 'food', high = false }) {
 export default function Result({
   lang, result, text, typeAuto, product, barcode, fromPhoto, onBack, backLabel: backLabelProp, notify,
   saved, onRetake, onForget, watchedAllergens = [], profiles, onProfile,
+  onEdit, onRevert, onReplacePhoto, onCompletePhoto,
 }) {
   const food = isFood(result);
   const backLabel = backLabelProp || 'back';
@@ -340,7 +386,8 @@ export default function Result({
           <span className="muted small">{t(lang, 'readFromPhotoHint')}</span>
         </p>
       )}
-      {saved && <SavedNote lang={lang} saved={saved} onRetake={onRetake} onForget={onForget} />}
+      {saved?.edited && <EditedNote lang={lang} saved={saved} onRevert={onRevert} />}
+      {saved && !saved.edited && <SavedNote lang={lang} saved={saved} onRetake={onRetake} onForget={onForget} />}
       {profiles?.profiles.length > 1 && onProfile && (
         <p className="profile-switch">
           <label htmlFor="result-profile">{t(lang, 'resultFor')}</label>{' '}
@@ -356,6 +403,7 @@ export default function Result({
       <AvoidHits lang={lang} hits={result.avoidHits} />
       <AdditiveList lang={lang} additives={result.items} grouped={!food} />
       <IngredientsText lang={lang} text={text} result={result} />
+      <EditIngredients key={text} lang={lang} text={text} onEdit={onEdit} onReplacePhoto={onReplacePhoto} onCompletePhoto={onCompletePhoto} />
       <div className="actions result-actions">
         <ShareButton lang={lang} result={result} product={product} barcode={barcode} text={text} notify={notify} />
       </div>

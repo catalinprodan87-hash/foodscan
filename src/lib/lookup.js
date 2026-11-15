@@ -25,7 +25,7 @@ const COMMON_FIELDS = [
   'code', 'product_type', 'last_modified_t',
   'product_name_ro', 'product_name', 'product_name_en',
   'brands', 'quantity', 'image_front_small_url',
-  'ingredients_text_ro', 'ingredients_text', 'ingredients_text_en',
+  'ingredients_text_ro', 'ingredients_text', 'ingredients_text_en', 'lang',
 ];
 const FOOD_FIELDS = ['additives_tags', 'nova_group', 'nutriscore_grade', 'nutrient_levels', 'nutriments', 'allergens_tags', 'traces_tags', 'ingredients_analysis_tags'];
 
@@ -140,6 +140,9 @@ export function mapProduct(raw, type, code) {
     image: first(p.image_front_small_url) || null,
     ingredientsText,
     hasIngredients: ingredientsText.length > 0,
+    // 'ro' when the database has the Romanian list; otherwise the product's main language (or 'en')
+    ingredientsLang: !ingredientsText ? null : first(p.ingredients_text_ro) ? 'ro'
+      : first(p.ingredients_text) ? (first(p.lang) || 'xx') : 'en',
     source: SOURCE_NAMES[type],
     url: productPageUrl(type, first(p.code, code)),
     // when the product page was last edited (Unix seconds → ISO date)

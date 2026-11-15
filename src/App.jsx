@@ -16,7 +16,9 @@ import { activeAvoid, updateActive, addProfile, setActive } from './lib/profiles
 import { decodeList } from './lib/shareList.js';
 import { isShareLaunch, takeShared } from './lib/shareTarget.js';
 import { createHistoryStore, makeEntry, entryRequest, entryTitle } from './lib/history.js';
-import { createSavedStore, savedFromRequest, requestFromSaved } from './lib/savedIngredients.js';
+import { createSavedStore, savedFromRequest, requestFromSaved, productSnapshot } from './lib/savedIngredients.js';
+import { chooseIngredients, editedRecord, revertRecord, completeText, migrateSaved } from './lib/ingredientText.js';
+import { saveAutoBackup } from './lib/autoBackup.js';
 import TabBar from './components/TabBar.jsx';
 import { UpdateBanner, OfflineBanner, InstallCard, Toast, WhatsNew } from './components/Banners.jsx';
 import { checkAfterStart } from './lib/updateStatus.js';
@@ -165,6 +167,16 @@ export default function App() {
         savedStoreRef.current.seed(list);
         setFlag('savedSeeded');
       }
+      // v3.3: remembered ingredients get a new schema; keep a copy of everything first.
+      if (!getFlag('migrated33')) {
+        const before = savedStoreRef.current.all();
+        if (Object.keys(before).length || list.length) {
+          saveAutoBackup(buildBackup({ history: list, saved: before, profiles: getProfiles(getLang() || detectLang()) }), 'v3.3');
+        }
+        const { map, changed } = migrateSaved(before);
+        if (changed) savedStoreRef.current.replaceAll(map);
+        setFlag('migrated33');
+      }
       if (alive) setHistory(list);
     }).catch(() => {});
     return () => { alive = false; };
@@ -295,6 +307,12 @@ export default function App() {
       try {
         const res = await lookupProduct(code, { productType: saved.productType, signal: ctrl.signal });
         if (ctrl.signal.aborted || res.status !== 'found') return;
+        // The database now has the Romanian list and the user did not choose their own text: use it.
+        if (chooseIngredients({ product: res.product, saved }).origin === 'database') {
+          setSubmitted((prev) => (prev?.saved && prev.barcode === code
+            ? { text: '', type: res.product.productType, auto: false, product: res.product, barcode: code } : prev));
+          return;
+        }
         const fresh = requestFromSaved(saved, res.product);
         savedStoreRef.current.save({ ...saved, product: fresh.product });
         setSubmitted((prev) => (prev?.saved && prev.barcode === code ? fresh : prev));
@@ -439,9 +457,57 @@ export default function App() {
     scrollTop();
   };
   const analyzePhotoText = (value, confidence) => {
-    const { product, barcode } = photo;
+    const { product, barcode, mode, baseText } = photo;
     setPhoto(null);
+    if (mode && barcode) {
+      // "Înlocuiește" / "Completează" the database's ingredients with the photo.
+      const text = mode === 'complete' ? completeText(baseText, value) : value;
+      const rec = { ...editedRecord(savedStoreRef.current.get(barcode), {
+        barcode, text, currentText: baseText, currentOrigin: 'database', productType: product?.productType, product: productSnapshot(product), source: 'photo',
+      }), confidence };
+      savedStoreRef.current.save(rec);
+      setSubmitted({ text, type: product?.productType || 'food', auto: false, product, barcode, fromPhoto: true, confidence, saved: { date: rec.date, source: 'photo', edited: true, hasOriginal: !!rec.original, fresh: true } });
+      scrollTop();
+      return;
+    }
     setSubmitted(remember(buildRequest({ text: value, source: 'photo', chosenType, product, barcode, confidence })));
+    scrollTop();
+  };
+
+  // ───── v3.3: the user's own ingredients text ─────
+  const shownText = (req) => (req?.text?.trim() ? req.text : req?.product?.ingredientsText || '');
+  const originOf = (req) => (req?.saved?.edited ? 'edited' : req?.saved ? 'user' : req?.product && !req?.text?.trim() ? 'database' : 'user');
+  /** "Re-analizează": the edited text replaces the current one, remembered for the barcode. */
+  const editIngredients = (value) => {
+    const cur = submitted;
+    if (!cur || !value.trim()) return;
+    const barcode = cur.barcode || cur.product?.code || null;
+    if (!barcode) { setSubmitted({ ...cur, text: value }); return; }
+    const rec = editedRecord(savedStoreRef.current.get(barcode), {
+      barcode, text: value, currentText: shownText(cur), currentOrigin: originOf(cur), productType: cur.type, product: productSnapshot(cur.product),
+    });
+    savedStoreRef.current.save(rec);
+    setSubmitted({ ...cur, text: value, fromPhoto: false, saved: { date: rec.date, source: 'edit', edited: true, hasOriginal: !!rec.original, fresh: true } });
+  };
+  /** "Revino la textul original": the database's text (looked up again) or the earlier photo / paste. */
+  const revertIngredients = () => {
+    const barcode = submitted?.barcode;
+    if (!barcode) return;
+    const r = revertRecord(savedStoreRef.current.get(barcode));
+    if (r.remove) {
+      savedStoreRef.current.remove(barcode);
+      runLookup(barcode, { force: true });
+    } else {
+      savedStoreRef.current.save(r.record);
+      setSubmitted(requestFromSaved(r.record, submitted.product));
+    }
+    notify(t(lang, 'editReverted'));
+  };
+  /** A new photo that replaces or completes the database's ingredients. */
+  const photoForIngredients = (mode) => (file) => {
+    const cur = submitted;
+    setPhoto({ file, product: cur.product, barcode: cur.barcode || cur.product?.code || null, mode, baseText: shownText(cur) });
+    setSubmitted(null);
     scrollTop();
   };
 
@@ -555,6 +621,9 @@ export default function App() {
         text={submitted.text?.trim() ? submitted.text : submitted.product?.ingredientsText || ''}
         product={submitted.product} barcode={submitted.barcode} fromPhoto={submitted.fromPhoto} onBack={leave} backLabel={leaveLabel}
         saved={submitted.saved} onRetake={retakeSaved} onForget={() => forgetSaved(submitted.barcode)}
+        onEdit={editIngredients} onRevert={revertIngredients}
+        onReplacePhoto={submitted.barcode && originOf(submitted) === 'database' ? photoForIngredients('replace') : undefined}
+        onCompletePhoto={submitted.barcode && originOf(submitted) === 'database' ? photoForIngredients('complete') : undefined}
         watchedAllergens={avoid.allergens} profiles={profiles} onProfile={(id) => changeProfiles(setActive(profiles, id))}
       />
     );

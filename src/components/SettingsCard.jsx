@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { t } from '../lib/i18n.js';
-import { parseBackup, storageStatus, requestPersistence } from '../lib/backup.js';
+import { parseBackup, storageStatus, requestPersistence, backupFileName } from '../lib/backup.js';
+import { getAutoBackup, removeAutoBackup } from '../lib/autoBackup.js';
 
 const mb = (n) => (n == null ? '–' : (n / 1048576).toFixed(1));
 
@@ -15,6 +16,17 @@ export default function SettingsCard({ lang, onExport, onImport, onDeleteAll, sc
   const [message, setMessage] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const fileRef = useRef(null);
+  const [auto, setAuto] = useState(() => getAutoBackup());
+  const downloadAuto = () => {
+    const url = URL.createObjectURL(new Blob([JSON.stringify(auto.backup, null, 1)], { type: 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = backupFileName(new Date(auto.date)).replace('backup-', 'backup-auto-');
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  };
 
   const refresh = () => storageStatus().then(setStatus);
   useEffect(() => { refresh(); }, []);
@@ -140,6 +152,16 @@ export default function SettingsCard({ lang, onExport, onImport, onDeleteAll, sc
         </div>
       )}
       {message && <p className={`small${message.error ? ' form-error' : ''}`} role="status">{message.text}</p>}
+      {auto && (
+        <div className="auto-backup">
+          <h3 className="settings-sub">{t(lang, 'autoBackupTitle')}</h3>
+          <p className="muted small">{t(lang, 'autoBackupText', { date: new Date(auto.date).toLocaleDateString(lang === 'ro' ? 'ro-RO' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) })}</p>
+          <div className="actions">
+            <button type="button" className="btn ghost small-btn" onClick={downloadAuto}>📥 {t(lang, 'autoBackupDownload')}</button>
+            <button type="button" className="btn ghost small-btn danger" onClick={() => { removeAutoBackup(); setAuto(null); }}>🗑 {t(lang, 'autoBackupDelete')}</button>
+          </div>
+        </div>
+      )}
 
       <h3 className="settings-sub">{t(lang, 'deleteAllTitle')}</h3>
       <p className="muted small">{t(lang, 'deleteAllHint')}</p>
