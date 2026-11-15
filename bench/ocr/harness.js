@@ -4,7 +4,7 @@
  * Driven by bench/ocr/run.mjs through window.readImage().
  */
 import { loadImage, prepareColour, rotateImage } from '/src/lib/imagePrep.js';
-import { recognize, detectOrientation } from '/src/lib/ocr.js';
+import { recognize, detectOrientation, suggestCrop } from '/src/lib/ocr.js';
 import { readIngredients } from '/src/lib/readPhoto.js';
 
 const baseUrl = `${location.origin}/`;
@@ -20,7 +20,7 @@ window.readImage = async (url, crop, { retry = true } = {}) => {
   const r = await readIngredients(canvas, { recognize: (im, o) => recognize(im, { ...o, baseUrl }), rotate: rotateImage, shouldStop: () => !retry, orientationChecked: true });
   const ms = Math.round(performance.now() - t0);
   img.close?.();
-  return { raw: r.rawText, text: r.text, foundStart: r.foundStart, confidence: r.confidence, lines: r.lines, tries: r.tries, retried: r.retried, ms };
+  return { raw: r.rawText, text: r.text, foundStart: r.foundStart, confidence: r.confidence, lines: r.lines, tries: r.tries, retried: r.retried, uncertain: r.uncertain, ms };
 };
 
 /**
@@ -60,6 +60,15 @@ window.readRotated = async (url, quarterTurns, crop) => {
     turns: o.turns, method: o.method, orientConfidence: Math.round(o.confidence * 100) / 100, correct, orientMs,
     text: r.text, confidence: r.confidence, ms: Math.round(performance.now() - t1),
   };
+};
+
+/** The app's crop suggestion for an (upright) image. */
+window.suggestFor = async (url) => {
+  const blob = await (await fetch(url)).blob();
+  const img = await loadImage(new File([blob], 'x', { type: blob.type }));
+  const t0 = performance.now();
+  const s = await suggestCrop(img, { baseUrl });
+  return s ? { rect: [s.rect.x, s.rect.y, s.rect.w, s.rect.h], kind: s.kind, ms: Math.round(performance.now() - t0) } : { rect: null, ms: Math.round(performance.now() - t0) };
 };
 
 window.benchReady = true;

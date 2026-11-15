@@ -42,6 +42,7 @@ test('an upright photo is left as it is', async ({ page }) => {
   await page.setInputFiles('.scan-card input[type=file][capture]', await rotatedLabel(page, 'bench/ocr/images/biscuits-flat.png', 0));
   await expect(page.locator('.auto-orient')).toHaveCount(1); // checking…
   await expect(page.locator('.auto-orient')).toHaveCount(0, { timeout: 150_000 }); // …done, nothing turned
+  await expect(page.locator('.auto-orient.turned')).toHaveCount(0);
 });
 
 test('tapping Rotește cancels the automatic check (the user decides)', async ({ page }) => {

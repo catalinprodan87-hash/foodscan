@@ -131,10 +131,11 @@ export function recWidth(box, height = REC_HEIGHT) {
 
 /**
  * Greedy CTC decoding. probs: T×C (class 0 = blank, class i = dict[i-1]).
- * @returns {{text: string, conf: number}}
+ * @returns {{text: string, conf: number, probs: number[]}} probs: one per output character
  */
 export function ctcDecode(probs, T, C, dict) {
   let text = '';
+  const charProbs = [];
   let last = 0;
   let confSum = 0;
   let confN = 0;
@@ -147,13 +148,84 @@ export function ctcDecode(probs, T, C, dict) {
       if (v > bv) { bv = v; best = c; }
     }
     if (best !== 0 && best !== last) {
-      text += dict[best - 1] ?? '';
+      const ch = dict[best - 1] ?? '';
+      text += ch;
+      for (let k = 0; k < ch.length; k++) charProbs.push(bv);
       confSum += bv;
       confN++;
     }
     last = best;
   }
-  return { text, conf: confN ? confSum / confN : 0 };
+  return { text, conf: confN ? confSum / confN : 0, probs: charProbs };
+}
+
+export const UNCERTAIN_BELOW = 0.75;
+
+/**
+ * Words the recogniser was unsure about: the lowest letter probability in the
+ * word is below `threshold`. Words of at least 3 letters/digits.
+ * @returns {{word: string, min: number}[]}
+ */
+export function uncertainWords(text, probs, threshold = UNCERTAIN_BELOW) {
+  const out = [];
+  const re = /[\p{L}\p{N}][\p{L}\p{N}'-]*/gu;
+  let m;
+  while ((m = re.exec(text))) {
+    const word = m[0];
+    if (word.replace(/[^\p{L}\p{N}]/gu, '').length < 3) continue;
+    let min = 1;
+    for (let i = m.index; i < m.index + word.length; i++) min = Math.min(min, probs?.[i] ?? 1);
+    if (min < threshold) out.push({ word, min });
+  }
+  return out;
+}
+
+// ─────────────────────────────── text blocks ─────────────────────────────
+
+/** The first part of a line (where a heading like "Ingrediente:" would be), at most `maxRatio` × its height. */
+export function lineStart(box, maxRatio = 10) {
+  const len = Math.min(box.len, box.thick * maxRatio);
+  const shift = (box.len - len) / 2;
+  return { ...box, cx: box.cx - Math.cos(box.angle) * shift, cy: box.cy - Math.sin(box.angle) * shift, len };
+}
+
+/** Axis-aligned bounds of an oriented line box. */
+export function lineBounds(b) {
+  const ux = Math.abs(Math.cos(b.angle));
+  const uy = Math.abs(Math.sin(b.angle));
+  const hw = (b.len * ux + b.thick * uy) / 2;
+  const hh = (b.len * uy + b.thick * ux) / 2;
+  return { left: b.cx - hw, right: b.cx + hw, top: b.cy - hh, bottom: b.cy + hh };
+}
+
+/**
+ * Groups text lines into paragraphs: a line joins the block above it when the
+ * vertical gap is at most `gapRatio` × the line height and they overlap
+ * horizontally. Blocks come back largest first, lines top to bottom.
+ * @returns {{left, top, right, bottom, lines: object[]}[]}
+ */
+export function clusterBlocks(boxes, { gapRatio = 2 } = {}) {
+  const lines = boxes.map((b) => ({ ...b, bounds: lineBounds(b) })).sort((a, b) => a.bounds.top - b.bounds.top);
+  const blocks = [];
+  for (const line of lines) {
+    const lb = line.bounds;
+    const h = lb.bottom - lb.top;
+    const block = blocks.find((k) => {
+      const last = k.lines[k.lines.length - 1].bounds;
+      const gap = lb.top - last.bottom;
+      const overlap = Math.min(lb.right, k.right) - Math.max(lb.left, k.left);
+      return gap <= gapRatio * Math.max(h, last.bottom - last.top) && gap > -h && overlap > 0;
+    });
+    if (block) {
+      block.lines.push(line);
+      block.left = Math.min(block.left, lb.left);
+      block.right = Math.max(block.right, lb.right);
+      block.bottom = Math.max(block.bottom, lb.bottom);
+    } else {
+      blocks.push({ left: lb.left, top: lb.top, right: lb.right, bottom: lb.bottom, lines: [line] });
+    }
+  }
+  return blocks.sort((a, b) => (b.right - b.left) * (b.bottom - b.top) - (a.right - a.left) * (a.bottom - a.top));
 }
 
 /**

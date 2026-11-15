@@ -6,15 +6,19 @@
  * Messages in:  {type: 'init', assets}
  *               {type: 'recognize', id, bitmap, assets, detMaxSide?, upscale?}
  *               {type: 'orient', id, bitmap, assets}     (small copy, ≤ 960 px)
+ *               {type: 'suggest', id, bitmap, assets}    (copy ≤ 2400 px, upright)
  * Messages out: {type: 'progress', phase, progress}  {type: 'ready'}
  *               {type: 'result', id, text, confidence, lines}
  *               {type: 'result', id, orient: {base, lines, vote, texts, ms}}
+ *               {type: 'result', id, suggest: {width, height, blocks}}
+ *               (recognize results also carry `uncertain`: words read with low confidence)
  *               {type: 'error', id?, message}
  */
 import * as ort from 'onnxruntime-web/wasm';
 import {
   detSize, componentsFromProbMap, recWidth, ctcDecode, joinLines, REC_HEIGHT, DET_MAX_SIDE,
   orientationBase, topLines, rotateBox180, clsWidth, clsVote, lineSegments, CLS_HEIGHT, CLS_WIDTH, CLS_SURE, ORIENT_MAX_SIDE,
+  clusterBlocks, uncertainWords, lineStart,
 } from '../lib/paddleCore.js';
 
 const SESSION_OPTS = { executionProviders: ['wasm'], graphOptimizationLevel: 'all' };
@@ -161,6 +165,33 @@ async function orient(bitmap, assets) {
   return { base, lines: top.length, vote, texts, ms: Math.round(performance.now() - t0) };
 }
 
+const SUGGEST_MAX_READS = 30;
+const SUGGEST_DET_SIDE = 1280; // 960 merged the small print of a chocolate wrapper; 1920 doubled the time
+
+/**
+ * Text blocks for the crop suggestion: lines detected on a 1280 px scale and
+ * grouped into paragraphs; the START of each line (≤ 10 × its height, where
+ * a heading like "Ingrediente:" sits) is read, largest blocks first, at most
+ * 30 short reads.
+ */
+async function suggest(bitmap) {
+  // Line positions need no fine detail: detect on a small scale, read from the large copy.
+  const lines = (await detect(bitmap, SUGGEST_DET_SIDE)).filter((c) => !c.vertical);
+  const blocks = clusterBlocks(lines);
+  const out = [];
+  let reads = 0;
+  for (const block of blocks) {
+    const read = [];
+    for (const line of block.lines) {
+      const text = reads < SUGGEST_MAX_READS && line.len / line.thick >= 2 ? (await readLine(bitmap, lineStart(line))).text : undefined;
+      if (text !== undefined) reads++;
+      read.push({ bounds: line.bounds, text });
+    }
+    out.push({ left: block.left, top: block.top, right: block.right, bottom: block.bottom, lines: read });
+  }
+  return { width: bitmap.width, height: bitmap.height, blocks: out };
+}
+
 self.onmessage = async (e) => {
   const msg = e.data;
   try {
@@ -173,6 +204,11 @@ self.onmessage = async (e) => {
       const result = await orient(msg.bitmap, msg.assets);
       msg.bitmap.close?.();
       self.postMessage({ type: 'result', id: msg.id, orient: result });
+    } else if (msg.type === 'suggest') {
+      await init(msg.assets);
+      const result = await suggest(msg.bitmap);
+      msg.bitmap.close?.();
+      self.postMessage({ type: 'result', id: msg.id, suggest: result });
     } else if (msg.type === 'recognize') {
       await init(msg.assets);
       const bitmap = msg.bitmap;
@@ -186,7 +222,9 @@ self.onmessage = async (e) => {
       }
       bitmap.close?.();
       const { text, confidence } = joinLines(items);
-      self.postMessage({ type: 'result', id: msg.id, text, confidence, lines: items.length });
+      // Words the recogniser was unsure about (kept lines only), for the review step.
+      const uncertain = [...new Set(items.filter((it) => it.conf >= 0.5).flatMap((it) => uncertainWords(it.text, it.probs).map((w) => w.word)))];
+      self.postMessage({ type: 'result', id: msg.id, text, confidence, lines: items.length, uncertain });
     }
   } catch (err) {
     self.postMessage({ type: 'error', id: msg.id, message: String(err?.message || err) });

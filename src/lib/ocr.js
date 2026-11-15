@@ -10,6 +10,7 @@
  * `createWorker`, `fetchImpl` and `cachesImpl` are injectable for tests.
  */
 import { pickRotation } from './orientation.js';
+import { pickIngredientBlock } from './cropSuggest.js';
 import { ORIENT_MAX_SIDE } from './paddleCore.js';
 
 export const OCR_DIR = 'ocr/';
@@ -120,6 +121,13 @@ export function getEngine({ createWorker = defaultCreateWorker, baseUrl = global
             worker.postMessage({ type: 'recognize', id, bitmap, assets, detMaxSide, upscale }, bitmap && typeof bitmap.close === 'function' ? [bitmap] : []);
           });
         },
+        suggest(bitmap) {
+          const id = nextId++;
+          return new Promise((resolve, reject) => {
+            pending.set(id, { resolve: (m) => resolve(m.suggest), reject });
+            worker.postMessage({ type: 'suggest', id, bitmap, assets }, bitmap && typeof bitmap.close === 'function' ? [bitmap] : []);
+          });
+        },
         orient(bitmap) {
           const id = nextId++;
           return new Promise((resolve, reject) => {
@@ -145,7 +153,7 @@ export async function recognize(image, { onProgress, detMaxSide, upscale, ...eng
     ? await createImageBitmap(image)
     : image;
   const r = await engine.recognize(bitmap, { detMaxSide, upscale });
-  return { text: r.text || '', confidence: Math.round(r.confidence ?? 0), lines: r.lines ?? 0 };
+  return { text: r.text || '', confidence: Math.round(r.confidence ?? 0), lines: r.lines ?? 0, uncertain: r.uncertain || [] };
 }
 
 /**
@@ -167,6 +175,28 @@ export async function detectOrientation(image, { onProgress, ...engineOptions } 
   const measured = await engine.orient(small);
   const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
   return { ...pickRotation(measured), ms: Math.round(now - t0), measured };
+}
+
+export const SUGGEST_MAX_SIDE = 2400;
+
+/**
+ * Suggested crop around the ingredients list of an (upright) photo.
+ * @returns {Promise<{rect: {x, y, w, h}, kind, marker, ms}|null>}
+ */
+export async function suggestCrop(image, engineOptions = {}) {
+  const engine = await getEngine(engineOptions);
+  const t0 = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  let copy = image;
+  if (typeof OffscreenCanvas === 'function' && image && image.width) {
+    const k = Math.min(1, SUGGEST_MAX_SIDE / Math.max(image.width, image.height));
+    const c = new OffscreenCanvas(Math.max(1, Math.round(image.width * k)), Math.max(1, Math.round(image.height * k)));
+    c.getContext('2d').drawImage(image, 0, 0, c.width, c.height);
+    copy = typeof createImageBitmap === 'function' ? await createImageBitmap(c) : c;
+  }
+  const measured = await engine.suggest(copy);
+  const picked = pickIngredientBlock(measured);
+  const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  return picked ? { ...picked, ms: Math.round(now - t0) } : null;
 }
 
 /** Test helper: forget the engine singleton. */

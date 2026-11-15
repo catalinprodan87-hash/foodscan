@@ -874,7 +874,12 @@ main:focus { outline: none; }
 .report-problem textarea { width: 100%; font: 0.8rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 
 /* v2.2: automatic orientation note */
-.auto-orient { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; }
-.auto-orient.turned { color: var(--teal); font-weight: 600; }
-@media (prefers-color-scheme: dark) { .auto-orient.turned { color: #5eead4; } }
+.auto-orient, .photo-note { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; }
+.auto-orient.turned, .photo-note.done { color: var(--teal); font-weight: 600; }
+@media (prefers-color-scheme: dark) { .auto-orient.turned, .photo-note.done { color: #5eead4; } }
 .spinner.tiny { width: 14px; height: 14px; border-width: 2px; margin: 0; flex: none; }
+
+/* v2.3: words to check in the OCR review */
+.check-words { margin: 8px 0 4px; padding: 8px 10px; border-radius: 12px; background: var(--medium-bg); color: var(--text); }
+.check-words p { margin: 0 0 6px; }
+.check-chip { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }

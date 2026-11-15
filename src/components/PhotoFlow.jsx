@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { t } from '../lib/i18n.js';
 import { loadImage, previewCanvas, prepareColour, imageSize, rotateImage } from '../lib/imagePrep.js';
 import { needsBetterPhoto } from '../lib/ocrText.js';
-import { readIngredients } from '../lib/readPhoto.js';
+import { readIngredients, wordsToCheck } from '../lib/readPhoto.js';
 import CropBox from './CropBox.jsx';
 import PhotoButton from './PhotoButton.jsx';
 import ProductHeader from './ProductHeader.jsx';
@@ -11,6 +11,7 @@ import { recordTiming } from '../lib/diagnostics.js';
 
 const DEFAULT_RECT = { x: 0.04, y: 0.15, w: 0.92, h: 0.55 };
 const ORIENT_LIMIT_MS = 3000; // after the engine is ready; then the photo stays as it is
+const SUGGEST_LIMIT_MS = 15000; // crop suggestion: applied whenever it arrives, unless the user moved the box or started reading
 const mb = (n) => (n / 1048576).toFixed(1);
 
 /**
@@ -27,6 +28,10 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
   // Automatic orientation: { state: 'checking'|'download'|'turned'|'off', turns?, loaded?, total? }
   const [auto, setAuto] = useState({ state: 'off' });
   const orientChecked = useRef(false); // the automatic check finished for this photo (turned or not)
+  // Crop suggestion: { state: 'off'|'checking'|'done' }
+  const [suggest, setSuggest] = useState({ state: 'off' });
+  const userCropped = useRef(false); // the user moved the crop box: never override it
+  const textRef = useRef(null);
   const imgRef = useRef(null);
   const orientToken = useRef(null); // the running orientation check; null = cancelled
   const alive = useRef(true);
@@ -40,6 +45,8 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
     setError(null);
     setRect(DEFAULT_RECT);
     manualTurns.current = 0;
+    userCropped.current = false;
+    setSuggest({ state: 'off' });
     loadImage(file)
       .then((img) => {
         if (cancelled) { img.close?.(); return; }
@@ -73,6 +80,7 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
     manualTurns.current++;
     orientToken.current = null;
     setAuto({ state: 'off' });
+    setSuggest({ state: 'off' });
     turnPhoto(1);
   };
 
@@ -98,15 +106,37 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
         new Promise((resolve) => { setTimeout(() => resolve(null), ORIENT_LIMIT_MS); }),
       ]);
       if (!current()) return;
-      orientToken.current = null;
-      if (!o) { recordTiming('orient', ORIENT_LIMIT_MS, false, 'time limit'); setAuto({ state: 'off' }); return; }
-      recordTiming('orient', o.ms, true, `${o.method} turns ${o.turns}`);
-      orientChecked.current = o.method !== 'none';
-      if (o.turns && imgRef.current === img) {
-        turnPhoto(o.turns);
-        setAuto({ state: 'turned', turns: o.turns });
-      } else {
+      if (!o) {
+        recordTiming('orient', ORIENT_LIMIT_MS, false, 'time limit');
         setAuto({ state: 'off' });
+      } else {
+        recordTiming('orient', o.ms, true, `${o.method} turns ${o.turns}`);
+        orientChecked.current = o.method !== 'none';
+        if (o.turns && imgRef.current === img) {
+          turnPhoto(o.turns);
+          setAuto({ state: 'turned', turns: o.turns });
+        } else {
+          setAuto({ state: 'off' });
+        }
+      }
+
+      // Then frame the ingredients list on the (now upright) photo – unless the user already moved the box.
+      if (userCropped.current) { orientToken.current = null; return; }
+      setSuggest({ state: 'checking' });
+      const { suggestCrop } = await import('../lib/ocr.js');
+      const s = await Promise.race([
+        suggestCrop(imgRef.current),
+        new Promise((resolve) => { setTimeout(() => resolve('late'), SUGGEST_LIMIT_MS); }),
+      ]);
+      if (!current() || userCropped.current) { setSuggest({ state: 'off' }); return; }
+      orientToken.current = null;
+      if (s && s !== 'late') {
+        recordTiming('crop', s.ms, true, `${s.kind} ${s.marker}`);
+        setRect(s.rect);
+        setSuggest({ state: 'done' });
+      } else {
+        recordTiming('crop', SUGGEST_LIMIT_MS, s === null, s === 'late' ? 'time limit' : 'no heading found');
+        setSuggest({ state: 'off' });
       }
     } catch {
       if (current()) { orientToken.current = null; setAuto({ state: 'off' }); }
@@ -117,8 +147,9 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
   useEffect(() => () => imgRef.current?.close?.(), []);
 
   const read = async (cropRect) => {
-    orientToken.current = null; // reading now: an orientation answer would come too late
+    orientToken.current = null; // reading now: an orientation / crop answer would come too late
     setAuto((a) => (a.state === 'turned' ? a : { state: 'off' }));
+    setSuggest((x) => (x.state === 'done' ? x : { state: 'off' }));
     setStep('reading');
     setProgress({ phase: 'init', progress: 0 });
     const t0 = performance.now();
@@ -138,7 +169,7 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
       });
       if (!alive.current) return;
       recordTiming('ocr', performance.now() - t0, true, `${cropRect ? 'crop' : 'whole'} ${canvas.width}×${canvas.height} conf ${best.confidence} lines ${best.lines} tries ${best.tries}`);
-      setReview({ text: best.text, rawText: best.rawText, confidence: best.confidence, thumb, foundStart: best.foundStart, retried: best.retried });
+      setReview({ text: best.text, rawText: best.rawText, confidence: best.confidence, thumb, foundStart: best.foundStart, retried: best.retried, uncertain: best.uncertain });
       setStep('review');
     } catch (err) {
       recordTiming('ocr', performance.now() - t0, false, String(err?.message || err).slice(0, 60));
@@ -173,10 +204,15 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
             </p>
           )}
           {auto.state === 'turned' && <p className="small auto-orient turned" role="status">↻ {t(lang, 'orientTurned', { deg: auto.turns * 90 })}</p>}
+          {suggest.state === 'checking' && <p className="muted small photo-note crop-finding" role="status"><span className="spinner tiny" aria-hidden="true" /> {t(lang, 'cropFinding')}</p>}
+          {suggest.state === 'done' && <p className="small photo-note done crop-found" role="status">⬚ {t(lang, 'cropFound')}</p>}
           {/* The frame keeps the photo's exact shape (narrower for tall photos, so it fits
               in 70vh): the crop box is measured against the frame, so it must be the photo. */}
           <div className="crop-wrap" style={{ aspectRatio: `${width} / ${height}`, width: `min(100%, calc(70vh * ${(width / height).toFixed(4)}))` }}>
-            <CropBox src={preview} alt={t(lang, 'photoButton')} rect={rect} onChange={setRect} />
+            <CropBox
+              src={preview} alt={t(lang, 'photoButton')} rect={rect}
+              onChange={(r) => { userCropped.current = true; setSuggest({ state: 'off' }); setRect(r); }}
+            />
           </div>
           <div className="actions">
             <button type="button" className="btn primary" onClick={() => read(rect)}>{t(lang, 'cropUse')}</button>
@@ -247,7 +283,28 @@ export default function PhotoFlow({ lang, file, product, barcode, onAnalyze, onR
           <p className="muted small">{t(lang, review.foundStart ? 'reviewHint' : 'reviewNoMarker')}</p>
           {review.retried && <p className="muted small">{t(lang, 'ocrRetried')}</p>}
           <label htmlFor="ocr-text" className="sr-only">{t(lang, 'reviewTitle')}</label>
+          {(() => {
+            const check = wordsToCheck(review.uncertain, review.text);
+            if (!check.length) return null;
+            const select = (word) => {
+              const el = textRef.current;
+              if (!el) return;
+              const i = el.value.toLowerCase().indexOf(word.toLowerCase());
+              if (i < 0) return;
+              el.focus();
+              el.setSelectionRange(i, i + word.length);
+            };
+            return (
+              <div className="check-words">
+                <p className="small"><strong>{t(lang, 'checkWordsTitle')}</strong> <span className="muted">{t(lang, 'checkWordsHint')}</span></p>
+                <div className="chip-row">
+                  {check.map((w) => <button key={w} type="button" className="chip-btn check-chip" onClick={() => select(w)}>{w}</button>)}
+                </div>
+              </div>
+            );
+          })()}
           <textarea
+            ref={textRef}
             id="ocr-text"
             rows={8}
             value={review.text}

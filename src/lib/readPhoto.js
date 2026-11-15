@@ -41,14 +41,14 @@ export function isWeakRead(r) {
  * @param canvas the prepared photo
  * @param {{recognize: Function, rotate: (canvas, quarterTurns) => canvas, onProgress?: Function,
  *          onRetry?: Function, shouldStop?: () => boolean, orientationChecked?: boolean}} deps
- * @returns {Promise<{text, rawText, confidence, lines, foundStart, tries, retried}>}
+ * @returns {Promise<{text, rawText, confidence, lines, foundStart, tries, retried, uncertain}>}
  */
 export async function readIngredients(canvas, { recognize, rotate, onProgress, onRetry, shouldStop = () => false, orientationChecked = false }) {
   const once = async (image, options = {}) => {
     const ocr = await recognize(image, { onProgress, ...options });
     const extracted = extractIngredients(ocr.text);
     extracted.text = correctWords(extracted.text).text; // "sore" → "sare", restores diacritics
-    return { ...extracted, rawText: ocr.text, confidence: ocr.confidence, lines: ocr.lines };
+    return { ...extracted, rawText: ocr.text, confidence: ocr.confidence, lines: ocr.lines, uncertain: ocr.uncertain || [] };
   };
   let best = await once(canvas);
   let tries = 1;
@@ -60,4 +60,19 @@ export async function readIngredients(canvas, { recognize, rotate, onProgress, o
     if (readScore(r) > readScore(best)) best = { ...r, retried: true };
   }
   return { ...best, tries, retried: !!best.retried };
+}
+
+/**
+ * Uncertain words still present in the (edited) text, for the "check these
+ * words" chips; words the clean-up already corrected are gone. At most 12.
+ */
+export function wordsToCheck(uncertain = [], text = '') {
+  const lower = String(text).toLowerCase();
+  const seen = new Set();
+  return uncertain.filter((w) => {
+    const k = String(w).toLowerCase();
+    if (seen.has(k) || !lower.includes(k)) return false;
+    seen.add(k);
+    return true;
+  }).slice(0, 12);
 }
