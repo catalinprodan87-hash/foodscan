@@ -18,7 +18,12 @@ export const SOFTWARE = [
   { name: 'PaddleOCR (PP-OCRv4)', licence: 'Apache-2.0', url: 'https://github.com/PaddlePaddle/PaddleOCR' },
   { name: 'ONNX Runtime Web', licence: 'MIT', url: 'https://github.com/microsoft/onnxruntime' },
   { name: 'ZXing-C++ (zxing-wasm)', licence: 'Apache-2.0', url: 'https://github.com/zxing-cpp/zxing-cpp' },
+  { name: 'React', licence: 'MIT', url: 'https://react.dev' },
+  { name: 'Space Grotesk (font)', licence: 'OFL-1.1', url: 'https://github.com/floriankarsten/space-grotesk' },
 ];
+
+/** Full third-party credits and licences. */
+export const NOTICE_URL = 'https://github.com/catalinprodan87-hash/foodscan/blob/main/NOTICE.md';
 
 /** EU rules and scientific bodies cited in the ingredient databases. */
 export const REFERENCES = [

@@ -45,7 +45,7 @@ export function PastePrompt({ lang, onAnalyze, onPhoto, placeholderKey = 'inputP
   );
 }
 
-export function NotFound({ lang, code, type = 'food', onAnalyze, onPhoto, onBack }) {
+export function NotFound({ lang, code, type = 'food', cached = false, onAnalyze, onPhoto, onBack, onRetry }) {
   return (
     <div className="result">
       <section className="card notice">
@@ -55,6 +55,12 @@ export function NotFound({ lang, code, type = 'food', onAnalyze, onPhoto, onBack
         <PastePrompt lang={lang} onAnalyze={onAnalyze} />
       </section>
       <AddProductLinks lang={lang} code={code} type={type} />
+      {onRetry && (
+        <section className="card retry-card">
+          {cached && <p className="muted small">{t(lang, 'notFoundCached')}</p>}
+          <button type="button" className="btn ghost block" onClick={onRetry}>🔄 {t(lang, 'searchAgain')}</button>
+        </section>
+      )}
       <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, 'back')}</button>
     </div>
   );
@@ -85,6 +91,21 @@ export function NoIngredients({ lang, product, partial, onAnalyze, onPhoto, onBa
       {food && partial && partial.additives.length > 0 && (
         <AdditiveList lang={lang} additives={partial.additives} title={t(lang, 'tagsAdditives')} />
       )}
+      <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, 'back')}</button>
+    </div>
+  );
+}
+
+/** EAN-13 20–29: a code printed by the shop (weighed / packed in store). */
+export function InStore({ lang, code, onAnalyze, onPhoto, onBack }) {
+  return (
+    <div className="result">
+      <section className="card notice">
+        <h2 className="card-title">🏷️ {t(lang, 'inStoreTitle')}</h2>
+        <p>{t(lang, 'inStoreText', { code })}</p>
+        <PhotoButton lang={lang} onPhoto={onPhoto} className="btn primary block" />
+        <PastePrompt lang={lang} onAnalyze={onAnalyze} />
+      </section>
       <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, 'back')}</button>
     </div>
   );

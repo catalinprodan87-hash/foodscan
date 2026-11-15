@@ -1,4 +1,5 @@
 import PhotoButton from './PhotoButton.jsx';
+import ReportProblem from './ReportProblem.jsx';
 import { t, pick } from '../lib/i18n.js';
 import { normalize } from '../lib/analyze.js';
 import AdditiveList from './AdditiveList.jsx';
@@ -267,6 +268,7 @@ export default function Result({
       <button type="button" className="btn primary block" onClick={onBack}>
         {t(lang, backLabel)}
       </button>
+      <ReportProblem lang={lang} screen="result" product={product ? { name: product.name, code: product.code || barcode } : (barcode ? { code: barcode } : null)} />
     </div>
   );
 }

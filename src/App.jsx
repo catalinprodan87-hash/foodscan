@@ -3,9 +3,12 @@ import Header from './components/Header.jsx';
 import Home from './components/Home.jsx';
 import Result from './components/Result.jsx';
 import Disclaimer from './components/Disclaimer.jsx';
-import { LookupLoading, NotFound, NoIngredients, LookupFailed } from './components/LookupViews.jsx';
+import { LookupLoading, NotFound, NoIngredients, LookupFailed, InStore } from './components/LookupViews.jsx';
 import { analyze, detectProductType } from './lib/analyze.js';
-import { lookupProduct, analyzeInput } from './lib/lookup.js';
+import { lookupProduct, analyzeInput, isInStoreCode, createNotFoundCache } from './lib/lookup.js';
+import { recordTiming } from './lib/diagnostics.js';
+import { buildBackup, backupFileName, historyToRestore, mergeSaved, clearLocalData, requestPersistence } from './lib/backup.js';
+import { defaultAvoidState } from './data/avoidPresets.js';
 import { buildRequest } from './lib/request.js';
 import { detectLang, t } from './lib/i18n.js';
 import { getLang, setLang as saveLang, getAvoidState, setAvoidState, getFlag, setFlag } from './lib/storage.js';
@@ -55,9 +58,13 @@ export default function App() {
   const abortRef = useRef(null);
   const storeRef = useRef(null);
   const savedRef = useRef(null);
+  const persistAskedRef = useRef(false);
   // Ingredients the user photographed / pasted for a barcode, remembered for the next scan.
   const savedStoreRef = useRef(null);
   if (!savedStoreRef.current) savedStoreRef.current = createSavedStore();
+  // Barcodes no database knew (24 h), so a second scan answers at once.
+  const notFoundRef = useRef(null);
+  if (!notFoundRef.current) notFoundRef.current = createNotFoundCache();
   const mainRef = useRef(null);
 
   useEffect(() => {
@@ -103,6 +110,11 @@ export default function App() {
     savedRef.current = submitted;
     const entry = makeEntry(submitted, result);
     storeRef.current?.then((store) => store.save(entry, 200)).then(setHistory).catch(() => {});
+    // Once there is something worth keeping, ask the browser not to evict it.
+    if (!persistAskedRef.current) {
+      persistAskedRef.current = true;
+      requestPersistence();
+    }
   }, [submitted, result]);
 
   const historyResult = useMemo(() => {
@@ -122,6 +134,43 @@ export default function App() {
       onAction: async () => { setHistory(await store.save(entry, 200)); },
     });
   }, [notify, lang]);
+
+  // ───── Settings: backup, restore, delete everything ─────
+  const exportData = useCallback(() => {
+    const data = buildBackup({ history, saved: savedStoreRef.current.all(), avoid });
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = backupFileName();
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  }, [history, avoid]);
+
+  /** Adds new / newer history and remembered ingredients; the avoid list is replaced. */
+  const importData = useCallback(async (backup) => {
+    const store = await storeRef.current;
+    const toWrite = historyToRestore(history, backup.history);
+    for (const entry of toWrite) await store.save(entry, 200);
+    setHistory(await store.all());
+    const before = savedStoreRef.current.all();
+    const merged = mergeSaved(before, backup.saved);
+    savedStoreRef.current.replaceAll(merged);
+    const savedAdded = Object.keys(merged).filter((c) => merged[c] !== before[c]).length;
+    if (backup.avoid) { setAvoid(backup.avoid); setAvoidState(backup.avoid); }
+    return { history: toWrite.length, saved: savedAdded, avoid: !!backup.avoid };
+  }, [history]);
+
+  const deleteAllData = useCallback(async () => {
+    try { await (await storeRef.current).clear(); } catch { /* ignore */ }
+    clearLocalData();
+    // Cached product lookups also record what was scanned. The OCR engine is kept (no personal data).
+    try { await globalThis.caches?.delete('openfacts-api'); } catch { /* ignore */ }
+    setHistory([]);
+    setAvoid(defaultAvoidState());
+    window.location.reload();
+  }, []);
 
   const clearHistory = useCallback(async () => {
     const store = await storeRef.current;
@@ -144,7 +193,8 @@ export default function App() {
     setPhoto(null);
   }, []);
 
-  const runLookup = useCallback(async (code) => {
+  /** @param {{force?: boolean}} opts force: ignore the not-found cache ("Caută din nou"). */
+  const runLookup = useCallback(async (code, { force = false } = {}) => {
     abortRef.current?.abort();
     const ctrl = new AbortController();
     abortRef.current = ctrl;
@@ -157,6 +207,7 @@ export default function App() {
     if (saved) {
       setLookup(null);
       setSubmitted(requestFromSaved(saved));
+      if (isInStoreCode(code)) return; // no database knows in-store codes
       try {
         const res = await lookupProduct(code, { productType: saved.productType, signal: ctrl.signal });
         if (ctrl.signal.aborted || res.status !== 'found') return;
@@ -167,14 +218,28 @@ export default function App() {
       return;
     }
 
+    // Weighed / packed in store (EAN-13 20–29): no public database knows it.
+    if (isInStoreCode(code)) {
+      setLookup({ status: 'in_store', code });
+      return;
+    }
+    if (force) notFoundRef.current.remove(code);
+    else if (notFoundRef.current.has(code)) {
+      setLookup({ status: 'not_found', code, cached: true });
+      return;
+    }
+
     setLookup({ status: 'loading', code });
     let res;
+    const t0 = performance.now();
     try {
       res = await lookupProduct(code, { productType: chosenType, signal: ctrl.signal });
     } catch {
       return; // aborted by the user
     }
     if (ctrl.signal.aborted) return;
+    recordTiming('lookup', performance.now() - t0, res.status !== 'error', `${res.status} ${res.tried?.join('>') || ''}`);
+    if (res.status === 'not_found') notFoundRef.current.add(code);
     if (res.status === 'found' && res.product.hasIngredients) {
       setLookup(null);
       setSubmitted({ text: '', type: res.product.productType, auto: false, product: res.product, barcode: code });
@@ -286,7 +351,11 @@ export default function App() {
       </Suspense>
     );
   } else if (tab === 'about') {
-    screen = <Suspense fallback={<Loading />}><AboutView lang={lang} /></Suspense>;
+    screen = (
+      <Suspense fallback={<Loading />}>
+        <AboutView lang={lang} onExport={exportData} onImport={importData} onDeleteAll={deleteAllData} />
+      </Suspense>
+    );
   } else if (photo) {
     screen = (
       <Suspense fallback={<section className="card ocr-progress" aria-busy="true"><div className="spinner" aria-hidden="true" /></section>}>
@@ -299,7 +368,14 @@ export default function App() {
   } else if (lookup?.status === 'loading') {
     screen = <LookupLoading lang={lang} code={lookup.code} onCancel={goHome} />;
   } else if (lookup?.status === 'not_found') {
-    screen = <NotFound lang={lang} code={lookup.code} type={chosenType || 'food'} onAnalyze={analyzeText} onPhoto={startPhoto} onBack={goHome} />;
+    screen = (
+      <NotFound
+        lang={lang} code={lookup.code} type={chosenType || 'food'} cached={lookup.cached}
+        onAnalyze={analyzeText} onPhoto={startPhoto} onBack={goHome} onRetry={() => runLookup(lookup.code, { force: true })}
+      />
+    );
+  } else if (lookup?.status === 'in_store') {
+    screen = <InStore lang={lang} code={lookup.code} onAnalyze={analyzeText} onPhoto={startPhoto} onBack={goHome} />;
   } else if (lookup?.status === 'no_ingredients') {
     screen = (
       <NoIngredients
@@ -311,7 +387,7 @@ export default function App() {
     screen = (
       <LookupFailed
         lang={lang} code={lookup.code} kind={lookup.kind}
-        onRetry={() => runLookup(lookup.code)} onAnalyze={analyzeText} onPhoto={startPhoto} onBack={goHome}
+        onRetry={() => runLookup(lookup.code, { force: true })} onAnalyze={analyzeText} onPhoto={startPhoto} onBack={goHome}
       />
     );
   } else if (result) {

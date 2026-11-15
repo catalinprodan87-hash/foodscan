@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   lookupProduct, fetchProduct, lookupOrder, mapProduct, analyzeInput, apiUrl, productPageUrl,
+  isInStoreCode, createNotFoundCache, NOT_FOUND_TTL_MS,
   cleanBarcode, isValidGtin, upcEToUpcA, normalizeBarcode, LookupError,
 } from '../src/lib/lookup.js';
 import { analyze } from '../src/lib/analyze.js';
@@ -30,6 +31,12 @@ function mockFetch(routes) {
     calls.push({ type, url, signal: opts.signal });
     const route = routes[type] ?? notFound();
     if (route === 'network') return Promise.reject(new TypeError('Failed to fetch'));
+    if (route && typeof route === 'object' && 'delay' in route) {
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => resolve(route.then), route.delay);
+        opts.signal?.addEventListener('abort', () => { clearTimeout(timer); reject(Object.assign(new Error('aborted'), { name: 'AbortError' })); });
+      });
+    }
     if (route === 'hang') {
       return new Promise((_, reject) => {
         opts.signal?.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' })));
@@ -177,6 +184,80 @@ describe('lookupProduct() routing', () => {
     const p = lookupProduct('5940000000007', { fetchImpl, signal: ctrl.signal, timeoutMs: 5000 });
     ctrl.abort();
     await assert.rejects(p, (err) => err instanceof LookupError && err.kind === 'aborted');
+  });
+});
+
+// ─────────────────────────── slow databases ───────────────────────────────
+describe('lookupProduct() with a slow database', () => {
+  const later = (ms, response) => ({ delay: ms, then: response });
+
+  test('a hanging first database starts the others in parallel: about one timeout, not three', async () => {
+    const { fetchImpl, calls } = mockFetch({ food: 'hang', cosmetic: 'hang', household: 'hang' });
+    const started = Date.now();
+    const r = await lookupProduct('5940000000007', { fetchImpl, timeoutMs: 200, staggerMs: 30 });
+    const took = Date.now() - started;
+    assert.equal(r.status, 'error');
+    assert.equal(r.kind, 'timeout');
+    assert.equal(calls.length, 3);
+    assert.ok(took < 450, `took ${took} ms (sequential would be ~600)`);
+  });
+
+  test('priority is kept: a quicker match lower down waits for the first database', async () => {
+    const { fetchImpl } = mockFetch({ food: later(120, found(NUTELLA)), cosmetic: later(5, found(SHAMPOO)) });
+    const r = await lookupProduct('3017620422003', { fetchImpl, staggerMs: 20 });
+    assert.equal(r.status, 'found');
+    assert.equal(r.product.productType, 'food');
+    assert.equal(r.product.name, 'Cremă de alune cu cacao');
+  });
+
+  test('the first database slow and empty → the parallel match lower down is used', async () => {
+    const { fetchImpl, calls } = mockFetch({ food: later(100, notFound()), cosmetic: later(5, found(SHAMPOO)), household: 'hang' });
+    const r = await lookupProduct('3600523614455', { fetchImpl, staggerMs: 20 });
+    assert.equal(r.product.productType, 'cosmetic');
+    assert.deepEqual(r.tried, ['food', 'cosmetic', 'household']);
+    assert.equal(calls.length, 3);
+    assert.ok(calls[2].signal.aborted, 'the unneeded request was stopped');
+  });
+
+  test('quick answers keep the one-by-one order (no extra requests)', async () => {
+    const { fetchImpl, calls } = mockFetch({ cosmetic: found(SHAMPOO) });
+    await lookupProduct('3600523614455', { fetchImpl, staggerMs: 1000 });
+    assert.deepEqual(calls.map((c) => c.type), ['food', 'cosmetic']);
+  });
+});
+
+describe('in-store barcodes and the not-found cache', () => {
+  test('EAN-13 codes 20–29 are in-store codes', () => {
+    assert.equal(isInStoreCode('2012345678903'), true);
+    assert.equal(isInStoreCode('2912345678907'), true);
+    assert.equal(isInStoreCode('5941234567892'), false);
+    assert.equal(isInStoreCode('20123456'), false, 'EAN-8 not included');
+    assert.equal(isInStoreCode(''), false);
+  });
+
+  test('not-found codes are remembered for 24 h, then forgotten', () => {
+    const m = new Map();
+    const ls = { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v) };
+    let now = 1_000_000;
+    const cache = createNotFoundCache(ls, () => now);
+    assert.equal(cache.has('5940000000007'), false);
+    cache.add('5940000000007');
+    assert.equal(createNotFoundCache(ls, () => now).has('5940000000007'), true, 'persists');
+    now += NOT_FOUND_TTL_MS - 1;
+    assert.equal(cache.has('5940000000007'), true);
+    now += 2;
+    assert.equal(cache.has('5940000000007'), false);
+  });
+
+  test('remove, and no storage does not crash', () => {
+    const m = new Map();
+    const cache = createNotFoundCache({ getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v) });
+    cache.add('1');
+    cache.remove('1');
+    assert.equal(cache.has('1'), false);
+    const none = createNotFoundCache(null);
+    none.add('x');
+    assert.equal(none.has('x'), false);
   });
 });
 

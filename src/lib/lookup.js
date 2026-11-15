@@ -228,10 +228,22 @@ export function lookupOrder(chosenType) {
   return [chosenType, ...LOOKUP_ORDER.filter((t) => t !== chosenType)];
 }
 
+/** After this long without an answer, the remaining databases are asked in parallel. */
+export const STAGGER_MS = 1500;
+
 /**
  * Looks a barcode up across the Open *Facts databases.
+ *
+ * The databases are asked in priority order (chosen type first). When one
+ * answers quickly, the next is asked after it, as before. When one is slow
+ * (no answer within `staggerMs`), all the remaining ones start in parallel,
+ * so a hanging server costs about one timeout instead of three. Priority is
+ * kept: a match in a lower database only wins once every higher one has
+ * answered "not found" (or failed).
+ *
  * @param {string} code normalised barcode
- * @param {{productType?: string|null, fetchImpl?: Function, timeoutMs?: number, signal?: AbortSignal}} options
+ * @param {{productType?: string|null, fetchImpl?: Function, timeoutMs?: number,
+ *          signal?: AbortSignal, staggerMs?: number}} options
  * @returns {Promise<
  *   {status: 'found', code, product, tried: string[]} |
  *   {status: 'not_found', code, tried: string[]} |
@@ -239,20 +251,94 @@ export function lookupOrder(chosenType) {
  * >}
  * Not found everywhere → 'not_found'. If nothing was found and at least one
  * database failed → 'error' (the product may exist; offer a retry).
+ * `tried`: the databases that were asked, in priority order.
  */
-export async function lookupProduct(code, { productType = null, fetchImpl, timeoutMs, signal } = {}) {
-  const tried = [];
+export async function lookupProduct(code, { productType = null, fetchImpl, timeoutMs, signal, staggerMs = STAGGER_MS } = {}) {
+  const order = lookupOrder(productType);
+  const ctrl = new AbortController(); // also stops the slower requests once a match is chosen
+  const onAbort = () => ctrl.abort();
+  if (signal?.aborted) ctrl.abort();
+  signal?.addEventListener('abort', onAbort, { once: true });
+
+  const tasks = [];
+  const start = () => {
+    const type = order[tasks.length];
+    const promise = fetchProduct(type, code, { fetchImpl, timeoutMs, signal: ctrl.signal }).then(
+      (res) => ({ res }),
+      (err) => ({ err }),
+    );
+    tasks.push({ type, promise });
+  };
+
   let error = null;
-  for (const type of lookupOrder(productType)) {
-    tried.push(type);
-    try {
-      const res = await fetchProduct(type, code, { fetchImpl, timeoutMs, signal });
-      if (res.found) return { status: 'found', code, product: res.product, tried };
-    } catch (err) {
-      if (err.kind === 'aborted') throw err;
-      error = error || err;
+  try {
+    start();
+    for (let i = 0; i < order.length; i++) {
+      if (i >= tasks.length) start();
+      const { promise } = tasks[i];
+      if (tasks.length < order.length) {
+        let timer;
+        const slow = new Promise((resolve) => { timer = setTimeout(() => resolve('slow'), staggerMs); });
+        const first = await Promise.race([promise.then(() => 'done'), slow]);
+        clearTimeout(timer);
+        if (first === 'slow') while (tasks.length < order.length) start();
+      }
+      const { res, err } = await promise;
+      if (err) {
+        if (err.kind === 'aborted' || signal?.aborted) throw new LookupError('aborted');
+        error = error || err;
+        continue;
+      }
+      if (res.found) return { status: 'found', code, product: res.product, tried: tasks.map((t) => t.type) };
     }
+  } finally {
+    signal?.removeEventListener('abort', onAbort);
+    ctrl.abort(); // any request still running is no longer needed
   }
+  const tried = tasks.map((t) => t.type);
   if (error) return { status: 'error', code, kind: error.kind || 'network', tried };
   return { status: 'not_found', code, tried };
+}
+
+// ─────────────────────── In-store and cached answers ───────────────────────
+
+/**
+ * EAN-13 codes starting with 20–29 are "restricted circulation" numbers
+ * (GS1): shops print them for products weighed or packed in store, so no
+ * public database knows them.
+ */
+export function isInStoreCode(code) {
+  return /^2\d{12}$/.test(String(code || ''));
+}
+
+export const NOT_FOUND_TTL_MS = 24 * 60 * 60 * 1000;
+const NOT_FOUND_KEY = 'ingrediscan:notFound';
+const NOT_FOUND_MAX = 200;
+
+/**
+ * Remembers barcodes that no database knew, for 24 h, so scanning the same
+ * unknown product again answers at once. "Caută din nou" bypasses it.
+ */
+export function createNotFoundCache(ls, now = () => Date.now()) {
+  let storage = ls;
+  if (storage === undefined) {
+    try { storage = globalThis.localStorage; } catch { storage = null; }
+  }
+  const read = () => {
+    try { return JSON.parse(storage?.getItem(NOT_FOUND_KEY) || '{}') || {}; } catch { return {}; }
+  };
+  const write = (map) => {
+    try { storage?.setItem(NOT_FOUND_KEY, JSON.stringify(map)); } catch { /* quota / private mode */ }
+  };
+  const fresh = (map) => Object.fromEntries(Object.entries(map).filter(([, at]) => now() - at < NOT_FOUND_TTL_MS));
+  return {
+    has(code) { return code in fresh(read()); },
+    add(code) {
+      const map = fresh(read());
+      map[code] = now();
+      const codes = Object.keys(map).sort((a, b) => map[b] - map[a]).slice(0, NOT_FOUND_MAX);
+      write(Object.fromEntries(codes.map((c) => [c, map[c]])));
+    },
+    remove(code) { const map = read(); delete map[code]; write(map); },
+  };
 }

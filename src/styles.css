@@ -851,3 +851,24 @@ main:focus { outline: none; }
 .saved-note p { margin: 0; }
 .saved-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 8px; }
 .saved-actions .btn { width: auto; min-height: 36px; padding: 6px 12px; font-size: 0.85rem; }
+
+/* v2.1: crop step header with the rotate button */
+.crop-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.crop-head .card-title { margin: 0; }
+.rotate-btn { min-height: 40px; padding: 6px 12px; font-size: 0.9rem; }
+.rotate-btn span { font-size: 1.15rem; line-height: 1; }
+
+/* v2.1: about → your data */
+.settings-sub { margin: 14px 0 4px; font-size: 0.92rem; font-family: var(--heading); }
+.settings-card .actions { flex-wrap: wrap; }
+.privacy-list { margin: 0 0 4px; padding-left: 18px; }
+.privacy-list li { margin: 4px 0; }
+.confirm-box { margin-top: 8px; padding: 10px 12px; border-radius: 12px; background: var(--bg); }
+.btn.danger-fill { background: var(--high); border-color: var(--high); color: #fff; }
+@media (prefers-color-scheme: dark) { .btn.danger-fill { background: #b91c1c; border-color: #b91c1c; } }
+.retry-card { padding: 12px 16px; }
+
+/* v2.1: report a problem */
+.report-problem summary { cursor: pointer; font-weight: 600; color: var(--muted); min-height: 32px; }
+.report-problem[open] summary { margin-bottom: 8px; color: var(--text); }
+.report-problem textarea { width: 100%; font: 0.8rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }

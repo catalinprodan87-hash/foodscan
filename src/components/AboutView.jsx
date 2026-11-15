@@ -1,9 +1,10 @@
 import { t, pick } from '../lib/i18n.js';
-import { DATABASES_REVIEWED, PRODUCT_SOURCES, REFERENCES, SOFTWARE } from '../data/meta.js';
+import { DATABASES_REVIEWED, PRODUCT_SOURCES, REFERENCES, SOFTWARE, NOTICE_URL } from '../data/meta.js';
+import SettingsCard from './SettingsCard.jsx';
 
 const fmt = (iso, lang) => new Date(iso + 'T12:00:00Z').toLocaleDateString(lang === 'ro' ? 'ro-RO' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
-export default function AboutView({ lang }) {
+export default function AboutView({ lang, onExport, onImport, onDeleteAll }) {
   /* global __APP_VERSION__, __BUILD_DATE__ */
   const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
   const built = typeof __BUILD_DATE__ !== 'undefined' ? __BUILD_DATE__ : null;
@@ -16,6 +17,25 @@ export default function AboutView({ lang }) {
           {t(lang, 'aboutVersion', { version, date: built ? fmt(built, lang) : '–' })}
         </p>
       </section>
+
+      <section className="card" aria-labelledby="about-privacy">
+        <h2 id="about-privacy" className="card-title">🔒 {t(lang, 'aboutPrivacy')}</h2>
+        <p className="small">{t(lang, 'aboutPrivacyText')}</p>
+        <h3 className="settings-sub">{t(lang, 'privacyLeavesTitle')}</h3>
+        <ul className="small privacy-list">
+          <li>{t(lang, 'privacyLeaves1')}</li>
+          <li>{t(lang, 'privacyLeaves2')}</li>
+          <li>{t(lang, 'privacyLeaves3')}</li>
+        </ul>
+        <h3 className="settings-sub">{t(lang, 'privacyStaysTitle')}</h3>
+        <ul className="small privacy-list">
+          <li>{t(lang, 'privacyStays1')}</li>
+          <li>{t(lang, 'privacyStays2')}</li>
+          <li>{t(lang, 'privacyStays3')}</li>
+        </ul>
+      </section>
+
+      <SettingsCard lang={lang} onExport={onExport} onImport={onImport} onDeleteAll={onDeleteAll} />
 
       <section className="card" aria-labelledby="about-products">
         <h2 id="about-products" className="card-title">{t(lang, 'aboutProducts')}</h2>
@@ -47,11 +67,7 @@ export default function AboutView({ lang }) {
             <li key={s.name}><a href={s.url} target="_blank" rel="noopener noreferrer">{s.name} ↗</a> <span className="muted small">({s.licence})</span></li>
           ))}
         </ul>
-      </section>
-
-      <section className="card" aria-labelledby="about-privacy">
-        <h2 id="about-privacy" className="card-title">🔒 {t(lang, 'aboutPrivacy')}</h2>
-        <p className="small">{t(lang, 'aboutPrivacyText')}</p>
+        <p className="small"><a className="source-link" href={NOTICE_URL} target="_blank" rel="noopener noreferrer">{t(lang, 'noticeLink')} ↗</a></p>
       </section>
 
       <section className="card" aria-labelledby="about-disclaimer">

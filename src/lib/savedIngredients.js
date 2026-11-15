@@ -115,6 +115,8 @@ export function createSavedStore(ls) {
     all() { return read(); },
     save(saved) { if (saved) write(upsertSaved(read(), saved)); },
     remove(barcode) { const m = read(); delete m[barcode]; write(m); },
+    /** Replaces everything (restoring a backup). */
+    replaceAll(map) { write(map || {}); },
     /** Adds history entries for barcodes not remembered yet (one-off migration). */
     seed(entries) {
       const m = read();

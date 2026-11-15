@@ -11,6 +11,12 @@ export function fitSize(width, height, max = OCR_MAX_SIDE) {
   return { width: Math.max(1, Math.round(width * scale)), height: Math.max(1, Math.round(height * scale)), scale };
 }
 
+/** Size after `quarterTurns` × 90° clockwise (odd turns swap the sides). */
+export function rotatedSize(width, height, quarterTurns) {
+  const odd = ((quarterTurns % 4) + 4) % 2 === 1;
+  return odd ? { width: height, height: width } : { width, height };
+}
+
 /** Normalised crop rect {x, y, w, h} (0–1) → pixel rect inside the image. */
 export function cropPixels(rect, width, height) {
   if (!rect) return { sx: 0, sy: 0, sw: width, sh: height };
@@ -58,6 +64,28 @@ export function previewCanvas(img, max = 1200) {
   canvas.width = size.width;
   canvas.height = size.height;
   canvas.getContext('2d').drawImage(img, 0, 0, size.width, size.height);
+  return canvas;
+}
+
+/**
+ * The photo turned by `quarterTurns` × 90° clockwise, on a canvas with the
+ * long side ≤ maxSide (the OCR working size): rotating a 12 MP original would
+ * need a second full-size copy in memory. 90° steps are lossless.
+ * @returns {HTMLCanvasElement}
+ */
+export function rotateImage(img, quarterTurns = 1, maxSide = OCR_MAX_SIDE) {
+  const { width, height } = imageSize(img);
+  const fit = fitSize(width, height, maxSide);
+  const turns = ((quarterTurns % 4) + 4) % 4;
+  const out = rotatedSize(fit.width, fit.height, turns);
+  const canvas = document.createElement('canvas');
+  canvas.width = out.width;
+  canvas.height = out.height;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
+  ctx.translate(out.width / 2, out.height / 2);
+  ctx.rotate((turns * Math.PI) / 2);
+  ctx.drawImage(img, -fit.width / 2, -fit.height / 2, fit.width, fit.height);
   return canvas;
 }
 

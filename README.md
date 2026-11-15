@@ -34,7 +34,7 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Scanner** (`src/lib/scanner.js`, lazy-loaded): the browser's own `BarcodeDetector` where it exists (Chrome on Android – Google's detector), otherwise **ZXing-C++ compiled to WebAssembly** (`zxing-wasm`, self-hosted at `scan/zxing_reader.wasm`, 0.9 MB, precached). EAN-13 / EAN-8 / UPC-A / UPC-E. The main back lens is chosen on phones with several (ultra-wide lenses cannot focus close), with continuous autofocus, 1080p, slight zoom and a torch button. Without a native detector, frames cycle through fast / full-resolution / ±30° tilted decoding. The camera stops as soon as a code is accepted, when the overlay closes and when the page is hidden.
 - **No misreads:** every code must pass its check digit; the camera needs the same code in two frames, photos need two agreeing decoding passes (`camera.js`). UPC-E is expanded to UPC-A.
 - **Photos of barcodes:** native detector, then ZXing-C++ on several scales, crops, sharpened and rotated versions. Benchmark on 24 deliberately bad photos (small, tilted 40°, curved jar, blur, glare, noise, JPEG q 0.3, clutter): **23/24 read, 0 wrong** (the old zxing-js reader: 14/24). Live camera (fake-camera test, no native detector): 4/5 hard frames in 1–2 s.
-- **Lookup** (`src/lib/lookup.js`): the chosen product type's database is queried first; with auto or no match, the others follow in the order OFF → OBF → OPF. The database that finds the product (or the product's own `product_type`) sets the product type. Each request has an 8 s `AbortController` timeout; nothing found + any failed request → "error" with a retry button, otherwise "not found".
+- **Lookup** (`src/lib/lookup.js`): the chosen product type's database is queried first; with auto or no match, the others follow in the order OFF → OBF → OPF. The database that finds the product (or the product's own `product_type`) sets the product type. Each request has an 8 s `AbortController` timeout; nothing found + any failed request → "error" with a retry button, otherwise "not found". Quick answers keep the one-by-one order; if a database has not answered within 1.5 s, the remaining ones are asked in parallel (a hanging server costs about one timeout instead of three), and a match in a higher-priority database still wins. "Not found" is remembered for 24 h (`createNotFoundCache`); **Caută din nou** asks again. EAN-13 codes 20–29 (printed by the shop for weighed / packed products) are not looked up: the app explains and offers photo / paste, remembered for the code.
 - **Results:** product name, brand, quantity, image and barcode, a "View on Open … Facts" link, and the analysis (food also uses `additives_tags`, `nova_group`, `nutriscore_grade`). Not found or no ingredients → prompt to paste the ingredients; the barcode is kept with the analysis.
 - **Offline:** Open \*Facts API responses are cached by the service worker (NetworkFirst, 14 days, 300 entries).
 
@@ -51,6 +51,14 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Self-hosted engine** (`scripts/copy-ocr-assets.mjs`, runs before `dev` / `build`): ONNX Runtime wasm (14 MB) + detector (4.7 MB) + recogniser (7.7 MB) + character list in `public/ocr/` (git-ignored). About 25 MB once, with a real progress bar; then kept by the service worker (CacheFirst, 90 days) for offline use. Not precached.
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
+
+### Your data, backup, problem reports (v2.1)
+
+- **Despre → Datele tale**: whether the browser keeps the app's data under storage pressure (the app asks with `navigator.storage.persist()` after the first saved analysis), space used, **download the text reading engine now** (on Wi-Fi), **backup** of history + remembered ingredients + avoid list in one JSON file (`src/lib/backup.js`; restoring adds new / newer items and replaces the avoid list after a preview), and **delete all data** (history, remembered ingredients, settings, cached lookups; the OCR engine is kept).
+- **Privacy** section listing exactly what leaves the phone (only the barcode, to Open *Facts) and what stays.
+- **Raportează o problemă** on the photo review and result screens: an editable plain-text report (version, browser, screen, the last 20 lookup / OCR timings kept locally, OCR text) shared by the user through the share sheet (WhatsApp, e-mail…) or copied. Never a photo, never sent automatically (`src/lib/diagnostics.js`).
+- **⟳ Rotește** in the crop step turns the photo 90° per tap (for photos the camera saved sideways or upside down). The crop frame now always has the photo's exact shape (tall photos were letterboxed, so the crop could miss the chosen area).
+- Credits and licences: [`NOTICE.md`](NOTICE.md).
 
 ### Remembered ingredients (v1.4)
 
@@ -108,7 +116,9 @@ Checked on real data: the Kaufland tomato paste 5949069402286 is in Open Food Fa
 │   │   ├── TabBar.jsx         # Scanează / Istoric / Lista mea / Despre
 │   │   ├── HistoryView.jsx    # History list, search, filters, swipe / long-press delete
 │   │   ├── AvoidListView.jsx  # Presets per type, custom entries, export / import
-│   │   ├── AboutView.jsx      # Sources, regulations, review dates, disclaimer
+│   │   ├── AboutView.jsx      # Privacy, your data, sources, regulations, review dates, disclaimer
+│   │   ├── SettingsCard.jsx   # Storage status, OCR download, backup / restore, delete all
+│   │   ├── ReportProblem.jsx  # Editable problem report, shared by the user
 │   │   ├── Onboarding.jsx     # First-run slides
 │   │   ├── Banners.jsx        # Update, offline, install (Android / iPhone), toast
 │   │   ├── ResultExtras.jsx   # Highlighted ingredients, share, add-product links
@@ -118,7 +128,7 @@ Checked on real data: the Kaufland tomato paste 5949069402286 is in Open Food Fa
 │   │   ├── BarcodeEntry.jsx   # Manual barcode + read from a photo
 │   │   ├── ScannerOverlay.jsx # Full-screen camera scanner (lazy-loaded)
 │   │   ├── ProductHeader.jsx  # Image, name, brand, barcode, Open … Facts link
-│   │   ├── LookupViews.jsx    # Loading, not found, no ingredients, network error
+│   │   ├── LookupViews.jsx    # Loading, not found (+ search again), in-store code, no ingredients, network error
 │   │   ├── PhotoButton.jsx    # "Fotografiază ingredientele" (camera file input)
 │   │   ├── PhotoFlow.jsx      # Crop → OCR progress → review (lazy-loaded)
 │   │   ├── CropBox.jsx        # Draggable / resizable crop rectangle
@@ -161,6 +171,7 @@ Checked on real data: the Kaufland tomato paste 5949069402286 is in Open Food Fa
 │   ├── scan.test.js           # camera choice, misread protection, barcode format names
 │   ├── saved.test.js          # Remembered ingredients by barcode
 │   ├── data.test.js           # Database schema: both languages, levels, codes, regions, alias clashes
+│   ├── v21.test.js            # Backup / restore / delete, diagnostics report, rotation sizes
 │   └── scores.test.js         # NOVA explanations, Nutri-Score facts, restrictions outside the EU
 ├── e2e/                       # Browser tests (Playwright, API mocked): paste, barcode flows, remembered
 │                              # ingredients offline, history, avoid list, RO/EN, one real OCR smoke test
