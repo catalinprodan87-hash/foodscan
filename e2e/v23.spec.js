@@ -42,12 +42,12 @@ test('moving the box yourself is never overridden by the suggestion', async ({ p
 });
 
 test('words the reader was unsure about are offered for checking', async ({ page }) => {
-  test.setTimeout(150_000);
+  test.setTimeout(240_000); // a real photo with a fold: some words stay uncertain
   await page.goto('./');
-  await page.setInputFiles('.scan-card input[type=file][capture]', 'bench/ocr/images/tomato-photo.jpg');
+  await page.setInputFiles('.scan-card input[type=file][capture]', 'tests/corpus/own/ro-09-bomboane-fructe-iaurt.jpg');
   await expect(page.locator('.crop-wrap')).toBeVisible();
   await page.click('text=Sari peste, citește toată poza');
-  await expect(page.locator('#ocr-text')).toBeVisible({ timeout: 120_000 });
+  await expect(page.locator('#ocr-text')).toBeVisible({ timeout: 200_000 });
   const chips = page.locator('.check-chip');
   await expect(chips.first()).toBeVisible();
   const word = await chips.first().textContent();

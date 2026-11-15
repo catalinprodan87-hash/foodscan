@@ -1,10 +1,12 @@
 /**
- * On-device OCR with PaddleOCR (PP-OCRv4 detector + English/Latin recogniser)
+ * On-device OCR with PaddleOCR (PP-OCRv4 detector + PP-OCRv5 Latin recogniser;
+ * the PP-OCRv5 Cyrillic recogniser is fetched only for photos that need it)
  * running on ONNX Runtime Web in a Web Worker.
  *
  * Everything is self-hosted under ./ocr/ (copied from npm by
  * scripts/copy-ocr-assets.mjs) and cached by the service worker (CacheFirst,
- * 90 days): ~24 MB download on the first photo, offline afterwards. The photo
+ * 90 days): ~26 MB download on the first photo (+8 MB the first time a photo
+ * has Cyrillic text), offline afterwards. The photo
  * never leaves the phone.
  *
  * `createWorker`, `fetchImpl` and `cachesImpl` are injectable for tests.
@@ -14,6 +16,10 @@ import { pickIngredientBlock } from './cropSuggest.js';
 import { ORIENT_MAX_SIDE } from './paddleCore.js';
 
 export const OCR_DIR = 'ocr/';
+
+// Benchmarks only: another line stretch than the recogniser's default (paddleCore REC_STRETCH).
+let stretchOverride;
+export function setRecStretch(n) { stretchOverride = n || undefined; }
 
 /** Absolute URLs of the self-hosted OCR files. */
 export function ocrAssets(baseUrl) {
@@ -26,6 +32,9 @@ export function ocrAssets(baseUrl) {
     rec: `${base}paddle/rec.onnx`,
     cls: `${base}paddle/cls.onnx`,
     dict: `${base}paddle/dict.txt`,
+    // Cyrillic recogniser: downloaded only when a photo needs it (not part of the first download).
+    recCyr: `${base}paddle/rec-cyrillic.onnx`,
+    dictCyr: `${base}paddle/dict-cyrillic.txt`,
   };
   assets.downloads = [`${ortDir}ort-wasm-simd-threaded.wasm`, `${ortDir}ort-wasm-simd-threaded.mjs`, assets.det, assets.rec, assets.cls, assets.dict];
   return assets;
@@ -118,21 +127,21 @@ export function getEngine({ createWorker = defaultCreateWorker, baseUrl = global
           const id = nextId++;
           return new Promise((resolve, reject) => {
             pending.set(id, { resolve, reject });
-            worker.postMessage({ type: 'recognize', id, bitmap, assets, detMaxSide, upscale, debug }, bitmap && typeof bitmap.close === 'function' ? [bitmap] : []);
+            worker.postMessage({ type: 'recognize', id, bitmap, assets, detMaxSide, upscale, debug, stretch: stretchOverride }, bitmap && typeof bitmap.close === 'function' ? [bitmap] : []);
           });
         },
         suggest(bitmap) {
           const id = nextId++;
           return new Promise((resolve, reject) => {
             pending.set(id, { resolve: (m) => resolve(m.suggest), reject });
-            worker.postMessage({ type: 'suggest', id, bitmap, assets }, bitmap && typeof bitmap.close === 'function' ? [bitmap] : []);
+            worker.postMessage({ type: 'suggest', id, bitmap, assets, stretch: stretchOverride }, bitmap && typeof bitmap.close === 'function' ? [bitmap] : []);
           });
         },
         orient(bitmap) {
           const id = nextId++;
           return new Promise((resolve, reject) => {
             pending.set(id, { resolve: (m) => resolve(m.orient), reject });
-            worker.postMessage({ type: 'orient', id, bitmap, assets }, bitmap && typeof bitmap.close === 'function' ? [bitmap] : []);
+            worker.postMessage({ type: 'orient', id, bitmap, assets, stretch: stretchOverride }, bitmap && typeof bitmap.close === 'function' ? [bitmap] : []);
           });
         },
         terminate() { worker.terminate(); },

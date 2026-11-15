@@ -7,7 +7,9 @@
  *                   → reading step (extraction, word clean-up, retries)
  */
 import { loadImage, prepareColour, rotateImage } from '/src/lib/imagePrep.js';
-import { recognize, detectOrientation, suggestCrop } from '/src/lib/ocr.js';
+import { recognize, detectOrientation, suggestCrop, setRecStretch } from '/src/lib/ocr.js';
+
+window.setStretch = (n) => setRecStretch(n);
 import { readIngredients } from '/src/lib/readPhoto.js';
 
 const baseUrl = `${location.origin}/`;
@@ -79,4 +81,12 @@ window.debugLines = async (url, { pick = [] } = {}) => {
     return { i, text: b.text, W, url: c.toDataURL('image/png') };
   });
   return { width: canvas.width, height: canvas.height, items: r.items.map((b, i) => ({ i, ...b, cx: Math.round(b.cx), cy: Math.round(b.cy), len: Math.round(b.len), thick: Math.round(b.thick) })), overlay: ov.toDataURL('image/jpeg', 0.85), crops };
+};
+
+/** Debug: what the orientation check measured for a photo. */
+window.debugOrient = async (url) => {
+  const blob = await (await fetch(url)).blob();
+  const img = await loadImage(new File([blob], 'x', { type: blob.type }));
+  const o = await detectOrientation(img, { baseUrl });
+  return { turns: o.turns, method: o.method, confidence: o.confidence, base: o.measured.base, lines: o.measured.lines, vote: o.measured.vote, texts: o.measured.texts };
 };

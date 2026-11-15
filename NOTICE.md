@@ -18,7 +18,8 @@ The real-photo benchmark (`tests/corpus/off/`, never deployed) includes ingredie
 
 | Component | Licence | Used for |
 |---|---|---|
-| [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) PP-OCRv4 models (via the npm package [paddle-ocr-onnx-models](https://www.npmjs.com/package/paddle-ocr-onnx-models)) | Apache-2.0 | Reading ingredient text from photos, on the phone |
+| [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) PP-OCRv4 detector and direction classifier (via the npm package [paddle-ocr-onnx-models](https://www.npmjs.com/package/paddle-ocr-onnx-models)) | Apache-2.0 | Finding text lines in photos, on the phone |
+| [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) PP-OCRv5 Latin and Cyrillic recognisers, ONNX exports from [ppu-paddle-ocr-models](https://github.com/PT-Perkasa-Pilar-Utama/ppu-paddle-ocr-models) (in `vendor/paddleocr/`) | Apache-2.0 | Reading the text, with diacritics and Cyrillic |
 | [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) | MIT | Running the OCR models in the browser |
 | [ZXing-C++](https://github.com/zxing-cpp/zxing-cpp) via [zxing-wasm](https://github.com/Sec-ant/zxing-wasm) | Apache-2.0 / MIT | Reading barcodes |
 | [React](https://react.dev) | MIT | User interface |

@@ -1,6 +1,7 @@
 /**
  * PaddleOCR in a Web Worker: ONNX Runtime Web (WebAssembly, CPU) runs the
- * PP-OCRv4 text detector, the English/Latin recogniser and the text direction
+ * PP-OCRv4 text detector, the PP-OCRv5 Latin recogniser (Cyrillic one for lines
+ * the Latin one cannot read, loaded on demand) and the text direction
  * classifier on the photo. The photo never leaves the phone.
  *
  * Messages in:  {type: 'init', assets}
@@ -18,7 +19,7 @@ import * as ort from 'onnxruntime-web/wasm';
 import {
   detSize, componentsFromProbMap, recWidth, ctcDecode, joinLines, REC_HEIGHT, DET_MAX_SIDE,
   orientationBase, topLines, rotateBox180, clsWidth, clsVote, lineSegments, CLS_HEIGHT, CLS_WIDTH, CLS_SURE, ORIENT_MAX_SIDE,
-  clusterBlocks, uncertainWords, lineStart,
+  clusterBlocks, uncertainWords, lineStart, REC_STRETCH, CYR_TRY, CYR_MIN_LINES, CYR_MARGIN, CYR_MIN_CONF, cyrillicShare,
 } from '../lib/paddleCore.js';
 
 const SESSION_OPTS = { executionProviders: ['wasm'], graphOptimizationLevel: 'all' };
@@ -27,6 +28,8 @@ let rec = null;
 let dict = null;
 let initPromise = null;
 let clsPromise = null;
+let cyrPromise = null;
+let stretch = REC_STRETCH; // per message (benchmarks try other values)
 
 function init(assets) {
   if (!initPromise) {
@@ -52,6 +55,23 @@ function loadCls(assets) {
       : Promise.resolve(null);
   }
   return clsPromise;
+}
+
+/**
+ * The Cyrillic recogniser (Bulgarian, Serbian, Russian, Ukrainian…), loaded the
+ * first time a photo has lines the Latin one reads badly; null if not shipped
+ * or it cannot load (those lines stay as the Latin reading).
+ */
+function loadCyr(assets) {
+  if (!cyrPromise) {
+    cyrPromise = assets.recCyr
+      ? Promise.all([
+        ort.InferenceSession.create(assets.recCyr, SESSION_OPTS),
+        fetch(assets.dictCyr).then((r) => r.text()).then((t) => [...t.split('\n'), ' ']),
+      ]).then(([session, d]) => ({ session, dict: d })).catch(() => null)
+      : Promise.resolve(null);
+  }
+  return cyrPromise;
 }
 
 /** Planar BGR float tensor, (x/255 − mean) / std per channel; with outW > w the extra columns are 0 (padding). */
@@ -96,14 +116,35 @@ function cutLine(image, box, W, H) {
   return ctx;
 }
 
-async function readLine(image, box) {
+async function readLine(image, box, model = rec, chars = dict) {
   const H = REC_HEIGHT;
-  const W = recWidth(box, H);
+  const W = recWidth(box, H, stretch);
   const ctx = cutLine(image, box, W, H);
-  const out = await rec.run({ [rec.inputNames[0]]: tensor(ctx, W, H, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5]) });
-  const t = out[rec.outputNames[0]];
+  const out = await model.run({ [model.inputNames[0]]: tensor(ctx, W, H, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5]) });
+  const t = out[model.outputNames[0]];
   const [, T, C] = t.dims;
-  return ctcDecode(t.data, T, C, dict);
+  return ctcDecode(t.data, T, C, chars);
+}
+
+/**
+ * Lines the Latin recogniser was unsure about are read again with the
+ * Cyrillic one; its reading is kept when it is in Cyrillic and clearly more
+ * confident. Photos without such lines never load the Cyrillic model.
+ */
+async function rereadCyrillic(bitmap, items, assets) {
+  const unsure = items.filter((it) => it.conf < CYR_TRY && it.text.replace(/\s/g, '').length >= 3);
+  if (unsure.length < CYR_MIN_LINES) return 0;
+  const cyr = await loadCyr(assets);
+  if (!cyr) return 0;
+  let swapped = 0;
+  for (const it of unsure) {
+    const r = await readLine(bitmap, it, cyr.session, cyr.dict);
+    if (cyrillicShare(r.text) >= 0.5 && r.conf >= CYR_MIN_CONF && r.conf > it.conf + CYR_MARGIN) {
+      Object.assign(it, r, { script: 'cyrillic' });
+      swapped++;
+    }
+  }
+  return swapped;
 }
 
 /** Probability that the line is upside down (classifier labels: 0°, 180°). */
@@ -193,6 +234,7 @@ async function suggest(bitmap) {
 }
 
 self.onmessage = async (e) => {
+  stretch = e.data?.stretch || REC_STRETCH;
   const msg = e.data;
   try {
     if (msg.type === 'init') {
@@ -220,11 +262,12 @@ self.onmessage = async (e) => {
         items.push({ ...boxes[i], ...r });
         self.postMessage({ type: 'progress', phase: 'recognize', progress: (i + 1) / boxes.length });
       }
+      await rereadCyrillic(bitmap, items, msg.assets);
       bitmap.close?.();
       const { text, confidence } = joinLines(items);
       // Words the recogniser was unsure about (kept lines only), for the review step.
       const uncertain = [...new Set(items.filter((it) => it.conf >= 0.5).flatMap((it) => uncertainWords(it.text, it.probs).map((w) => w.word)))];
-      const debugItems = msg.debug ? items.map(({ cx, cy, angle, len, thick, text: t, conf }) => ({ cx, cy, angle, len, thick, text: t, conf })) : undefined;
+      const debugItems = msg.debug ? items.map(({ cx, cy, angle, len, thick, text: t, conf, script }) => ({ cx, cy, angle, len, thick, text: t, conf, script })) : undefined;
       self.postMessage({ type: 'result', id: msg.id, text, confidence, lines: items.length, uncertain, items: debugItems });
     }
   } catch (err) {

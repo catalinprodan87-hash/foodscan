@@ -32,10 +32,13 @@ export function readingScore(lines, lex) {
   return 0.5 * conf + 0.5 * lexiconScore(lines.map((l) => l.text).join(' '), lex);
 }
 
+/** Below this difference between the two readings, the recogniser cannot tell up from down. */
+export const READ_UNSURE = 0.1;
+
 /**
  * @param {{base: 0|1, lines: number, vote?: {flip: boolean, confidence: number}|null,
  *          texts?: {up: {text, conf}[], down: {text, conf}[]}|null}} m
- * @returns {{turns: 0|1|2|3, method: 'none'|'cls'|'recogniser'|'weak', confidence: number}}
+ * @returns {{turns: 0|1|2|3, method: 'none'|'cls'|'recogniser'|'unsure'|'weak', confidence: number}}
  *   turns: quarter turns clockwise to apply to the photo
  */
 export function pickRotation(m, lex) {
@@ -48,6 +51,11 @@ export function pickRotation(m, lex) {
   if (m.texts) {
     const up = readingScore(m.texts.up, lex);
     const down = readingScore(m.texts.down, lex);
+    // Both ways read about equally (logos, numbers, curved dark packs): keep the photo
+    // as taken, or follow the classifier's lean – photos are usually taken upright.
+    if (Math.abs(up - down) < READ_UNSURE) {
+      return { turns: turnsFor(!!m.vote?.flip && m.vote.confidence >= 0.6), method: 'unsure', confidence: Math.abs(up - down) };
+    }
     return { turns: turnsFor(down > up), method: 'recogniser', confidence: Math.abs(up - down) };
   }
   if (m.vote) return { turns: turnsFor(m.vote.flip), method: 'weak', confidence: m.vote.confidence };

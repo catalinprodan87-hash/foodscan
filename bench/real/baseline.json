@@ -1,5 +1,7 @@
 {
  "date": "2026-11-15",
+ "model": "en-v4",
+ "stretch": "default",
  "throttle": 1,
  "detMaxSide": 1920,
  "photos": 20,
@@ -7,170 +9,170 @@
   "bg": {
    "blocks": 6,
    "chars": 1838,
-   "cerStrict": 88.7,
-   "cerFolded": 88.7,
-   "werStrict": 98.5,
-   "werFolded": 98.5
+   "cerStrict": 45.9,
+   "cerFolded": 45.9,
+   "werStrict": 66,
+   "werFolded": 66
   },
   "cs": {
    "blocks": 1,
    "chars": 393,
-   "cerStrict": 60.3,
-   "cerFolded": 55.7,
-   "werStrict": 96,
-   "werFolded": 94
+   "cerStrict": 48.3,
+   "cerFolded": 42.5,
+   "werStrict": 80,
+   "werFolded": 62
   },
   "de": {
    "blocks": 4,
    "chars": 865,
-   "cerStrict": 6.1,
-   "cerFolded": 4.6,
-   "werStrict": 45.7,
-   "werFolded": 35.9
+   "cerStrict": 0.6,
+   "cerFolded": 0.6,
+   "werStrict": 8.7,
+   "werFolded": 8.7
   },
   "el": {
    "blocks": 1,
    "chars": 179,
-   "cerStrict": 87.2,
-   "cerFolded": 87.2,
-   "werStrict": 100,
-   "werFolded": 100
+   "cerStrict": 42.5,
+   "cerFolded": 42.5,
+   "werStrict": 91.7,
+   "werFolded": 91.7
   },
   "en": {
    "blocks": 1,
    "chars": 267,
-   "cerStrict": 48.3,
-   "cerFolded": 48.3,
-   "werStrict": 71.1,
-   "werFolded": 71.1
+   "cerStrict": 0,
+   "cerFolded": 0,
+   "werStrict": 0,
+   "werFolded": 0
   },
   "fr": {
    "blocks": 2,
    "chars": 1017,
-   "cerStrict": 45.5,
-   "cerFolded": 43.9,
-   "werStrict": 77.3,
-   "werFolded": 72.7
+   "cerStrict": 1.9,
+   "cerFolded": 1.7,
+   "werStrict": 10.4,
+   "werFolded": 9.1
   },
   "hr": {
    "blocks": 3,
    "chars": 1014,
-   "cerStrict": 74.7,
-   "cerFolded": 74.4,
-   "werStrict": 97.9,
-   "werFolded": 97.2
+   "cerStrict": 65.6,
+   "cerFolded": 64.9,
+   "werStrict": 85.9,
+   "werFolded": 83.8
   },
   "hu": {
    "blocks": 3,
    "chars": 1300,
-   "cerStrict": 26.6,
-   "cerFolded": 18.5,
-   "werStrict": 87.8,
-   "werFolded": 63.9
+   "cerStrict": 14.3,
+   "cerFolded": 13.3,
+   "werStrict": 28.6,
+   "werFolded": 24.5
   },
   "it": {
    "blocks": 2,
    "chars": 630,
-   "cerStrict": 37.8,
-   "cerFolded": 37.6,
-   "werStrict": 66,
-   "werFolded": 64.9
+   "cerStrict": 11.1,
+   "cerFolded": 11,
+   "werStrict": 26.6,
+   "werFolded": 25.5
   },
   "pl": {
    "blocks": 1,
    "chars": 303,
-   "cerStrict": 16.2,
-   "cerFolded": 14.9,
-   "werStrict": 82.1,
-   "werFolded": 79.5
+   "cerStrict": 5.9,
+   "cerFolded": 5.3,
+   "werStrict": 28.2,
+   "werFolded": 23.1
   },
   "ro": {
    "blocks": 20,
    "chars": 5021,
-   "cerStrict": 47.7,
-   "cerFolded": 45.2,
-   "werStrict": 80.7,
-   "werFolded": 74.6
+   "cerStrict": 21.6,
+   "cerFolded": 20.3,
+   "werStrict": 40.7,
+   "werFolded": 34.5
   },
   "sk": {
    "blocks": 1,
    "chars": 157,
-   "cerStrict": 28.7,
-   "cerFolded": 21.7,
-   "werStrict": 85,
-   "werFolded": 75
+   "cerStrict": 4.5,
+   "cerFolded": 4.5,
+   "werStrict": 10,
+   "werFolded": 10
   },
   "sr": {
    "blocks": 3,
    "chars": 508,
-   "cerStrict": 12,
-   "cerFolded": 10,
-   "werStrict": 52.1,
-   "werFolded": 47.9
+   "cerStrict": 4.7,
+   "cerFolded": 4.1,
+   "werStrict": 30.1,
+   "werFolded": 28.8
   }
  },
  "byKind": {
   "ingredients": {
    "blocks": 33,
    "chars": 10890,
-   "cerStrict": 49.2,
-   "cerFolded": 46.9,
-   "werStrict": 82.4,
-   "werFolded": 77
+   "cerStrict": 21.9,
+   "cerFolded": 21.1,
+   "werStrict": 38.7,
+   "werFolded": 35.4
   },
   "origin": {
    "blocks": 6,
    "chars": 1042,
-   "cerStrict": 33.8,
-   "cerFolded": 32.1,
-   "werStrict": 71.8,
-   "werFolded": 66
+   "cerStrict": 19,
+   "cerFolded": 18.1,
+   "werStrict": 37.2,
+   "werFolded": 34.6
   },
   "other": {
    "blocks": 9,
    "chars": 1560,
-   "cerStrict": 54.6,
-   "cerFolded": 52.1,
-   "werStrict": 83.4,
-   "werFolded": 76.7
+   "cerStrict": 38.8,
+   "cerFolded": 37,
+   "werStrict": 62.8,
+   "werFolded": 55.3
   }
  },
  "all": {
   "blocks": 48,
   "chars": 13492,
-  "cerStrict": 48.6,
-  "cerFolded": 46.3,
-  "werStrict": 81.7,
-  "werFolded": 76
+  "cerStrict": 23.6,
+  "cerFolded": 22.7,
+  "werStrict": 41.8,
+  "werFolded": 38
  },
  "tables": {
   "labels": 93,
-  "labelsFound": 40,
+  "labelsFound": 75,
   "values": 158,
-  "valuesFound": 104,
-  "labelRecall": 43,
-  "valueRecall": 65.8
+  "valuesFound": 130,
+  "labelRecall": 80.6,
+  "valueRecall": 82.3
  },
  "app": {
   "photos": 18,
-  "cerFolded": 49.3,
-  "cerStrict": 50.5,
-  "foundStart": 5
+  "cerFolded": 37,
+  "cerStrict": 37.5,
+  "foundStart": 12
  },
  "timeMs": {
-  "allTextMedian": 9282,
-  "allTextMax": 22342,
-  "appMedian": 15270,
-  "appMax": 28265
+  "allTextMedian": 12913,
+  "allTextMax": 33294,
+  "appMedian": 17430,
+  "appMax": 38706
  },
  "pairs": [
   {
    "name": "taitei-instant",
    "singles": [
-    56.9,
-    63
+    38.4,
+    46.2
    ],
-   "merged": 55.4
+   "merged": 38.4
   }
  ]
 }

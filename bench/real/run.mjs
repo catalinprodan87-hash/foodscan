@@ -7,6 +7,8 @@
  *   npm run bench:real -- --only=ro-06          photos whose name starts with this
  *   npm run bench:real -- --throttle=4          CPU slowed down 4× (rough mid-range phone)
  *   npm run bench:real -- --det=2560            detector input long side (default 1920)
+ *   npm run bench:real -- --stretch=2           draw each line 2× wider for the recogniser
+ *   OCR_REC=latin-v5 npm run bench:real         another recogniser (see scripts/copy-ocr-assets.mjs)
  *   npm run bench:real -- --update-baseline     store the result as bench/real/baseline.json
  *
  * Per text block: character and word error rate, strict (diacritics count)
@@ -28,6 +30,7 @@ const opt = (name) => args.find((a) => a.startsWith(`--${name}=`))?.split('=')[1
 const only = opt('only');
 const throttle = Number(opt('throttle') || 1);
 const detMaxSide = opt('det') ? Number(opt('det')) : undefined;
+const stretch = opt('stretch') ? Number(opt('stretch')) : undefined; // line stretch (default: the app's)
 const updateBaseline = args.includes('--update-baseline');
 
 // Every corpus folder with a truth.json (own photos; later Open Food Facts photos).
@@ -47,6 +50,7 @@ const page = await browser.newPage();
 page.on('pageerror', (e) => console.error('page error:', e.message));
 await page.goto(`${server.url}bench/real/harness.html`);
 await page.waitForFunction(() => window.benchReady);
+if (stretch) await page.evaluate((n) => window.setStretch(n), stretch);
 if (throttle > 1) {
   const cdp = await page.context().newCDPSession(page);
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: throttle });
@@ -112,7 +116,7 @@ for (const r of rows) for (const b of r.blocks.filter((x) => x.table)) for (cons
 const app = rows.filter((r) => r.app.score);
 const appT = app.reduce((a, r) => ({ c: a.c + r.app.score.folded.chars, e: a.e + r.app.score.folded.charEdits, sc: a.sc + r.app.score.strict.chars, se: a.se + r.app.score.strict.charEdits }), { c: 0, e: 0, sc: 0, se: 0 });
 const summary = {
-  date: new Date().toISOString().slice(0, 10), throttle, detMaxSide: detMaxSide || 1920, photos: rows.length,
+  date: new Date().toISOString().slice(0, 10), model: process.env.OCR_REC || 'en-v4', stretch: stretch || 'default', throttle, detMaxSide: detMaxSide || 1920, photos: rows.length,
   byLang, byKind, all: totals(() => true),
   tables: { ...tables, labelRecall: pct(tables.labelsFound, tables.labels), valueRecall: pct(tables.valuesFound, tables.values) },
   app: { photos: app.length, cerFolded: rate(appT.e, appT.c), cerStrict: rate(appT.se, appT.sc), foundStart: app.filter((r) => r.app.foundStart).length },
@@ -131,7 +135,7 @@ console.log(`Time per photo: all text median ${summary.timeMs.allTextMedian} ms 
 
 const out = join(root, 'bench', 'results');
 mkdirSync(out, { recursive: true });
-const tag = `${throttle > 1 ? `-throttle${throttle}` : ''}${detMaxSide ? `-det${detMaxSide}` : ''}`;
+const tag = `${process.env.OCR_REC ? `-${process.env.OCR_REC}` : ''}${stretch ? `-x${stretch}` : ''}${throttle > 1 ? `-throttle${throttle}` : ''}${detMaxSide ? `-det${detMaxSide}` : ''}`;
 writeFileSync(join(out, `real${tag}.json`), JSON.stringify({ summary, rows }, null, 1));
 const md = [
   `# Real-photo benchmark – ${summary.date}`, '',

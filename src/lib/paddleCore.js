@@ -1,5 +1,5 @@
 /**
- * PaddleOCR (PP-OCRv4) pipeline maths, without ONNX Runtime or canvas:
+ * PaddleOCR (PP-OCRv4 detector, PP-OCRv5 recognisers) pipeline maths, without ONNX Runtime or canvas:
  * text-line boxes from the detector's probability map, CTC decoding of the
  * recogniser output, and reading order. Unit-tested in tests/ocr.test.js.
  */
@@ -124,9 +124,36 @@ export function componentsFromProbMap(prob, w, h, sx = 1, sy = 1, { thresh = DET
   return boxes;
 }
 
-/** Recogniser input width for a line box (height 48). */
-export function recWidth(box, height = REC_HEIGHT) {
-  return Math.max(16, Math.min(2000, Math.ceil((box.len / box.thick) * height)));
+/**
+ * How much wider than its true shape a line is drawn for the recogniser.
+ * Labels use condensed fonts: at the true shape a narrow letter gets less
+ * than two of the recogniser's output steps (one per 8 px), and thin letters,
+ * commas and spaces vanish ("21,2%" → "212%"). Measured on real photos:
+ * docs/OCR_REAL.md.
+ */
+export const REC_STRETCH = 2;
+
+/*
+ * Cyrillic lines: the Latin recogniser reads them with low confidence; those
+ * lines (when a photo has at least CYR_MIN_LINES) are read again with the
+ * Cyrillic recogniser, whose reading wins when it is in Cyrillic, at least
+ * CYR_MIN_CONF confident and CYR_MARGIN more confident than the Latin one.
+ */
+export const CYR_TRY = 0.85;
+export const CYR_MIN_LINES = 2;
+export const CYR_MARGIN = 0.1;
+export const CYR_MIN_CONF = 0.8; // and confident in itself (mixed RO / BG lines read badly either way)
+
+/** Share of the letters in `text` that are Cyrillic. */
+export function cyrillicShare(text) {
+  const letters = String(text).match(/\p{L}/gu) || [];
+  if (!letters.length) return 0;
+  return letters.filter((c) => /[\u0400-\u04FF]/.test(c)).length / letters.length;
+}
+
+/** Recogniser input width for a line box (height 48), stretched by `stretch`. */
+export function recWidth(box, height = REC_HEIGHT, stretch = REC_STRETCH) {
+  return Math.max(16, Math.min(4000, Math.ceil((box.len / box.thick) * height * stretch)));
 }
 
 /**
@@ -229,13 +256,64 @@ export function clusterBlocks(boxes, { gapRatio = 2 } = {}) {
 }
 
 /**
- * Recognised lines → text in reading order: lines top to bottom, pieces on
- * the same line left to right, lines separated by newlines.
+ * Recognised lines → text in reading order. A paragraph (≥ 3 long lines, e.g.
+ * the ingredients) with a table beside it on the right (the nutrition table)
+ * is kept together; without this the two were read across, one line of each
+ * in turn. Everything else is read row by row, as before:
+ * top to bottom, pieces on the same row left to right. Lines are separated by
+ * newlines.
  * @param {{cx, cy, angle, len, thick, text, conf}[]} items
  * @returns {{text: string, confidence: number}}
  */
 export function joinLines(items, minConf = MIN_LINE_CONF) {
-  const kept = items.filter((it) => it.text.trim() && it.conf >= minConf).map((it) => ({
+  const kept = items.filter((it) => it.text.trim() && it.conf >= minConf);
+  if (kept.length < 3) return joinRows(kept);
+  const blocks = clusterBlocks(kept);
+  const median = (xs) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)];
+  const ratio = (b) => median(b.lines.map((l) => l.len / l.thick));
+  // A table beside it: a stack of short cells to the right, on the same rows.
+  const tableRight = (p) => blocks.some((b) => b !== p && b.lines.length >= PARA_MIN_LINES && ratio(b) < TABLE_MAX_RATIO
+    && b.left >= p.right - 2 * p.lines[0].thick && b.top < p.bottom && b.bottom > p.top);
+  const paragraphs = blocks.filter((b) => b.lines.length >= PARA_MIN_LINES && ratio(b) >= PARA_MIN_RATIO && tableRight(b));
+  if (!paragraphs.length) return joinRows(kept);
+  const units = paragraphs.map((p) => ({ top: p.top, items: [...p.lines] }));
+  const inPara = new Set(paragraphs.flatMap((p) => p.lines));
+  for (const b of blocks) {
+    if (inPara.has(b.lines[0])) continue;
+    // A piece of a paragraph line the detector cut off (one line, right next to it).
+    const piece = b.lines.length === 1 && b.lines[0];
+    const host = piece && units.slice(0, paragraphs.length).find((u, k) => paragraphs[k].lines.some((l) => Math.abs(l.bounds.top - piece.bounds.top) < l.thick * 0.45
+      && piece.bounds.left >= l.bounds.right - l.thick && piece.bounds.left - l.bounds.right <= 3 * l.thick));
+    if (host) host.items.push(piece);
+    else for (const l of b.lines) units.push({ top: l.bounds.top, items: [l], loose: true });
+  }
+  // Loose lines on the same row are one unit (a table row), as before.
+  const ordered = units.sort((a, b) => a.top - b.top);
+  const out = [];
+  let row = [];
+  const flush = () => { if (row.length) { out.push(joinRows(row).text); row = []; } };
+  for (const u of ordered) {
+    if (u.loose) {
+      if (row.length && Math.abs(row[0].bounds.top - u.top) >= Math.min(row[0].thick, u.items[0].thick) * 0.45) flush();
+      row.push(u.items[0]);
+    } else {
+      flush();
+      out.push(joinRows(u.items).text);
+    }
+  }
+  flush();
+  const confidence = Math.round((kept.reduce((s, i) => s + i.conf, 0) / kept.length) * 100);
+  return { text: out.filter(Boolean).join('\n'), confidence };
+}
+
+/** A paragraph: at least this many lines, typically this many times longer than tall; a table: cells shorter than TABLE_MAX_RATIO. */
+export const PARA_MIN_LINES = 3;
+export const PARA_MIN_RATIO = 8;
+export const TABLE_MAX_RATIO = 5;
+
+/** Lines of one block: top to bottom, pieces on the same line left to right. */
+function joinRows(items) {
+  const kept = items.map((it) => ({
     ...it,
     left: it.cx - (it.len / 2) * Math.cos(it.angle),
     top: it.cy - (it.len / 2) * Math.sin(it.angle),

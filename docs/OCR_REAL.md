@@ -1,4 +1,4 @@
-# Text reading on real photos – measurement (v3.1)
+# Text reading on real photos (v3.1 measurement, v3.2 improvements)
 
 Measured 2026-11-15 with `npm run bench:real` (`bench/real/`), on 20 photos:
 
@@ -8,6 +8,58 @@ Measured 2026-11-15 with `npm run bench:real` (`bench/real/`), on 20 photos:
 Every text block (ingredients per language, origin, storage, preparation) was transcribed by hand. Nutrition tables are scored by the share of row names and values found. Each photo is read the way the app does it: EXIF applied, automatic orientation, then the reading engine (PaddleOCR PP-OCRv4 English recogniser in a Web Worker, ONNX Runtime WebAssembly).
 
 **CER / WER**: character / word error rate of a block, found anywhere in the text the reader returned. **Strict**: ă â î ș ț and other accents must be right. **Folded**: accents removed, which is how the analysis matches ingredients.
+
+## v3.2: what changed and the result
+
+Same 20 photos, same scoring.
+
+1. **PP-OCRv5 Latin recogniser** in place of the PP-OCRv4 English one:
+   - It knows ă â î ș ț and the letters of Hungarian, Polish, Czech, Croatian and German.
+   - ONNX, 8.1 MB instead of 7.7 MB; first download ~26 MB.
+   - Source and checksums: `vendor/paddleocr/README.md`.
+2. **Each line drawn 2× wider for the recogniser** (`REC_STRETCH`), so condensed label fonts keep their thin letters, commas and spaces. Tried 1×, 1.5×, 2× and 2.5×: 2.5× read no better than 2× and was about 40% slower.
+3. **PP-OCRv5 Cyrillic recogniser, only when needed.**
+   - Lines the Latin model reads with low confidence are read again with the Cyrillic one. The Cyrillic reading wins only when it is in Cyrillic, at least 80% confident and 10 points more confident than the Latin reading.
+   - It downloads (8.1 MB) the first time a photo has such lines, then stays cached.
+4. **Orientation keeps the photo as taken when it cannot tell up from down.** With the new recogniser, the curved noodle cup (ro-04) was otherwise turned 180°.
+5. **A paragraph with a table beside it on the right is read whole.** Before, the ingredients and the nutrition table next to them were read across, one line of each in turn.
+   - A broader version (every paragraph read as a block) helped the Kinder box a lot (31% to 0.6%), but broke 5 other photos where the detector splits a line at a wide word gap. So only the narrow version was kept.
+
+| Character error rate, folded (all text of the photo) | v3.1 | v3.2 |
+|---|---:|---:|
+| ro – Romanian | 45.2% | **20.3%** |
+| fr – French | 43.9% | **1.7%** |
+| en – English | 48.3% | **0%** |
+| de – German | 4.6% | **0.6%** |
+| it – Italian | 37.6% | **11.0%** |
+| pl – Polish | 14.9% | **5.3%** |
+| hu – Hungarian | 18.5% | **13.3%** |
+| sk – Slovak | 21.7% | **4.5%** |
+| sr – Serbian (Latin) | 10.0% | **4.1%** |
+| bg – Bulgarian (Cyrillic) | 88.7% | **45.9%** |
+| el – Greek (no Greek model) | 87.2% | 42.5% |
+| hr – Croatian | 74.4% | 64.9% |
+| cs – Czech | 55.7% | 42.5% |
+| **All 13,492 characters** | ~45% | **22.8%** |
+
+| | v3.1 | v3.2 |
+|---|---:|---:|
+| Strict (with diacritics), Romanian | 47.7% | 21.6% |
+| Nutrition tables: row names / values found | 43% / 66% | 81% / 82% |
+| Orientation correct, real photos | 18 / 20 | **20 / 20** |
+| Orientation correct, synthetic rotations (`bench:ocr --rotations`) | 48 / 48 | 48 / 48 |
+| What the app picks by itself: ingredients CER folded | 49.3% | 37.0% |
+| "Ingrediente:" heading found by itself | 5 / 18 | 12 / 18 |
+| Time per photo, median (desktop): all text / the app's full path | 9.3 s / 15.3 s | 12.9 s / 17.4 s |
+
+**Still weak:**
+- The dark, curved instant-noodle cup (ro-02/03/04: 40–65%). The text sits on a black curved surface and is partly hidden.
+- The bag folded at the left edge (ro-09).
+- Croatian and Czech. Most of their text is on those two photos.
+- What the app picks by itself on packs with several languages or a table next to the ingredients: on 4 photos it still frames the wrong block. Choosing the block better is the next step for reading.
+- The remaining Bulgarian errors come from mixed lines (Romanian and Bulgarian on one row).
+
+The time per photo on a phone is still to be measured on the phone.
 
 ## Baseline (the app as it is in v3.0)
 
@@ -65,7 +117,7 @@ Every text block (ingredients per language, origin, storage, preparation) was tr
 4. **Close lines merge.** On dense labels (ketchup storage text, nutrition tables), two neighbouring lines sometimes come out as one box, which then reads as nothing.
 5. **The app picks the wrong part of the photo.** On multi-language packs the automatic crop often frames another language or the nutrition table. The heading was found on only 5 of 18 photos. On the Italian pasta the whole text reads at 2.9% CER, but the app's extracted ingredients come out at 83%.
 
-## Preview for v3.2: stretching each line 2× before recognition
+## v3.1 preview: stretching each line 2× before recognition
 
 The same 20 photos with one change: each line is stretched to twice its width before recognition (`recWidth` × 2, max 4000 px). The app was not changed in v3.1. This is only what v3.2 starts from.
 
