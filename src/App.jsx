@@ -11,10 +11,11 @@ import { createRepeatFilter, addScan, updateScan } from './lib/shopping.js';
 import { vibrate } from './lib/camera.js';
 import { summaryParts } from './components/Result.jsx';
 import { buildBackup, backupFileName, historyToRestore, mergeSaved, clearLocalData, requestPersistence } from './lib/backup.js';
-import { defaultAvoidState } from './data/avoidPresets.js';
 import { buildRequest } from './lib/request.js';
 import { detectLang, t } from './lib/i18n.js';
-import { getLang, setLang as saveLang, getAvoidState, setAvoidState, getFlag, setFlag } from './lib/storage.js';
+import { getLang, setLang as saveLang, getProfiles, setProfiles as saveProfiles, getFlag, setFlag } from './lib/storage.js';
+import { activeAvoid, updateActive, addProfile, setActive } from './lib/profiles.js';
+import { decodeList } from './lib/shareList.js';
 import { createHistoryStore, makeEntry, entryRequest, entryTitle } from './lib/history.js';
 import { createSavedStore, savedFromRequest, requestFromSaved } from './lib/savedIngredients.js';
 import TabBar from './components/TabBar.jsx';
@@ -30,6 +31,7 @@ const CompareView = lazy(() => import('./components/CompareView.jsx'));
 const AvoidListView = lazy(() => import('./components/AvoidListView.jsx'));
 const AboutView = lazy(() => import('./components/AboutView.jsx'));
 const Onboarding = lazy(() => import('./components/Onboarding.jsx'));
+const GlossaryDialog = lazy(() => import('./components/GlossaryDialog.jsx'));
 
 const Loading = () => <section className="card ocr-progress" aria-busy="true"><div className="spinner" aria-hidden="true" /></section>;
 
@@ -45,7 +47,10 @@ const Loading = () => <section className="card ocr-progress" aria-busy="true"><d
  */
 export default function App() {
   const [lang, setLang] = useState(() => getLang() || detectLang());
-  const [avoid, setAvoid] = useState(() => getAvoidState());
+  // Family profiles; `avoid` is the active profile's list (presets, custom, allergens).
+  const [profiles, setProfilesState] = useState(() => getProfiles(getLang() || detectLang()));
+  const avoid = useMemo(() => activeAvoid(profiles), [profiles]);
+  const changeProfiles = useCallback((next) => { setProfilesState(next); saveProfiles(next); }, []);
   const [text, setText] = useState('');
   const [chosenType, setChosenType] = useState(null); // null = auto
   const [scanning, setScanning] = useState(false);
@@ -64,6 +69,9 @@ export default function App() {
   const [compare, setCompare] = useState(null); // two history entries
   const [onboarded, setOnboarded] = useState(() => getFlag('onboarded'));
   const [toast, setToast] = useState(null);
+  const [glossary, setGlossary] = useState(null); // term id while the glossary is open
+  const [incoming, setIncoming] = useState(null); // { name, avoid } from an #import= link, or { error }
+  const [scanFirst, setScanFirstState] = useState(() => getFlag('scanFirst'));
   const abortRef = useRef(null);
   const storeRef = useRef(null);
   const savedRef = useRef(null);
@@ -79,6 +87,38 @@ export default function App() {
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
+
+  // "?" buttons anywhere open the glossary.
+  useEffect(() => {
+    const onGlossary = (e) => setGlossary(e.detail || 'nova');
+    window.addEventListener('ingrediscan:glossary', onGlossary);
+    return () => window.removeEventListener('ingrediscan:glossary', onGlossary);
+  }, []);
+
+  // A list sent by link (#import=…): ask before adding it as a new profile.
+  useEffect(() => {
+    const check = async () => {
+      try {
+        const list = await decodeList(window.location.hash);
+        if (list) setIncoming(list);
+      } catch {
+        setIncoming({ error: true });
+      }
+    };
+    check();
+    window.addEventListener('hashchange', check);
+    return () => window.removeEventListener('hashchange', check);
+  }, []);
+  const closeIncoming = useCallback(() => {
+    setIncoming(null);
+    try { window.history.replaceState(null, '', window.location.pathname + window.location.search); } catch { /* ignore */ }
+  }, []);
+
+  // "Open the scanner on start" (Settings), once onboarding is done.
+  useEffect(() => {
+    if (getFlag('scanFirst') && getFlag('onboarded') && !window.location.hash) setScanning(true);
+  }, []);
+  const changeScanFirst = (on) => { setFlag('scanFirst', on); setScanFirstState(on); };
 
   // History store (IndexedDB, or localStorage as a fallback).
   useEffect(() => {
@@ -146,7 +186,7 @@ export default function App() {
 
   // ───── Settings: backup, restore, delete everything ─────
   const exportData = useCallback(() => {
-    const data = buildBackup({ history, saved: savedStoreRef.current.all(), avoid });
+    const data = buildBackup({ history, saved: savedStoreRef.current.all(), profiles });
     const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
     const a = document.createElement('a');
     a.href = url;
@@ -155,7 +195,7 @@ export default function App() {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 10_000);
-  }, [history, avoid]);
+  }, [history, profiles]);
 
   /** Adds new / newer history and remembered ingredients; the avoid list is replaced. */
   const importData = useCallback(async (backup) => {
@@ -167,9 +207,10 @@ export default function App() {
     const merged = mergeSaved(before, backup.saved);
     savedStoreRef.current.replaceAll(merged);
     const savedAdded = Object.keys(merged).filter((c) => merged[c] !== before[c]).length;
-    if (backup.avoid) { setAvoid(backup.avoid); setAvoidState(backup.avoid); }
-    return { history: toWrite.length, saved: savedAdded, avoid: !!backup.avoid };
-  }, [history]);
+    if (backup.profiles) changeProfiles(backup.profiles);
+    else if (backup.avoid) changeProfiles(updateActive(profiles, backup.avoid));
+    return { history: toWrite.length, saved: savedAdded, avoid: !!(backup.avoid || backup.profiles) };
+  }, [history, profiles, changeProfiles]);
 
   const deleteAllData = useCallback(async () => {
     try { await (await storeRef.current).clear(); } catch { /* ignore */ }
@@ -177,7 +218,6 @@ export default function App() {
     // Cached product lookups also record what was scanned. The OCR engine is kept (no personal data).
     try { await globalThis.caches?.delete('openfacts-api'); } catch { /* ignore */ }
     setHistory([]);
-    setAvoid(defaultAvoidState());
     window.location.reload();
   }, []);
 
@@ -378,9 +418,14 @@ export default function App() {
     setLang(l);
     saveLang(l);
   };
-  const changeAvoid = (s) => {
-    setAvoid(s);
-    setAvoidState(s);
+  const changeAvoid = (s) => changeProfiles(updateActive(profiles, s));
+  const addIncoming = () => {
+    const name = incoming.name || t(lang, 'profileShared');
+    const next = addProfile(profiles, name, incoming.avoid);
+    changeProfiles(next);
+    notify(t(lang, 'importAdded', { name }));
+    closeIncoming();
+    setTab('list');
   };
   const changeTab = (next) => {
     if (next === tab && next === 'history') { setHistoryOpen(null); setCompare(null); }
@@ -415,6 +460,7 @@ export default function App() {
         lang={lang} result={historyResult} text={historyOpen.product ? historyOpen.product.ingredientsText || historyOpen.text : historyOpen.text}
         typeAuto={false} product={historyOpen.product} barcode={historyOpen.barcode} fromPhoto={historyOpen.fromPhoto}
         onBack={() => setHistoryOpen(null)} backLabel="backToHistory" notify={notify} watchedAllergens={avoid.allergens}
+        profiles={profiles} onProfile={(id) => changeProfiles(setActive(profiles, id))}
       />
     ) : (
       <Suspense fallback={<Loading />}>
@@ -428,13 +474,13 @@ export default function App() {
   } else if (tab === 'list') {
     screen = (
       <Suspense fallback={<Loading />}>
-        <AvoidListView lang={lang} avoid={avoid} onChange={changeAvoid} history={history} notify={notify} />
+        <AvoidListView lang={lang} avoid={avoid} onChange={changeAvoid} history={history} notify={notify} profiles={profiles} onProfiles={changeProfiles} />
       </Suspense>
     );
   } else if (tab === 'about') {
     screen = (
       <Suspense fallback={<Loading />}>
-        <AboutView lang={lang} onExport={exportData} onImport={importData} onDeleteAll={deleteAllData} />
+        <AboutView lang={lang} onExport={exportData} onImport={importData} onDeleteAll={deleteAllData} scanFirst={scanFirst} onScanFirst={changeScanFirst} />
       </Suspense>
     );
   } else if (photo) {
@@ -478,7 +524,7 @@ export default function App() {
         text={submitted.text?.trim() ? submitted.text : submitted.product?.ingredientsText || ''}
         product={submitted.product} barcode={submitted.barcode} fromPhoto={submitted.fromPhoto} onBack={leave} backLabel={leaveLabel}
         saved={submitted.saved} onRetake={retakeSaved} onForget={() => forgetSaved(submitted.barcode)}
-        watchedAllergens={avoid.allergens}
+        watchedAllergens={avoid.allergens} profiles={profiles} onProfile={(id) => changeProfiles(setActive(profiles, id))}
       />
     );
   } else {
@@ -514,13 +560,21 @@ export default function App() {
       <OfflineBanner lang={lang} />
       <Header lang={lang} onLang={changeLang} />
       {tab === 'scan' && !photo && !lookup && !result && <InstallCard lang={lang} />}
-      <main id="main" ref={mainRef} tabIndex={-1}>{screen}</main>
+      <main id="main" ref={mainRef} tabIndex={-1}>
+        {incoming && <ImportCard lang={lang} incoming={incoming} full={profiles.profiles.length >= 8} onAdd={addIncoming} onClose={closeIncoming} />}
+        {screen}
+      </main>
       {tab !== 'about' && <Disclaimer lang={lang} type={footerType} />}
       <TabBar lang={lang} tab={tab} onTab={changeTab} badge={0} />
       <Toast toast={toast} onClose={() => setToast(null)} />
       {!onboarded && (
         <Suspense fallback={null}>
-          <Onboarding lang={lang} onLang={changeLang} onDone={finishOnboarding} />
+          <Onboarding lang={lang} onLang={changeLang} onDone={finishOnboarding} onExample={(sample) => { finishOnboarding(); setTab('scan'); analyzeText(sample); }} />
+        </Suspense>
+      )}
+      {glossary && (
+        <Suspense fallback={null}>
+          <GlossaryDialog lang={lang} term={glossary} onClose={() => setGlossary(null)} />
         </Suspense>
       )}
       {scanning && (
@@ -532,5 +586,30 @@ export default function App() {
         </Suspense>
       )}
     </div>
+  );
+}
+
+/** A list someone sent by link: preview, then add as a new profile or dismiss. */
+function ImportCard({ lang, incoming, full, onAdd, onClose }) {
+  if (incoming.error) {
+    return (
+      <section className="card import-card" role="alert">
+        <p>{t(lang, 'importInvalid')}</p>
+        <button type="button" className="btn ghost small-btn" onClick={onClose}>{t(lang, 'close')}</button>
+      </section>
+    );
+  }
+  const { avoid } = incoming;
+  const presets = Object.values(avoid.presets || {}).filter(Boolean).length;
+  return (
+    <section className="card import-card" aria-labelledby="import-h">
+      <h2 id="import-h" className="card-title">📨 {t(lang, 'importTitle', { name: incoming.name || t(lang, 'profileShared') })}</h2>
+      <p className="small">{t(lang, 'importSummary', { presets, custom: avoid.custom?.length || 0, allergens: avoid.allergens?.length || 0 })}</p>
+      {full && <p className="small form-error">{t(lang, 'importFull')}</p>}
+      <div className="actions">
+        <button type="button" className="btn primary small-btn" disabled={full} onClick={onAdd}>{t(lang, 'importAdd')}</button>
+        <button type="button" className="btn ghost small-btn" onClick={onClose}>{t(lang, 'importDismiss')}</button>
+      </div>
+    </section>
   );
 }

@@ -1,6 +1,6 @@
 import { t } from '../lib/i18n.js';
 
-const EXAMPLES = {
+export const EXAMPLES = {
   food: {
     ro: 'Ingrediente: zahăr, făină de grâu, ulei de palmier, sirop de glucoză-fructoză, cacao degresată 4%, emulgatori: lecitină din soia, E471; agent de afânare: bicarbonat de sodiu; colorant: caramel amoniacal-sulfitic (E150d), E129; conservant: sorbat de potasiu; acidifiant: acid citric; arome. Poate conține urme de lapte.',
     en: 'Ingredients: sugar, wheat flour, palm oil, glucose-fructose syrup, fat-reduced cocoa 4%, emulsifiers: soy lecithin, E471; raising agent: sodium bicarbonate; colours: sulphite ammonia caramel (E150d), E129; preservative: potassium sorbate; acid: citric acid; flavourings. May contain traces of milk.',

@@ -1,4 +1,5 @@
 import { t, pick } from '../lib/i18n.js';
+import HelpButton from './HelpButton.jsx';
 import { NONFOOD_CATEGORIES } from '../data/nonFoodIngredients.js';
 import { itemDomId } from '../lib/share.js';
 import { REGIONS, regionShort } from '../data/restrictions.js';
@@ -38,7 +39,7 @@ function AdditiveItem({ lang, item, showCode }) {
           {item.why && <p>{pick(item.why, lang)}</p>}
           {restricted && (
             <div className="restricted-box">
-              <p><strong>🌍 {t(lang, 'restrictedTitle')}</strong></p>
+              <p><strong>🌍 {t(lang, 'restrictedTitle')}</strong> <HelpButton lang={lang} term="status" /></p>
               <ul>
                 {item.restrictions.map((x) => (
                   <li key={x.region + x.status}>

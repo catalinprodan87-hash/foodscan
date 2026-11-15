@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { t, pick } from '../lib/i18n.js';
 import { ALLERGENS } from '../data/allergens.js';
+import ProfileBar from './ProfileBar.jsx';
 import { presetsForType } from '../data/avoidPresets.js';
 import {
   addCustom, updateCustom, removeCustom, setPreset, exportAvoidList, importAvoidList, previewCounts, setWatchedAllergen,
@@ -12,7 +13,8 @@ const GROUP_LABEL = { food: 'groupFood', cosmetic: 'groupCosmetic', household: '
 
 function TypeChips({ lang, types }) {
   return (
-    <span className="type-chips" aria-label={`${t(lang, 'appliesTo')}: ${types.map((x) => t(lang, 'type_' + x)).join(', ')}`}>
+    <span className="type-chips">
+      <span className="sr-only">{`${t(lang, 'appliesTo')}: ${types.map((x) => t(lang, 'type_' + x)).join(', ')}`}</span>
       {types.map((x) => (
         <span key={x} className={`type-pill type-pill-${x}`} aria-hidden="true">{TYPE_ICON[x]} {t(lang, 'type_' + x)}</span>
       ))}
@@ -84,7 +86,7 @@ function download(filename, text) {
 }
 
 /** "Lista mea": presets per product type, custom entries, export / import. */
-export default function AvoidListView({ lang, avoid, onChange, history, notify }) {
+export default function AvoidListView({ lang, avoid, onChange, history, notify, profiles, onProfiles }) {
   const [editing, setEditing] = useState(null);
   const fileRef = useRef(null);
   const counts = useMemo(() => previewCounts(history, avoid), [history, avoid]);
@@ -111,6 +113,7 @@ export default function AvoidListView({ lang, avoid, onChange, history, notify }
         <h1 className="card-title page-title" tabIndex={-1}>{t(lang, 'listTitle')}</h1>
         <p className="muted small">{t(lang, 'listIntro')}</p>
       </section>
+      {profiles && <ProfileBar lang={lang} profiles={profiles} onChange={onProfiles} notify={notify} />}
 
       {TYPES.map((type) => (
         <section key={type} className="card" aria-labelledby={`group-${type}`}>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { t, LANGS } from '../lib/i18n.js';
+import { EXAMPLES } from './IngredientInput.jsx';
 
 const SLIDES = [
   { icon: '🔍', title: 'onb1Title', text: 'onb1Text' },
@@ -8,7 +9,7 @@ const SLIDES = [
 ];
 
 /** First-run slides: what it does, disclaimer, camera & privacy. */
-export default function Onboarding({ lang, onLang, onDone }) {
+export default function Onboarding({ lang, onLang, onDone, onExample }) {
   const [i, setI] = useState(0);
   const titleRef = useRef(null);
   const last = i === SLIDES.length - 1;
@@ -45,6 +46,11 @@ export default function Onboarding({ lang, onLang, onDone }) {
         <button type="button" className="btn primary block" onClick={() => (last ? onDone() : setI(i + 1))}>
           {t(lang, last ? 'onbStart' : 'onbNext')}
         </button>
+        {last && onExample && (
+          <button type="button" className="btn ghost block" onClick={() => onExample(EXAMPLES.food[lang] || EXAMPLES.food.ro)}>
+            🧪 {t(lang, 'onbExample')}
+          </button>
+        )}
       </div>
     </div>
   );

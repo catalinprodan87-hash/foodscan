@@ -1,7 +1,7 @@
 {
   "name": "ingrediscan",
   "private": true,
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "IngrediScan – installable web app that flags risky ingredients and additives in supermarket products (RO/EN).",
   "type": "module",
   "scripts": {
@@ -26,6 +26,7 @@
     "zxing-wasm": "^3.1.6"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
     "@playwright/test": "^1.63.0",
     "@vitejs/plugin-react": "^4.7.0",
     "paddle-ocr-onnx-models": "^0.2.0",

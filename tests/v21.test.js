@@ -24,14 +24,25 @@ const memory = () => {
 const entry = (id, date) => ({ id, date, text: 'apă', productType: 'food', verdict: 'ok' });
 
 describe('backup', () => {
-  test('round trip: build → JSON → parse', () => {
+  test('round trip: build → JSON → parse (version 2, family profiles)', () => {
     const avoid = { ...defaultAvoidState(), custom: [{ id: 'c1', terms: ['scorțișoară'], types: ['food'] }] };
-    const data = buildBackup({ history: [entry('b:1', '2026-11-01')], saved: { 1: { barcode: '1', text: 'sare', date: '2026-11-01' } }, avoid }, new Date('2026-11-15T10:00:00Z'));
+    const profiles = { profiles: [{ id: 'me', name: 'Eu', ...avoid }, { id: 'p2', name: 'Copil', ...defaultAvoidState(), allergens: ['milk'] }], active: 'p2' };
+    const data = buildBackup({ history: [entry('b:1', '2026-11-01')], saved: { 1: { barcode: '1', text: 'sare', date: '2026-11-01' } }, profiles }, new Date('2026-11-15T10:00:00Z'));
     assert.equal(data.version, BACKUP_VERSION);
     const back = parseBackup(JSON.stringify(data));
     assert.equal(back.history.length, 1);
     assert.equal(back.saved['1'].text, 'sare');
-    assert.deepEqual(back.avoid.custom[0].terms, ['scorțișoară']);
+    assert.deepEqual(back.profiles.profiles.map((p) => p.name), ['Eu', 'Copil']);
+    assert.deepEqual(back.profiles.profiles[0].custom[0].terms, ['scorțișoară']);
+    assert.deepEqual(back.profiles.profiles[1].allergens, ['milk']);
+    assert.equal(back.profiles.active, 'p2');
+  });
+
+  test('a version 1 backup (one list) still restores, as the active list', () => {
+    const v1 = { format: 'ingrediscan-backup', version: 1, history: [], saved: {}, avoid: { ...defaultAvoidState(), allergens: ['eggs'] } };
+    const back = parseBackup(JSON.stringify(v1));
+    assert.equal(back.profiles, null);
+    assert.deepEqual(back.avoid.allergens, ['eggs']);
   });
 
   test('an avoid-list export restores only the list', () => {

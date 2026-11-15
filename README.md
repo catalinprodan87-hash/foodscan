@@ -58,6 +58,16 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
+### Family lists, sending a list, glossary, accessibility (v2.8)
+
+- **One avoid list per person** (Lista mea → "Lista cui"): "Eu", "Copil", … up to 8. The list saved before v2.8 becomes "Eu". A result can be re-checked for another person with the "Verificat pentru" selector.
+- **Send a list by link**: "Trimite lista" shares a link (`#import=…`, the list compressed into the link – nothing goes to a server). Opening it shows what it contains and asks before adding it as a new person; a damaged link says so and changes nothing.
+- **New groups** (off by default): the six colours that must carry the EU warning for children (E102, E104, E110, E122, E124, E129) and caffeine / guarana.
+- **Glossary**: "?" next to NOVA, Nutri-Score, allergens and restrictions, and in About – NOVA, Nutri-Score, DZA/ADI, IARC groups, banned vs not approved, E-numbers, "may contain traces".
+- **Start with the camera** (About → Datele tale), and "Încearcă cu un exemplu" at the end of the first-run slides.
+- **Accessibility**: every screen is checked with axe (light and dark, no serious or critical issue), text at 200 % never makes a screen scroll sideways, score tiles read as one sentence. Manual TalkBack checklist: [docs/a11y.md](docs/a11y.md).
+- Backups are now version 2 (all profiles); version 1 files still restore.
+
 ### Shopping mode and comparing products (v2.7)
 
 - **Mod cumpărături** in the scanner: the camera stays on and each new barcode becomes a card in a sheet at the bottom (name, verdict colour, the main reason; badges *salvat*, *lipsesc ingredientele*, *cod magazin*, *negăsit*), looked up in the background. The same code within 10 s is ignored (the box is still in front of the camera); a code already in the list moves to the top. Tapping a card opens the full result; **Înapoi la cumpărături** returns to the camera with the list intact. Shopping scans go to the history. The camera stops after 5 minutes without a new product (battery, heat). `src/lib/shopping.js`.

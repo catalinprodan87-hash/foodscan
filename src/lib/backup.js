@@ -4,20 +4,21 @@
  * storage helpers behind the settings card. Pure parts are unit-tested.
  */
 import { sanitizeAvoidState, EXPORT_FORMAT as AVOID_FORMAT } from './avoidList.js';
+import { sanitizeProfiles } from './profiles.js';
 
 export const BACKUP_FORMAT = 'ingrediscan-backup';
-export const BACKUP_VERSION = 1;
+export const BACKUP_VERSION = 2; // 2: family profiles (v2.8); version 1 files (one avoid list) still restore
 export const KEY_PREFIX = 'ingrediscan:';
 
 /** The backup object (stringify it to save). */
-export function buildBackup({ history = [], saved = {}, avoid }, now = new Date()) {
+export function buildBackup({ history = [], saved = {}, profiles }, now = new Date()) {
   return {
     format: BACKUP_FORMAT,
     version: BACKUP_VERSION,
     exportedAt: now.toISOString(),
     history,
     saved,
-    avoid: sanitizeAvoidState(avoid),
+    profiles: sanitizeProfiles(profiles),
   };
 }
 
@@ -31,13 +32,15 @@ const isSaved = (s) => s && typeof s === 'object' && typeof s.barcode === 'strin
 /**
  * Reads a backup file (or an avoid-list export, which restores just the list).
  * Unknown or broken entries are skipped.
- * @returns {{history: object[], saved: Record<string, object>, avoid: object|null}}
+ * @returns {{history: object[], saved: Record<string, object>, avoid: object|null, profiles: object|null}}
+ *   profiles (version 2) replace all profiles; avoid (version 1, avoid-list
+ *   export) replaces the active profile's list
  * @throws Error('invalid') not an IngrediScan file; Error('newer') made by a newer app version
  */
 export function parseBackup(text) {
   let data;
   try { data = JSON.parse(text); } catch { throw new Error('invalid'); }
-  if (data?.format === AVOID_FORMAT) return { history: [], saved: {}, avoid: sanitizeAvoidState(data) };
+  if (data?.format === AVOID_FORMAT) return { history: [], saved: {}, avoid: sanitizeAvoidState(data), profiles: null };
   if (!data || data.format !== BACKUP_FORMAT) throw new Error('invalid');
   if (!(data.version >= 1)) throw new Error('invalid');
   if (data.version > BACKUP_VERSION) throw new Error('newer');
@@ -45,7 +48,8 @@ export function parseBackup(text) {
   const saved = Object.fromEntries(
     Object.values(data.saved && typeof data.saved === 'object' ? data.saved : {}).filter(isSaved).map((s) => [s.barcode, s]),
   );
-  return { history, saved, avoid: data.avoid ? sanitizeAvoidState(data.avoid) : null };
+  if (data.version >= 2 && data.profiles) return { history, saved, avoid: null, profiles: sanitizeProfiles(data.profiles) };
+  return { history, saved, avoid: data.avoid ? sanitizeAvoidState(data.avoid) : null, profiles: null };
 }
 
 /** History entries from the backup that are new or newer than what the phone has. */

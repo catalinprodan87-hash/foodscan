@@ -199,7 +199,7 @@ describe('non-food avoid presets', () => {
 
   test('presets are filtered by product type', () => {
     const ids = (t) => presetsForType(t).map((p) => p.id);
-    assert.deepEqual(ids('food'), ['palm', 'gfs', 'hydrogenated', 'sugar', 'flavourings', 'maltodextrin', 'modstarch']);
+    assert.deepEqual(ids('food'), ['palm', 'gfs', 'hydrogenated', 'sugar', 'flavourings', 'maltodextrin', 'modstarch', 'southampton', 'caffeine']);
     assert.deepEqual(ids('cosmetic'), NONFOOD_IDS);
     assert.deepEqual(ids('household'), NONFOOD_IDS.filter((id) => id !== 'parabens'));
   });

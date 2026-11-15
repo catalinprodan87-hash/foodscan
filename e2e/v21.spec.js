@@ -81,7 +81,8 @@ test('settings: backup, delete all, restore', async ({ page }) => {
   const backup = JSON.parse(readFileSync(await download.path(), 'utf8'));
   expect(backup.format).toBe('ingrediscan-backup');
   expect(backup.history).toHaveLength(1);
-  expect(backup.avoid.custom[0].terms).toEqual(['scorțișoară']);
+  expect(backup.version).toBe(2);
+  expect(backup.profiles.profiles[0].custom[0].terms).toEqual(['scorțișoară']);
 
   await page.click('.settings-card button:has-text("Șterge toate datele")');
   await page.click('text=Da, șterge tot');

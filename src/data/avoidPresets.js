@@ -93,6 +93,28 @@ export const AVOID_PRESETS = [
     codes: ['E1404', 'E1410', 'E1412', 'E1413', 'E1414', 'E1420', 'E1422', 'E1440', 'E1442', 'E1450', 'E1451', 'E1452'],
   },
 
+  {
+    // EU Reg. 1333/2008 Annex V: these six colours must carry "may have an
+    // adverse effect on activity and attention in children" (Southampton study).
+    id: 'southampton',
+    types: ['food'],
+    defaultOn: false,
+    label: { en: 'Colours with a warning for children', ro: 'Coloranți cu avertizare pentru copii' },
+    terms: [
+      'tartrazina', 'tartrazine', 'galben de chinolina', 'galben chinolina', 'quinoline yellow',
+      'galben amurg', 'galben sunset', 'sunset yellow', 'azorubina', 'carmoisina', 'azorubine', 'carmoisine',
+      'ponceau 4r', 'rosu ponceau', 'rosu cosenila a', 'rosu allura', 'allura red',
+    ],
+    codes: ['E102', 'E104', 'E110', 'E122', 'E124', 'E129'],
+  },
+  {
+    id: 'caffeine',
+    types: ['food'],
+    defaultOn: false,
+    label: { en: 'Caffeine', ro: 'Cafeină' },
+    terms: ['cafeina', 'cofeina', 'caffeine', 'guarana', 'extract de guarana', 'guarana extract'],
+  },
+
   // ───────────────── Non-food presets (cosmetics & household) ─────────────────
   // Matched by item code from nonFoodIngredients.js, all off by default.
   {

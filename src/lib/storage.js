@@ -1,5 +1,6 @@
 /** Small, failure-tolerant wrapper around localStorage. */
 import { sanitizeAvoidState } from './avoidList.js';
+import { sanitizeProfiles } from './profiles.js';
 import { LANGS } from './i18n.js';
 
 const PREFIX = 'ingrediscan:';
@@ -46,6 +47,15 @@ export function getAvoidState() {
 
 export function setAvoidState(state) {
   save('avoid', state);
+}
+
+/** Family profiles; the list saved before v2.8 becomes the first profile. */
+export function getProfiles(lang = 'ro') {
+  return sanitizeProfiles(load('profiles', null), load('avoid', null), lang);
+}
+
+export function setProfiles(state) {
+  save('profiles', state);
 }
 
 /** One-time flags: first-run slides seen, iPhone install hint dismissed. */

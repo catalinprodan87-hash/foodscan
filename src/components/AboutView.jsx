@@ -5,10 +5,11 @@ import { NONFOOD_INGREDIENTS } from '../data/nonFoodIngredients.js';
 import { RESTRICTIONS } from '../data/restrictions.js';
 import { ALLERGENS } from '../data/allergens.js';
 import SettingsCard from './SettingsCard.jsx';
+import { openGlossary } from '../data/glossary.js';
 
 const fmt = (iso, lang) => new Date(iso + 'T12:00:00Z').toLocaleDateString(lang === 'ro' ? 'ro-RO' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
-export default function AboutView({ lang, onExport, onImport, onDeleteAll }) {
+export default function AboutView({ lang, onExport, onImport, onDeleteAll, scanFirst, onScanFirst }) {
   /* global __APP_VERSION__, __BUILD_DATE__ */
   const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
   const built = typeof __BUILD_DATE__ !== 'undefined' ? __BUILD_DATE__ : null;
@@ -20,6 +21,7 @@ export default function AboutView({ lang, onExport, onImport, onDeleteAll }) {
         <p className="muted small">
           {t(lang, 'aboutVersion', { version, date: built ? fmt(built, lang) : '–' })}
         </p>
+        <button type="button" className="btn ghost small-btn" onClick={() => openGlossary('nova')}>📖 {t(lang, 'glossaryTitle')}</button>
       </section>
 
       <section className="card" aria-labelledby="about-privacy">
@@ -39,7 +41,7 @@ export default function AboutView({ lang, onExport, onImport, onDeleteAll }) {
         </ul>
       </section>
 
-      <SettingsCard lang={lang} onExport={onExport} onImport={onImport} onDeleteAll={onDeleteAll} />
+      <SettingsCard lang={lang} onExport={onExport} onImport={onImport} onDeleteAll={onDeleteAll} scanFirst={scanFirst} onScanFirst={onScanFirst} />
 
       <section className="card" aria-labelledby="about-products">
         <h2 id="about-products" className="card-title">{t(lang, 'aboutProducts')}</h2>

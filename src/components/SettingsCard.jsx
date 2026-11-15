@@ -8,7 +8,7 @@ const mb = (n) => (n == null ? '–' : (n / 1048576).toFixed(1));
  * About → "Datele tale": storage status, OCR engine download, backup
  * (export / import) and "delete all data".
  */
-export default function SettingsCard({ lang, onExport, onImport, onDeleteAll }) {
+export default function SettingsCard({ lang, onExport, onImport, onDeleteAll, scanFirst = false, onScanFirst }) {
   const [status, setStatus] = useState(null);
   const [ocr, setOcr] = useState({ state: 'checking' }); // checking | missing | ready | downloading | error
   const [pending, setPending] = useState(null); // parsed backup waiting for confirmation
@@ -78,6 +78,16 @@ export default function SettingsCard({ lang, onExport, onImport, onDeleteAll }) 
     <section className="card settings-card" aria-labelledby="about-data">
       <h2 id="about-data" className="card-title">💾 {t(lang, 'dataTitle')}</h2>
 
+      {onScanFirst && (
+        <>
+          <h3 className="settings-sub">{t(lang, 'startTitle')}</h3>
+          <label className="check-row small">
+            <input type="checkbox" checked={scanFirst} onChange={(e) => onScanFirst(e.target.checked)} />
+            <span>{t(lang, 'scanFirst')}</span>
+          </label>
+        </>
+      )}
+
       <h3 className="settings-sub">{t(lang, 'storageTitle')}</h3>
       <p className="small">
         {status?.persisted === true ? `✅ ${t(lang, 'storageKept')}` : status?.persisted === false ? `⚠️ ${t(lang, 'storageNotKept')}` : t(lang, 'storageUnknown')}
@@ -121,7 +131,7 @@ export default function SettingsCard({ lang, onExport, onImport, onDeleteAll }) 
         <div className="confirm-box" role="alertdialog" aria-labelledby="restore-q">
           <p id="restore-q" className="small">
             {t(lang, 'backupContains', { history: pending.history.length, saved: Object.keys(pending.saved).length })}
-            {pending.avoid ? ` ${t(lang, 'backupAvoidWillReplace')}` : ''}
+            {pending.avoid || pending.profiles ? ` ${t(lang, 'backupAvoidWillReplace')}` : ''}
           </p>
           <div className="actions">
             <button type="button" className="btn primary small-btn" onClick={confirmImport}>{t(lang, 'backupRestore')}</button>

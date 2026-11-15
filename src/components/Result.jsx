@@ -1,5 +1,6 @@
 import PhotoButton from './PhotoButton.jsx';
 import ReportProblem from './ReportProblem.jsx';
+import HelpButton from './HelpButton.jsx';
 import { ALLERGENS_BY_ID } from '../data/allergens.js';
 import { t, pick } from '../lib/i18n.js';
 import { normalize } from '../lib/analyze.js';
@@ -156,28 +157,30 @@ export function ScoreTiles({ lang, processing, why, grade, nutrition }) {
     <>
       <div className="score-tiles">
         <section className="card score-tile" aria-labelledby="tile-nova">
-          <span id="tile-nova" className="tile-label">{t(lang, 'scoreProcessing')}</span>
+          <span className="tile-head"><span id="tile-nova" className="tile-label">{t(lang, 'scoreProcessing')}</span><HelpButton lang={lang} term="nova" /></span>
+          {n && <p className="sr-only">{t(lang, 'novaSentence', { n, name: t(lang, 'nova_' + n), why: novaShort })}</p>}
           {n ? (
             <>
-              <p className="tile-value"><span className={`tile-big ${NOVA_COLOR[n]}-text`}>NOVA {n}</span> <span className="muted small">/ 4</span></p>
+              <p className="tile-value" aria-hidden="true"><span className={`tile-big ${NOVA_COLOR[n]}-text`}>NOVA {n}</span> <span className="muted small">/ 4</span></p>
               <div className="tile-scale" aria-hidden="true">
                 {[1, 2, 3, 4].map((g) => <span key={g} className={g === n ? `on ${NOVA_COLOR[g]}` : ''} />)}
               </div>
-              <p className="tile-name">{t(lang, 'nova_' + n)}</p>
-              <p className="tile-why">{t(lang, 'whyShort', { text: novaShort })}</p>
+              <p className="tile-name" aria-hidden="true">{t(lang, 'nova_' + n)}</p>
+              <p className="tile-why" aria-hidden="true">{t(lang, 'whyShort', { text: novaShort })}</p>
             </>
           ) : <p className="muted">{t(lang, 'nova_null')}</p>}
         </section>
         <section className="card score-tile" aria-labelledby="tile-nutri">
-          <span id="tile-nutri" className="tile-label">{t(lang, 'scoreNutrition')}</span>
+          <span className="tile-head"><span id="tile-nutri" className="tile-label">{t(lang, 'scoreNutrition')}</span><HelpButton lang={lang} term="nutriscore" /></span>
+          {grade && <p className="sr-only">{t(lang, 'nutriSentence', { grade: grade.toUpperCase(), name: t(lang, ['a', 'b'].includes(grade) ? 'nutriGood' : grade === 'c' ? 'nutriMid' : 'nutriPoor'), why: nutriShort })}</p>}
           {grade ? (
             <>
-              <p className="tile-value"><span className={`tile-big ns-text-${grade}`}>{grade.toUpperCase()}</span> <span className="muted small">Nutri-Score</span></p>
+              <p className="tile-value" aria-hidden="true"><span className={`tile-big ns-text-${grade}`}>{grade.toUpperCase()}</span> <span className="muted small">Nutri-Score</span></p>
               <div className="tile-scale five" aria-hidden="true">
                 {['a', 'b', 'c', 'd', 'e'].map((g) => <span key={g} className={g === grade ? `on ns-${g}` : ''} />)}
               </div>
-              <p className="tile-name">{t(lang, ['a', 'b'].includes(grade) ? 'nutriGood' : grade === 'c' ? 'nutriMid' : 'nutriPoor')}</p>
-              <p className="tile-why">{t(lang, 'whyShort', { text: nutriShort })}</p>
+              <p className="tile-name" aria-hidden="true">{t(lang, ['a', 'b'].includes(grade) ? 'nutriGood' : grade === 'c' ? 'nutriMid' : 'nutriPoor')}</p>
+              <p className="tile-why" aria-hidden="true">{t(lang, 'whyShort', { text: nutriShort })}</p>
             </>
           ) : <p className="muted">{t(lang, 'nutriNone')}</p>}
         </section>
@@ -257,7 +260,7 @@ function AllergenCard({ lang, allergens, diet, watched = [], fromPhoto }) {
   const watchedFound = [...contains, ...traces].some((a) => watched.includes(a.id));
   return (
     <section className={`card allergen-card${watchedFound ? ' has-watched' : ''}`} aria-labelledby="allergens-h">
-      <h3 id="allergens-h" className="card-title">{t(lang, 'allergensTitle')}</h3>
+      <h3 id="allergens-h" className="card-title">{t(lang, 'allergensTitle')} <HelpButton lang={lang} term="traces" /></h3>
       {contains.length > 0 && <p>{t(lang, 'allergensContains')} <strong>{names(contains)}</strong>.</p>}
       {traces.length > 0 && <p>{t(lang, 'allergensTraces')} {names(traces)}.</p>}
       {!contains.length && !traces.length && <p>{t(lang, 'allergensNone')}</p>}
@@ -297,7 +300,7 @@ export function summaryParts(result, lang) {
 
 export default function Result({
   lang, result, text, typeAuto, product, barcode, fromPhoto, onBack, backLabel: backLabelProp, notify,
-  saved, onRetake, onForget, watchedAllergens = [],
+  saved, onRetake, onForget, watchedAllergens = [], profiles, onProfile,
 }) {
   const food = isFood(result);
   const backLabel = backLabelProp || 'back';
@@ -314,6 +317,14 @@ export default function Result({
         </p>
       )}
       {saved && <SavedNote lang={lang} saved={saved} onRetake={onRetake} onForget={onForget} />}
+      {profiles?.profiles.length > 1 && onProfile && (
+        <p className="profile-switch">
+          <label htmlFor="result-profile">{t(lang, 'resultFor')}</label>{' '}
+          <select id="result-profile" value={profiles.active} onChange={(e) => onProfile(e.target.value)}>
+            {profiles.profiles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        </p>
+      )}
       <VerdictBanner lang={lang} result={result} />
       {food && <AllergenCard lang={lang} allergens={result.allergens} diet={result.diet} watched={watchedAllergens} fromPhoto={fromPhoto} />}
       <SafetyTips lang={lang} tips={result.safetyTips} />
