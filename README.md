@@ -58,6 +58,13 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
+### Share a photo into the app (v2.9)
+
+- On Android, with IngrediScan installed: in Gallery / Photos / Camera, **Share → IngrediScan** opens the photo straight in the crop-and-read step. Shared text (e.g. an ingredient list copied from a website) goes into the ingredients box.
+- How it works: the manifest declares a `share_target`; the service worker (`src/sw.js`, vite-plugin-pwa `injectManifest`) receives the photo, keeps it in Cache Storage on the phone and opens the app at `./?share=1`, which reads it once and removes it. Nothing is uploaded.
+- The service worker keeps the earlier behaviour: the app is precached, the OCR engine is cached on first use, product lookups are network-first, and a new version waits for "Reîncarcă" (which now also reloads when the update was found by the hourly check). Browser tests cover sharing, offline start, OCR caching and both update paths.
+- Not on iPhone (Safari has no Web Share Target) and not in a browser tab – only in the installed app.
+
 ### Family lists, sending a list, glossary, accessibility (v2.8)
 
 - **One avoid list per person** (Lista mea → "Lista cui"): "Eu", "Copil", … up to 8. The list saved before v2.8 becomes "Eu". A result can be re-checked for another person with the "Verificat pentru" selector.

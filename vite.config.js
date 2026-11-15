@@ -32,6 +32,16 @@ export default defineConfig({
     VitePWA({
       // 'prompt': a new version waits until the user taps "Reîncarcă" (no reload mid-scan).
       registerType: 'prompt',
+      // Own service worker (src/sw.js) for the Web Share Target; same caching as before.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
+      injectManifest: {
+        // Includes the 0.9 MB barcode decoder (scan/zxing_reader.wasm) so scanning works offline.
+        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest,wasm,woff2}'],
+        // The OCR engine (~9 MB) is not precached: it downloads on first use (runtime cache in sw.js).
+        globIgnores: ['ocr/**'],
+      },
       injectRegister: false, // registered in src/lib/pwa.js
       includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
       manifest: {
@@ -43,42 +53,19 @@ export default defineConfig({
         scope: './',
         display: 'standalone',
         orientation: 'portrait',
+        // Android: "Share → IngrediScan" for a photo of the ingredients (or text).
+        share_target: {
+          action: './share-target',
+          method: 'POST',
+          enctype: 'multipart/form-data',
+          params: { title: 'title', text: 'text', files: [{ name: 'photo', accept: ['image/*'] }] },
+        },
         background_color: '#f0fdfa',
         theme_color: '#0f766e',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
           { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
-        ],
-      },
-      workbox: {
-        // Includes the 0.9 MB barcode decoder (scan/zxing_reader.wasm) so scanning works offline.
-        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest,wasm,woff2}'],
-        clientsClaim: true, // the first install controls the page at once (OCR caching)
-        // The OCR engine (~9 MB) is not precached: it downloads on first use.
-        globIgnores: ['ocr/**'],
-        runtimeCaching: [
-          {
-            // Self-hosted OCR engine + language data: download once, then offline.
-            urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.includes('/ocr/') && !url.pathname.endsWith('manifest.json'),
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'ocr-engine',
-              expiration: { maxEntries: 20, maxAgeSeconds: 90 * 24 * 60 * 60 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            // Product lookups from Open Food / Beauty / Products Facts:
-            // fresh data when online, last known answer when offline.
-            urlPattern: /^https:\/\/world\.open(food|beauty|products)facts\.org\/api\/v2\/product\//,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'openfacts-api',
-              expiration: { maxEntries: 300, maxAgeSeconds: 14 * 24 * 60 * 60 },
-              cacheableResponse: { statuses: [200] },
-            },
-          },
         ],
       },
     }),

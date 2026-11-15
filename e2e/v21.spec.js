@@ -126,7 +126,8 @@ test('report a problem: editable text with version and timings, copied when shar
   await expect(page.locator('.verdict')).toBeVisible();
   await page.click('.report-problem summary');
   const text = page.locator('.report-problem textarea');
-  await expect(text).toHaveValue(/Versiune \/ Version: 2\.7\.0/);
+  const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
+  await expect(text).toHaveValue(new RegExp(`Versiune / Version: ${version.replace(/\./g, '\\.')}`));
   await expect(text).toHaveValue(/lookup \d+ ms ok \(found food\)/);
   await expect(text).toHaveValue(new RegExp(NUTELLA.code));
   await text.fill(`Test: ${await text.inputValue()}`);

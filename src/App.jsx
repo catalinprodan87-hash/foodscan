@@ -16,6 +16,7 @@ import { detectLang, t } from './lib/i18n.js';
 import { getLang, setLang as saveLang, getProfiles, setProfiles as saveProfiles, getFlag, setFlag } from './lib/storage.js';
 import { activeAvoid, updateActive, addProfile, setActive } from './lib/profiles.js';
 import { decodeList } from './lib/shareList.js';
+import { isShareLaunch, takeShared } from './lib/shareTarget.js';
 import { createHistoryStore, makeEntry, entryRequest, entryTitle } from './lib/history.js';
 import { createSavedStore, savedFromRequest, requestFromSaved } from './lib/savedIngredients.js';
 import TabBar from './components/TabBar.jsx';
@@ -114,10 +115,27 @@ export default function App() {
     try { window.history.replaceState(null, '', window.location.pathname + window.location.search); } catch { /* ignore */ }
   }, []);
 
-  // "Open the scanner on start" (Settings), once onboarding is done.
+  // Opened from Android's share sheet (?share=1): a photo goes to the photo
+  // flow, text into the ingredients box. Otherwise "open the scanner on start".
   useEffect(() => {
+    if (isShareLaunch()) {
+      try { window.history.replaceState(null, '', window.location.pathname + window.location.hash); } catch { /* ignore */ }
+      takeShared().then((shared) => {
+        if (shared?.file) {
+          setFlag('onboarded');
+          setOnboarded(true);
+          setPhoto({ file: shared.file, product: null, barcode: null });
+        } else if (shared?.text) {
+          setText(shared.text);
+          notify(t(getLang() || detectLang(), 'shareTextReady'));
+        } else {
+          notify(t(getLang() || detectLang(), 'shareEmpty'));
+        }
+      });
+      return;
+    }
     if (getFlag('scanFirst') && getFlag('onboarded') && !window.location.hash) setScanning(true);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const changeScanFirst = (on) => { setFlag('scanFirst', on); setScanFirstState(on); };
 
   // History store (IndexedDB, or localStorage as a fallback).

@@ -501,6 +501,9 @@ const STRINGS = {
     onbExample: 'Try it with an example',
     novaSentence: 'Processing: NOVA {n} of 4, {name}. Because: {why}',
     nutriSentence: 'Nutrition: Nutri-Score {grade}, {name}. Because: {why}',
+    // v2.9: share into the app
+    shareTextReady: 'Shared text added to the box \u2013 check it, then tap Analyse.',
+    shareEmpty: 'Nothing arrived from the share \u2013 try again, or take the photo in the app.',
   },
   ro: {
     appName: 'IngrediScan',
@@ -974,16 +977,16 @@ const STRINGS = {
     // v2.8: profiluri, trimitere listă, glosar, setare pornire
     profilesTitle: 'Lista cui',
     profileAdd: 'Adaugă persoană',
-    profilesHint: 'Rezultatele sunt verificate cu lista lui {name}. Fiecare persoană are lista ei.',
+    profilesHint: 'Rezultatele sunt verificate cu lista: {name}. Fiecare persoană are lista ei.',
     profileName: 'Nume (ex. Copil)',
     profileCreate: 'Adaugă',
     profileSave: 'Salvează',
     profileRename: 'Redenumește',
     profileDelete: 'Șterge',
-    profileDeleteConfirm: 'Ștergi lista lui {name}?',
+    profileDeleteConfirm: 'Ștergi lista „{name}”?',
     profileShared: 'Listă primită',
     sendList: 'Trimite lista',
-    sendListText: 'Lista de evitat a lui {name} în IngrediScan \u2013 deschide linkul ca s-o adaugi.',
+    sendListText: 'Lista de evitat „{name}” din IngrediScan \u2013 deschide linkul ca s-o adaugi.',
     sendListCopied: 'Link copiat \u2013 lipește-l într-un mesaj.',
     resultFor: 'Verificat pentru:',
     importTitle: 'Listă primită: {name}',
@@ -1000,6 +1003,9 @@ const STRINGS = {
     onbExample: 'Încearcă cu un exemplu',
     novaSentence: 'Procesare: NOVA {n} din 4, {name}. Motiv: {why}',
     nutriSentence: 'Nutriție: Nutri-Score {grade}, {name}. Motiv: {why}',
+    // v2.9: partajare în aplicație
+    shareTextReady: 'Textul partajat e în casetă \u2013 verifică-l, apoi apasă Analizează.',
+    shareEmpty: 'Nu a sosit nimic prin partajare \u2013 încearcă din nou sau fă poza din aplicație.',
   },
 };
 

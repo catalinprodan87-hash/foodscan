@@ -32,6 +32,11 @@ export function onNeedRefresh(fn) {
 
 /** Activates the waiting service worker and reloads the page. */
 export function applyUpdate() {
-  if (updateSW) updateSW(true);
-  else window.location.reload();
+  if (!updateSW) { window.location.reload(); return; }
+  // workbox-window reloads only for an update it found itself; one found by
+  // the hourly check would activate without a reload, so reload on the switch.
+  let done = false;
+  const reload = () => { if (!done) { done = true; window.location.reload(); } };
+  navigator.serviceWorker?.addEventListener('controllerchange', reload, { once: true });
+  updateSW(true);
 }

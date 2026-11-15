@@ -954,7 +954,7 @@ main:focus { outline: none; }
 .profile-form input { flex: 1 1 140px; min-width: 0; }
 .profile-actions { flex-wrap: wrap; }
 .profile-switch { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 4px 2px; font-size: 0.92rem; }
-.profile-switch select { font: inherit; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border, #ccc); background: var(--card, #fff); color: inherit; max-width: 100%; }
+.profile-switch select { font: inherit; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); max-width: 100%; }
 .import-card { border: 2px solid var(--teal); }
 .check-row { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
 .check-row input { width: 20px; height: 20px; flex: none; margin-top: 1px; }
