@@ -996,3 +996,16 @@ main:focus { outline: none; }
 .photo-strip li { flex: none; display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .photo-strip img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
 .add-photos { align-items: center; flex-wrap: wrap; margin: 4px 2px 14px; }
+/* v3.5 nutrition */
+.nutri-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 6px 0; }
+.nutri-table th, .nutri-table td { padding: 5px 4px; border-bottom: 1px solid var(--border); text-align: left; }
+.nutri-table td { text-align: right; white-space: nowrap; }
+.nutri-table th.sub { padding-left: 16px; font-weight: 400; color: var(--muted); }
+.nutri-table tr.nutri-bad td { color: var(--high); font-weight: 700; }
+.nutri-problems { list-style: none; padding: 0; margin: 6px 0; color: var(--high); }
+.nutri-edit { display: grid; gap: 6px; }
+.nutri-field { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.nutri-field input { width: 7em; font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); text-align: right; }
+.nutri-category { margin-top: 10px; }
+.nutri-computed { margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: var(--bg); }
+.tile-computed { font-size: 0.72rem; color: var(--muted); }

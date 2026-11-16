@@ -13,7 +13,7 @@ export const SAVED_MAX = 1000;
 const LS_KEY = 'ingrediscan:savedIngredients';
 
 // Product fields worth keeping (the database's own ingredients are not needed).
-const PRODUCT_FIELDS = ['code', 'productType', 'name', 'brands', 'quantity', 'image', 'source', 'url', 'ingredientsLang',
+const PRODUCT_FIELDS = ['code', 'productType', 'name', 'brands', 'quantity', 'image', 'source', 'url', 'ingredientsLang', 'nutriments', 'categories',
   'additiveTags', 'nova', 'nutriscore', 'nutrition', 'allergenTags', 'traceTags', 'analysisTags', 'updated'];
 
 export function productSnapshot(p) {

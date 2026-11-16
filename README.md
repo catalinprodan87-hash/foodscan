@@ -58,6 +58,19 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
+### Nutrition values and the app's own Nutri-Score (v3.5)
+
+- **Values per 100 g / 100 ml:** energy, fat, saturated fat, carbohydrates, sugars, fibre, protein and salt. They come from Open Food Facts, or from your photo of the nutrition table (`src/lib/nutritionText.js` reads RO / EN / HU / BG / DE / FR / IT / PL / HR / CZ row names). The table layout with the portion column first, as on oil bottles, is handled, and the reference intake (8400 kJ / 2000 kcal) is ignored.
+- **Sanity checks:**
+  - energy against 37 kJ/g fat + 17 kJ/g carbohydrates and protein + 8 kJ/g fibre (Reg. 1169/2011 Annex XIV);
+  - kJ against kcal;
+  - sugars ≤ carbohydrates, saturated fat ≤ fat;
+  - nothing above 100 g.
+
+  Problems are shown, and the values can be corrected and are kept for the barcode (in backups too).
+- **Nutri-Score computed on the phone** when the database has none and the values are consistent. It uses the 2023 algorithm (`src/lib/nutriscore.js`) for food, drinks, water, fats / oils / nuts and cheese, and is marked "calculat de aplicație". The category is guessed from the database categories, the quantity (ml) and the ingredients, and one tap corrects it. The share of fruits, vegetables and legumes comes from the percentages in the ingredients, or 0 when none is stated.
+- **Validation:** the same grade and score as Open Food Facts on 174 of 175 popular products sold in Romania (`tests/fixtures/nutriscore-off.json`, ODbL). The one difference is a salt value rounded on the label.
+
 ### Several photos per product (v3.4)
 
 - **Mai multe poze ale aceluiași produs** (home, not-found and no-ingredients screens) and **Adaugă poze** on a result open the gallery for several photos at once. Several shared photos open the same way.

@@ -1,0 +1,7517 @@
+{
+"_about": "Nutri-Score 2023 inputs and results computed by Open Food Facts (https://world.openfoodfacts.org) for 175 of the most scanned products sold in Romania, fetched 2026-11-16. Open Food Facts database: ODbL 1.0. Used only to check src/lib/nutriscore.js.",
+"products": [
+{
+"code": "5411188112709",
+"name": "Geröstete Mandel Ohne Zucker",
+"grade": "b",
+"score": 1,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 58,
+"points": 1
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat": {
+"value": 0.1,
+"points": 0
+},
+"salt": {
+"value": 0.15,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0.5,
+"points": 0
+},
+"fiber": {
+"value": 0.3,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8410376009392",
+"name": "gullon fibre zero sugar free",
+"grade": "d",
+"score": 14,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1912.1,
+"points": 5
+},
+"sugars": {
+"value": 5,
+"points": 1
+},
+"saturated_fat": {
+"value": 17,
+"points": 10
+},
+"salt": {
+"value": 0.65,
+"points": 3
+},
+"fiber": {
+"value": 9.3,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8000500426494",
+"name": "Nutella Plant-Based",
+"grade": "e",
+"score": 27,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2229,
+"points": 6
+},
+"sugars": {
+"value": 45.4,
+"points": 13
+},
+"saturated_fat": {
+"value": 11,
+"points": 10
+},
+"salt": {
+"value": 0.07,
+"points": 0
+},
+"fiber": {
+"value": 4.56,
+"points": 2
+},
+"fruits_vegetables_legumes": {
+"value": 13.5,
+"points": 0
+}
+}
+},
+{
+"code": "20724696",
+"name": "Amandes décortiquées",
+"grade": "a",
+"score": -10,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 159.1,
+"points": 1
+},
+"sugars": {
+"value": 4.8,
+"points": 1
+},
+"saturated_fat_ratio": {
+"value": 8.1,
+"points": 0
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"proteins": {
+"value": 24.5,
+"points": 7
+},
+"fiber": {
+"value": 12.1,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5411188124689",
+"name": "Oat No Sugars",
+"grade": "c",
+"score": 3,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 183.5,
+"points": 3
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat": {
+"value": 0.2,
+"points": 0
+},
+"salt": {
+"value": 0.1,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0.8,
+"points": 0
+},
+"fiber": {
+"value": 0.7,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5449000000996",
+"name": "Coca-Cola Original",
+"grade": "e",
+"score": 12,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 185,
+"points": 3
+},
+"sugars": {
+"value": 10.9,
+"points": 9
+},
+"saturated_fat": {
+"value": 0,
+"points": 0
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": null,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "80176800",
+"name": "Nutella",
+"grade": "e",
+"score": 36,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2211.4,
+"points": 6
+},
+"sugars": {
+"value": 56,
+"points": 15
+},
+"saturated_fat": {
+"value": 10.67,
+"points": 10
+},
+"salt": {
+"value": 1.07,
+"points": 5
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8000500310427",
+"name": "Biscuits NUTELLA Biscuits Noisettes et Cacao x22 - 304g",
+"grade": "e",
+"score": 28,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2158,
+"points": 6
+},
+"sugars": {
+"value": 35.8,
+"points": 10
+},
+"saturated_fat": {
+"value": 11.5,
+"points": 10
+},
+"salt": {
+"value": 0.56,
+"points": 2
+},
+"fiber": {
+"value": null,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "20005733",
+"name": "Cerneaux de Noix",
+"grade": "a",
+"score": -8,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 251.6,
+"points": 2
+},
+"sugars": {
+"value": 3,
+"points": 0
+},
+"saturated_fat_ratio": {
+"value": 9.8,
+"points": 0
+},
+"salt": {
+"value": 0.02,
+"points": 0
+},
+"proteins": {
+"value": 15.5,
+"points": 6
+},
+"fiber": {
+"value": 6.8,
+"points": 4
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "20047238",
+"name": "Nuts Royal",
+"grade": "c",
+"score": 9,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2677,
+"points": 7
+},
+"sugars": {
+"value": 4.2,
+"points": 1
+},
+"saturated_fat": {
+"value": 6.3,
+"points": 6
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"fiber": {
+"value": 8.3,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5411188115366",
+"name": "Alpro smooth subtle creamy oat",
+"grade": "c",
+"score": 5,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 177,
+"points": 3
+},
+"sugars": {
+"value": 3.1,
+"points": 2
+},
+"saturated_fat": {
+"value": 0.2,
+"points": 0
+},
+"salt": {
+"value": 0.1,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0.8,
+"points": 0
+},
+"fiber": {
+"value": 0.7,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8715700407760",
+"name": "Tomato Ketchup BIO",
+"grade": "d",
+"score": 14,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 476,
+"points": 1
+},
+"sugars": {
+"value": 24.8,
+"points": 7
+},
+"saturated_fat": {
+"value": 0.1,
+"points": 0
+},
+"salt": {
+"value": 1.7,
+"points": 8
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 61.7,
+"points": 2
+}
+}
+},
+{
+"code": "59032823",
+"name": "nutella",
+"grade": "e",
+"score": 30,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2252,
+"points": 6
+},
+"sugars": {
+"value": 56.3,
+"points": 15
+},
+"saturated_fat": {
+"value": 10.6,
+"points": 10
+},
+"salt": {
+"value": 0.11,
+"points": 0
+},
+"fiber": {
+"value": 3.5,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489346357",
+"name": "Boisson à l'amande, sans sucres",
+"grade": "b",
+"score": 1,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 56,
+"points": 1
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat": {
+"value": 0.1,
+"points": 0
+},
+"salt": {
+"value": 0.13,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0.5,
+"points": 0
+},
+"fiber": {
+"value": 0.22,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3046920028721",
+"name": "Dark absolute 99% cacao",
+"grade": "d",
+"score": 16,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2341,
+"points": 6
+},
+"sugars": {
+"value": 0.49,
+"points": 0
+},
+"saturated_fat": {
+"value": 29,
+"points": 10
+},
+"salt": {
+"value": 0.06,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "40896243",
+"name": "Buo Cioccolato Fondente 70%",
+"grade": "e",
+"score": 20,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2372.6,
+"points": 7
+},
+"sugars": {
+"value": 28,
+"points": 8
+},
+"saturated_fat": {
+"value": 25,
+"points": 10
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 11.1,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "80052760",
+"name": "Kinder bueno",
+"grade": "e",
+"score": 29,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2415.2,
+"points": 7
+},
+"sugars": {
+"value": 41,
+"points": 11
+},
+"saturated_fat": {
+"value": 17,
+"points": 10
+},
+"salt": {
+"value": 0.27,
+"points": 1
+},
+"fiber": {
+"value": 2,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8715035110106",
+"name": "Sojasaus",
+"grade": "e",
+"score": 20,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 322,
+"points": 0
+},
+"sugars": {
+"value": 0.6,
+"points": 0
+},
+"saturated_fat": {
+"value": 0,
+"points": 0
+},
+"salt": {
+"value": 16.9,
+"points": 20
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 14.9,
+"points": 0
+}
+}
+},
+{
+"code": "3038354199603",
+"name": "Panzani sauce pesto basilic 200g",
+"grade": "e",
+"score": 20,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1289,
+"points": 3
+},
+"sugars": {
+"value": 3.5,
+"points": 1
+},
+"saturated_fat": {
+"value": 4.4,
+"points": 4
+},
+"salt": {
+"value": 2.8,
+"points": 13
+},
+"fiber": {
+"value": 1.7,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 43,
+"points": 1
+}
+}
+},
+{
+"code": "5449000131805",
+"name": "Coca-Cola Zero Sugar",
+"grade": "c",
+"score": 4,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 0.9,
+"points": 0
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat": {
+"value": 0,
+"points": 0
+},
+"salt": {
+"value": 0.02,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 2,
+"points": 4
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": null,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5411188116592",
+"name": "Coconut",
+"grade": "b",
+"score": 2,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 85.4,
+"points": 1
+},
+"sugars": {
+"value": 1.9,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.9,
+"points": 0
+},
+"salt": {
+"value": 0.12,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0.1,
+"points": 0
+},
+"fiber": {
+"value": 0.1,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 5.3,
+"points": 0
+}
+}
+},
+{
+"code": "54491472",
+"name": "Cola",
+"grade": "e",
+"score": 12,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 185.3,
+"points": 3
+},
+"sugars": {
+"value": 10.9,
+"points": 9
+},
+"saturated_fat": {
+"value": 0,
+"points": 0
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5449000131836",
+"name": "Coca-Cola Zero 500ml",
+"grade": "c",
+"score": 4,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 0,
+"points": 0
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat": {
+"value": 0,
+"points": 0
+},
+"salt": {
+"value": 0.05,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 3,
+"points": 4
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8076809573252",
+"name": "Baiocchi nocciola & cacao",
+"grade": "e",
+"score": 19,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2130,
+"points": 6
+},
+"sugars": {
+"value": 23,
+"points": 6
+},
+"saturated_fat": {
+"value": 6.5,
+"points": 6
+},
+"salt": {
+"value": 0.6,
+"points": 2
+},
+"fiber": {
+"value": 4,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8076809545396",
+"name": "Pesto con Rucola",
+"grade": "e",
+"score": 24,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1833,
+"points": 5
+},
+"sugars": {
+"value": 4.9,
+"points": 1
+},
+"saturated_fat": {
+"value": 5,
+"points": 4
+},
+"salt": {
+"value": 3,
+"points": 14
+},
+"fiber": {
+"value": 1.8,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 35.1,
+"points": 0
+}
+}
+},
+{
+"code": "4014400400007",
+"name": "Toffifee 15er",
+"grade": "e",
+"score": 26,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2177,
+"points": 6
+},
+"sugars": {
+"value": 48.8,
+"points": 14
+},
+"saturated_fat": {
+"value": 12.7,
+"points": 10
+},
+"salt": {
+"value": 0.27,
+"points": 1
+},
+"fiber": {
+"value": 16,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8076800195057",
+"name": "Spaghetti Nº5",
+"grade": "a",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1521,
+"points": 4
+},
+"sugars": {
+"value": 3.5,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.5,
+"points": 0
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"proteins": {
+"value": 13,
+"points": 5
+},
+"fiber": {
+"value": 3,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8000500082379",
+"name": "Nutella",
+"grade": "e",
+"score": 31,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2252,
+"points": 6
+},
+"sugars": {
+"value": 56.3,
+"points": 15
+},
+"saturated_fat": {
+"value": 10.6,
+"points": 10
+},
+"salt": {
+"value": 0.11,
+"points": 0
+},
+"fiber": {
+"value": 3,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5449000000286",
+"name": "Coca Cola",
+"grade": "e",
+"score": 12,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 188,
+"points": 3
+},
+"sugars": {
+"value": 10.6,
+"points": 9
+},
+"saturated_fat": {
+"value": 0,
+"points": 0
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5411188115472",
+"name": "Soyamilch",
+"grade": "b",
+"score": -1,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 164.1,
+"points": 3
+},
+"sugars": {
+"value": 2.5,
+"points": 2
+},
+"saturated_fat": {
+"value": 0.3,
+"points": 0
+},
+"salt": {
+"value": 0.09,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 3,
+"points": 6
+},
+"fiber": {
+"value": 0.5,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 8,
+"points": 0
+}
+}
+},
+{
+"code": "8410376009415",
+"name": "Zero Chip Choco",
+"grade": "d",
+"score": 11,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1911,
+"points": 5
+},
+"sugars": {
+"value": 0.5,
+"points": 0
+},
+"saturated_fat": {
+"value": 6,
+"points": 5
+},
+"salt": {
+"value": 0.58,
+"points": 2
+},
+"fiber": {
+"value": 4,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8076809529433",
+"name": "Whole Wheat Penne Rigate",
+"grade": "a",
+"score": -5,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1466,
+"points": 4
+},
+"sugars": {
+"value": 3.5,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.5,
+"points": 0
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"proteins": {
+"value": 13,
+"points": 5
+},
+"fiber": {
+"value": 8,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "20150907",
+"name": "Cranberries",
+"grade": "d",
+"score": 13,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1388.4,
+"points": 4
+},
+"sugars": {
+"value": 67.8,
+"points": 15
+},
+"saturated_fat": {
+"value": 0.1,
+"points": 0
+},
+"salt": {
+"value": 0.03,
+"points": 0
+},
+"fiber": {
+"value": 6.4,
+"points": 4
+},
+"fruits_vegetables_legumes": {
+"value": 66,
+"points": 2
+}
+}
+},
+{
+"code": "8410376037784",
+"name": "Sandwich Zero Sin Azúcares",
+"grade": "c",
+"score": 10,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1986.4,
+"points": 5
+},
+"sugars": {
+"value": 4,
+"points": 1
+},
+"saturated_fat": {
+"value": 7.4,
+"points": 7
+},
+"salt": {
+"value": 0.58,
+"points": 2
+},
+"fiber": {
+"value": 7.8,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5053990101597",
+"name": "Sour Cream & Onion",
+"grade": "d",
+"score": 12,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2160.1,
+"points": 6
+},
+"sugars": {
+"value": 2.1,
+"points": 0
+},
+"saturated_fat": {
+"value": 2.9,
+"points": 2
+},
+"salt": {
+"value": 1.18,
+"points": 5
+},
+"fiber": {
+"value": 3.5,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5053990161669",
+"name": "Paprika Chips",
+"grade": "d",
+"score": 13,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2152,
+"points": 6
+},
+"sugars": {
+"value": 6.1,
+"points": 1
+},
+"saturated_fat": {
+"value": 2.7,
+"points": 2
+},
+"salt": {
+"value": 1.3,
+"points": 6
+},
+"fiber": {
+"value": 5.2,
+"points": 2
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3560070910366",
+"name": "Huile d\\'olive vierge extra",
+"grade": "b",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 481,
+"points": 4
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat_ratio": {
+"value": 14.3,
+"points": 1
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 100,
+"points": 5
+}
+}
+},
+{
+"code": "80761761",
+"name": "Kinder Bueno White 39g",
+"grade": "e",
+"score": 30,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2380,
+"points": 7
+},
+"sugars": {
+"value": 43.9,
+"points": 12
+},
+"saturated_fat": {
+"value": 16.8,
+"points": 10
+},
+"salt": {
+"value": 0.33,
+"points": 1
+},
+"fiber": {
+"value": 1.93,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3560070669981",
+"name": "80% cacao noir",
+"grade": "d",
+"score": 17,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2453,
+"points": 7
+},
+"sugars": {
+"value": 20,
+"points": 5
+},
+"saturated_fat": {
+"value": 29,
+"points": 10
+},
+"salt": {
+"value": 0.03,
+"points": 0
+},
+"fiber": {
+"value": 13,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3560070614202",
+"name": "Copos de Avena Integral",
+"grade": "a",
+"score": -5,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1566,
+"points": 4
+},
+"sugars": {
+"value": 0.7,
+"points": 0
+},
+"saturated_fat": {
+"value": 1.3,
+"points": 1
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 14,
+"points": 5
+},
+"fiber": {
+"value": 10,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8076802085738",
+"name": "Rigatoni Penne Rigate Nº73",
+"grade": "a",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1521,
+"points": 4
+},
+"sugars": {
+"value": 3.5,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.5,
+"points": 0
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"proteins": {
+"value": 13,
+"points": 5
+},
+"fiber": {
+"value": 3,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3155251205524",
+"name": "Beurre tendre doux",
+"grade": "e",
+"score": 20,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy_from_saturated_fat": {
+"value": 2109,
+"points": 10
+},
+"sugars": {
+"value": 1,
+"points": 0
+},
+"saturated_fat_ratio": {
+"value": 69.5,
+"points": 10
+},
+"salt": {
+"value": 0.03,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3245413451804",
+"name": "Avoine",
+"grade": "c",
+"score": 6,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 182,
+"points": 3
+},
+"sugars": {
+"value": 5,
+"points": 3
+},
+"saturated_fat": {
+"value": 0.2,
+"points": 0
+},
+"salt": {
+"value": 0.08,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0.5,
+"points": 0
+},
+"fiber": {
+"value": 0.8,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8076800376999",
+"name": "Lasagne all'uovo",
+"grade": "a",
+"score": -1,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1558,
+"points": 4
+},
+"sugars": {
+"value": 3,
+"points": 0
+},
+"saturated_fat": {
+"value": 1,
+"points": 0
+},
+"salt": {
+"value": 0.08,
+"points": 0
+},
+"proteins": {
+"value": 14,
+"points": 5
+},
+"fiber": {
+"value": 3,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "6410500090014",
+"name": "Knäckebrot mit Roggensauerteig",
+"grade": "b",
+"score": 1,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1463,
+"points": 4
+},
+"sugars": {
+"value": 1.6,
+"points": 0
+},
+"saturated_fat": {
+"value": 0.5,
+"points": 0
+},
+"salt": {
+"value": 1.4,
+"points": 6
+},
+"proteins": {
+"value": 10,
+"points": 4
+},
+"fiber": {
+"value": 20,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "87157635",
+"name": "Tomato Ketchup",
+"grade": "d",
+"score": 14,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 418.5,
+"points": 1
+},
+"sugars": {
+"value": 22.8,
+"points": 6
+},
+"saturated_fat": {
+"value": 0.1,
+"points": 0
+},
+"salt": {
+"value": 1.77,
+"points": 8
+},
+"fiber": {
+"value": 0.72,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 59.8,
+"points": 1
+}
+}
+},
+{
+"code": "5053990101573",
+"name": "Pringles originale",
+"grade": "d",
+"score": 11,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2240,
+"points": 6
+},
+"sugars": {
+"value": 0.9,
+"points": 0
+},
+"saturated_fat": {
+"value": 3,
+"points": 2
+},
+"salt": {
+"value": 1,
+"points": 4
+},
+"fiber": {
+"value": 4.1,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5410126716016",
+"name": "Biscoff",
+"grade": "e",
+"score": 29,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2087.1,
+"points": 6
+},
+"sugars": {
+"value": 38.71,
+"points": 11
+},
+"saturated_fat": {
+"value": 8.06,
+"points": 8
+},
+"salt": {
+"value": 0.93,
+"points": 4
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8076802085981",
+"name": "Nudeln Fusilli",
+"grade": "a",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1521,
+"points": 4
+},
+"sugars": {
+"value": 3.5,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.5,
+"points": 0
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"proteins": {
+"value": 13,
+"points": 5
+},
+"fiber": {
+"value": 3,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "7614500010013",
+"name": "Milk Chocolate Almond Nougat",
+"grade": "e",
+"score": 31,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2209,
+"points": 6
+},
+"sugars": {
+"value": 60,
+"points": 15
+},
+"saturated_fat": {
+"value": 17,
+"points": 10
+},
+"salt": {
+"value": 0.12,
+"points": 0
+},
+"fiber": {
+"value": 2.4,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489682677",
+"name": "Pecan Nuts",
+"grade": "a",
+"score": -6,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 251.6,
+"points": 2
+},
+"sugars": {
+"value": 4.1,
+"points": 1
+},
+"saturated_fat_ratio": {
+"value": 9.5,
+"points": 0
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"proteins": {
+"value": 11.5,
+"points": 4
+},
+"fiber": {
+"value": 10,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489141877",
+"name": "Huile d'olive vierge extra",
+"grade": "b",
+"score": -1,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 469.9,
+"points": 3
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat_ratio": {
+"value": 13.9,
+"points": 1
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 100,
+"points": 5
+}
+}
+},
+{
+"code": "8076809513746",
+"name": "Pesto alla Genovese",
+"grade": "e",
+"score": 27,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2029.9,
+"points": 6
+},
+"sugars": {
+"value": 5,
+"points": 1
+},
+"saturated_fat": {
+"value": 5.3,
+"points": 5
+},
+"salt": {
+"value": 3.2,
+"points": 15
+},
+"fiber": {
+"value": 3,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 34,
+"points": 0
+}
+}
+},
+{
+"code": "20019907",
+"name": "Succo di limone",
+"grade": "b",
+"score": -3,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 66.7,
+"points": 1
+},
+"sugars": {
+"value": 2.2,
+"points": 2
+},
+"saturated_fat": {
+"value": 0.1,
+"points": 0
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0.4,
+"points": 0
+},
+"fiber": {
+"value": 0.5,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 99.9,
+"points": 6
+}
+}
+},
+{
+"code": "5410126116953",
+"name": "Biscoff Smooth",
+"grade": "e",
+"score": 26,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2434.4,
+"points": 7
+},
+"sugars": {
+"value": 36.8,
+"points": 10
+},
+"saturated_fat": {
+"value": 7.6,
+"points": 7
+},
+"salt": {
+"value": 0.54,
+"points": 2
+},
+"fiber": {
+"value": 0.8,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8410376059373",
+"name": "Gullon ostya Kakaó 60g",
+"grade": "d",
+"score": 15,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2072,
+"points": 6
+},
+"sugars": {
+"value": 0.5,
+"points": 0
+},
+"saturated_fat": {
+"value": 13,
+"points": 10
+},
+"salt": {
+"value": 0.15,
+"points": 0
+},
+"fiber": {
+"value": 3.4,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8480000171320",
+"name": "Tomate frito",
+"grade": "b",
+"score": 2,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 339,
+"points": 1
+},
+"sugars": {
+"value": 7.2,
+"points": 2
+},
+"saturated_fat": {
+"value": 0.4,
+"points": 0
+},
+"salt": {
+"value": 1,
+"points": 4
+},
+"proteins": {
+"value": 1.4,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 89,
+"points": 5
+}
+}
+},
+{
+"code": "8000500269169",
+"name": "Biscuits Fourrés KINDER Cards Lait et Cacao 2x5 - 128g",
+"grade": "e",
+"score": 30,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2135,
+"points": 6
+},
+"sugars": {
+"value": 42.9,
+"points": 12
+},
+"saturated_fat": {
+"value": 13.5,
+"points": 10
+},
+"salt": {
+"value": 0.45,
+"points": 2
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489721413",
+"name": "Pistaziencreme",
+"grade": "e",
+"score": 30,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2494,
+"points": 7
+},
+"sugars": {
+"value": 45,
+"points": 13
+},
+"saturated_fat": {
+"value": 13,
+"points": 10
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 1.3,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "7613035833272",
+"name": "PERRIER eau minérale naturelle gazeuse 1L",
+"grade": "a",
+"score": 0,
+"kind": {
+"is_beverage": 1,
+"is_water": 1,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": null,
+"points": 0
+},
+"sugars": {
+"value": null,
+"points": 0
+},
+"saturated_fat": {
+"value": null,
+"points": 0
+},
+"salt": {
+"value": null,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": null,
+"points": 0
+},
+"fiber": {
+"value": null,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8410376002201",
+"name": "Galleta ligera sin sal y sin azúcar",
+"grade": "a",
+"score": -2,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1756,
+"points": 5
+},
+"sugars": {
+"value": 2.8,
+"points": 0
+},
+"saturated_fat": {
+"value": 1.5,
+"points": 1
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"proteins": {
+"value": 9,
+"points": 3
+},
+"fiber": {
+"value": 17,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8480000141583",
+"name": "Tortas de Maíz",
+"grade": "c",
+"score": 4,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1554.1,
+"points": 4
+},
+"sugars": {
+"value": 1,
+"points": 0
+},
+"saturated_fat": {
+"value": 0.33,
+"points": 0
+},
+"salt": {
+"value": 0.7,
+"points": 3
+},
+"proteins": {
+"value": 7.5,
+"points": 3
+},
+"fiber": {
+"value": 1,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8410376042498",
+"name": "Galletas Desayuno Zero Sin Azúcares",
+"grade": "b",
+"score": 2,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1719,
+"points": 5
+},
+"sugars": {
+"value": 1.4,
+"points": 0
+},
+"saturated_fat": {
+"value": 1.3,
+"points": 1
+},
+"salt": {
+"value": 0.65,
+"points": 3
+},
+"proteins": {
+"value": 6.8,
+"points": 2
+},
+"fiber": {
+"value": 9.8,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "80177609",
+"name": "Kinder Chocolate",
+"grade": "e",
+"score": 33,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2360,
+"points": 7
+},
+"sugars": {
+"value": 53.3,
+"points": 15
+},
+"saturated_fat": {
+"value": 22.6,
+"points": 10
+},
+"salt": {
+"value": 0.31,
+"points": 1
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5053990101542",
+"name": "pringles hot & spicy",
+"grade": "d",
+"score": 11,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2175,
+"points": 6
+},
+"sugars": {
+"value": 2.4,
+"points": 0
+},
+"saturated_fat": {
+"value": 2.9,
+"points": 2
+},
+"salt": {
+"value": 1.1,
+"points": 5
+},
+"fiber": {
+"value": 4.3,
+"points": 2
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "20003548",
+"name": "",
+"grade": "e",
+"score": 27,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2298,
+"points": 6
+},
+"sugars": {
+"value": 56.1,
+"points": 15
+},
+"saturated_fat": {
+"value": 6.4,
+"points": 6
+},
+"salt": {
+"value": 0.03,
+"points": 0
+},
+"fiber": {
+"value": 3,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8076809513692",
+"name": "Tomatensoße Napoletana",
+"grade": "a",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 280.5,
+"points": 0
+},
+"sugars": {
+"value": 5.2,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.4,
+"points": 0
+},
+"salt": {
+"value": 0.96,
+"points": 4
+},
+"proteins": {
+"value": 1.4,
+"points": 0
+},
+"fiber": {
+"value": 1.8,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 87.8,
+"points": 5
+}
+}
+},
+{
+"code": "8480000095329",
+"name": "Cereal mix 0% azúcares añadidos",
+"grade": "a",
+"score": -2,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1576.1,
+"points": 4
+},
+"sugars": {
+"value": 0.7,
+"points": 0
+},
+"saturated_fat": {
+"value": 0.7,
+"points": 0
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 9.4,
+"points": 3
+},
+"fiber": {
+"value": 5.6,
+"points": 3
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489346364",
+"name": "Coconut And Rice Milk",
+"grade": "c",
+"score": 3,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 80.9,
+"points": 1
+},
+"sugars": {
+"value": 1.9,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.9,
+"points": 0
+},
+"salt": {
+"value": 0.29,
+"points": 1
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 0.06,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 5.3,
+"points": 0
+}
+}
+},
+{
+"code": "3245413808196",
+"name": "Pesto verde",
+"grade": "d",
+"score": 17,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1838,
+"points": 5
+},
+"sugars": {
+"value": 1.8,
+"points": 0
+},
+"saturated_fat": {
+"value": 6.6,
+"points": 6
+},
+"salt": {
+"value": 1.7,
+"points": 8
+},
+"fiber": {
+"value": 4.2,
+"points": 2
+},
+"fruits_vegetables_legumes": {
+"value": 29,
+"points": 0
+}
+}
+},
+{
+"code": "8000500217078",
+"name": "B-ready",
+"grade": "e",
+"score": 30,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2177,
+"points": 6
+},
+"sugars": {
+"value": 47.1,
+"points": 13
+},
+"saturated_fat": {
+"value": 9.5,
+"points": 9
+},
+"salt": {
+"value": 0.56,
+"points": 2
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5449000131843",
+"name": "Coca-Cola Zero",
+"grade": "c",
+"score": 4,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 0.9,
+"points": 0
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat": {
+"value": 0,
+"points": 0
+},
+"salt": {
+"value": 0.02,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 3,
+"points": 4
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3560070737048",
+"name": "Petits pains grilles",
+"grade": "b",
+"score": 2,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1717,
+"points": 5
+},
+"sugars": {
+"value": 4.2,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.9,
+"points": 0
+},
+"salt": {
+"value": 1,
+"points": 4
+},
+"proteins": {
+"value": 10,
+"points": 4
+},
+"fiber": {
+"value": 6.9,
+"points": 4
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489724070",
+"name": "Mousse Proteica Gusto Cioccolato",
+"grade": "a",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 360.4,
+"points": 1
+},
+"sugars": {
+"value": 4.7,
+"points": 1
+},
+"saturated_fat": {
+"value": 1.4,
+"points": 1
+},
+"salt": {
+"value": 0.32,
+"points": 1
+},
+"proteins": {
+"value": 10,
+"points": 4
+},
+"fiber": {
+"value": 1.3,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3560070401826",
+"name": "biscottes braisées",
+"grade": "a",
+"score": -1,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1560,
+"points": 4
+},
+"sugars": {
+"value": 3.8,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.7,
+"points": 0
+},
+"salt": {
+"value": 0.92,
+"points": 4
+},
+"proteins": {
+"value": 14,
+"points": 5
+},
+"fiber": {
+"value": 14,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3083680025881",
+"name": "Maïs SSA 1/2",
+"grade": "b",
+"score": -2,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 18.5,
+"points": 0
+},
+"sugars": {
+"value": 5.2,
+"points": 1
+},
+"saturated_fat_ratio": {
+"value": 26.3,
+"points": 3
+},
+"salt": {
+"value": 0.4,
+"points": 1
+},
+"proteins": {
+"value": 2.9,
+"points": 1
+},
+"fiber": {
+"value": 3.8,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 99.2,
+"points": 5
+}
+}
+},
+{
+"code": "3560070387427",
+"name": "Amande intense",
+"grade": "c",
+"score": 6,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 264,
+"points": 5
+},
+"sugars": {
+"value": 4.2,
+"points": 3
+},
+"saturated_fat": {
+"value": 0.4,
+"points": 0
+},
+"salt": {
+"value": 0.02,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 1.7,
+"points": 2
+},
+"fiber": {
+"value": 0.76,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8076809513715",
+"name": "Sauce tomate aux olives",
+"grade": "b",
+"score": 1,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 321,
+"points": 0
+},
+"sugars": {
+"value": 4.8,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.5,
+"points": 0
+},
+"salt": {
+"value": 1.05,
+"points": 5
+},
+"proteins": {
+"value": 1.9,
+"points": 0
+},
+"fiber": {
+"value": 2.1,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 88.8,
+"points": 5
+}
+}
+},
+{
+"code": "4008400290829",
+"name": "Kinder Pinguin",
+"grade": "e",
+"score": 24,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1870,
+"points": 5
+},
+"sugars": {
+"value": 33,
+"points": 9
+},
+"saturated_fat": {
+"value": 20,
+"points": 10
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": null,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": null,
+"points": 0
+}
+}
+},
+{
+"code": "4056489406662",
+"name": "High Protein Drink Gusto Vaniglia",
+"grade": "d",
+"score": 8,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 276,
+"points": 6
+},
+"sugars": {
+"value": 5.2,
+"points": 4
+},
+"saturated_fat": {
+"value": 0.2,
+"points": 0
+},
+"salt": {
+"value": 0.26,
+"points": 1
+},
+"non_nutritive_sweeteners": {
+"value": 1,
+"points": 4
+},
+"proteins": {
+"value": 10.6,
+"points": 7
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3270190008262",
+"name": "Huile d\\'olive",
+"grade": "b",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 481,
+"points": 4
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat_ratio": {
+"value": 14.3,
+"points": 1
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 100,
+"points": 5
+}
+}
+},
+{
+"code": "3270190007425",
+"name": "Petits pains grilles",
+"grade": "b",
+"score": 2,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1717,
+"points": 5
+},
+"sugars": {
+"value": 4.2,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.9,
+"points": 0
+},
+"salt": {
+"value": 1,
+"points": 4
+},
+"proteins": {
+"value": 10,
+"points": 4
+},
+"fiber": {
+"value": 6.9,
+"points": 4
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5201004021328",
+"name": "Caprice",
+"grade": "e",
+"score": 25,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2002.2,
+"points": 5
+},
+"sugars": {
+"value": 48,
+"points": 13
+},
+"saturated_fat": {
+"value": 8.4,
+"points": 8
+},
+"salt": {
+"value": 0.39,
+"points": 1
+},
+"fiber": {
+"value": 4.3,
+"points": 2
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8410376023831",
+"name": "Digestive zero sin azúcares",
+"grade": "c",
+"score": 4,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1905.4,
+"points": 5
+},
+"sugars": {
+"value": 0.5,
+"points": 0
+},
+"saturated_fat": {
+"value": 1.5,
+"points": 1
+},
+"salt": {
+"value": 0.88,
+"points": 4
+},
+"proteins": {
+"value": 6.2,
+"points": 2
+},
+"fiber": {
+"value": 6.5,
+"points": 4
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "20005825",
+"name": "Melk Lait",
+"grade": "e",
+"score": 35,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2232.5,
+"points": 6
+},
+"sugars": {
+"value": 56.3,
+"points": 15
+},
+"saturated_fat": {
+"value": 18.4,
+"points": 10
+},
+"salt": {
+"value": 0.93,
+"points": 4
+},
+"fiber": {
+"value": 1.9,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5999884034469",
+"name": "HELL",
+"grade": "e",
+"score": 14,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 187,
+"points": 3
+},
+"sugars": {
+"value": 11,
+"points": 9
+},
+"saturated_fat": {
+"value": 0,
+"points": 0
+},
+"salt": {
+"value": 0.5,
+"points": 2
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": null,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489143833",
+"name": "Крема сирене",
+"grade": "d",
+"score": 14,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 1,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1024,
+"points": 3
+},
+"sugars": {
+"value": 3,
+"points": 0
+},
+"saturated_fat": {
+"value": 16,
+"points": 10
+},
+"salt": {
+"value": 0.65,
+"points": 3
+},
+"proteins": {
+"value": 5,
+"points": 2
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8076809572569",
+"name": "Pesto Basilico Vegan",
+"grade": "e",
+"score": 22,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1779.5,
+"points": 5
+},
+"sugars": {
+"value": 3.3,
+"points": 0
+},
+"saturated_fat": {
+"value": 3.8,
+"points": 3
+},
+"salt": {
+"value": 3,
+"points": 14
+},
+"fiber": {
+"value": 2,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 35.6,
+"points": 0
+}
+}
+},
+{
+"code": "8480000348654",
+"name": "Almendra al natural - Hacendado",
+"grade": "a",
+"score": -10,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 155.4,
+"points": 1
+},
+"sugars": {
+"value": 5.9,
+"points": 1
+},
+"saturated_fat_ratio": {
+"value": 7.7,
+"points": 0
+},
+"salt": {
+"value": 0.02,
+"points": 0
+},
+"proteins": {
+"value": 25.2,
+"points": 7
+},
+"fiber": {
+"value": 12.2,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489192923",
+"name": "Grana Padano DOP rallado/ralado",
+"grade": "d",
+"score": 14,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 1,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1654,
+"points": 4
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat": {
+"value": 18,
+"points": 10
+},
+"salt": {
+"value": 1.5,
+"points": 7
+},
+"proteins": {
+"value": 33,
+"points": 7
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489163534",
+"name": "Burrata",
+"grade": "d",
+"score": 12,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 1,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1051.6,
+"points": 3
+},
+"sugars": {
+"value": 1.4,
+"points": 0
+},
+"saturated_fat": {
+"value": 16,
+"points": 10
+},
+"salt": {
+"value": 0.65,
+"points": 3
+},
+"proteins": {
+"value": 10,
+"points": 4
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489774747",
+"name": "Maple Syrup",
+"grade": "e",
+"score": 19,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1479,
+"points": 4
+},
+"sugars": {
+"value": 82.3,
+"points": 15
+},
+"saturated_fat": {
+"value": 0,
+"points": 0
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489356042",
+"name": "Digestive",
+"grade": "d",
+"score": 17,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1949.8,
+"points": 5
+},
+"sugars": {
+"value": 17,
+"points": 4
+},
+"saturated_fat": {
+"value": 2,
+"points": 1
+},
+"salt": {
+"value": 1.6,
+"points": 8
+},
+"fiber": {
+"value": 3.6,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489195917",
+"name": "Jemné ovesné vločky",
+"grade": "a",
+"score": -5,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1536.9,
+"points": 4
+},
+"sugars": {
+"value": 0.7,
+"points": 0
+},
+"saturated_fat": {
+"value": 1,
+"points": 0
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 12,
+"points": 4
+},
+"fiber": {
+"value": 8.5,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489018636",
+"name": "Tortilla Wraps",
+"grade": "a",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1260,
+"points": 3
+},
+"sugars": {
+"value": 2.6,
+"points": 0
+},
+"saturated_fat": {
+"value": 1.4,
+"points": 1
+},
+"salt": {
+"value": 0.96,
+"points": 4
+},
+"proteins": {
+"value": 9.3,
+"points": 3
+},
+"fiber": {
+"value": 7.7,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489033042",
+"name": "Noisettes grillées",
+"grade": "a",
+"score": -8,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 251.6,
+"points": 2
+},
+"sugars": {
+"value": 3.5,
+"points": 1
+},
+"saturated_fat_ratio": {
+"value": 9.6,
+"points": 0
+},
+"salt": {
+"value": 0.03,
+"points": 0
+},
+"proteins": {
+"value": 14.3,
+"points": 6
+},
+"fiber": {
+"value": 8.2,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3560071469771",
+"name": "Galettes de riz Chocolat Noir",
+"grade": "d",
+"score": 18,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2057,
+"points": 6
+},
+"sugars": {
+"value": 22,
+"points": 6
+},
+"saturated_fat": {
+"value": 14,
+"points": 10
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"fiber": {
+"value": 6.4,
+"points": 4
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3560071469542",
+"name": "Galettes de riz complet",
+"grade": "b",
+"score": 1,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1644,
+"points": 4
+},
+"sugars": {
+"value": 0.9,
+"points": 0
+},
+"saturated_fat": {
+"value": 0.6,
+"points": 0
+},
+"salt": {
+"value": 0.28,
+"points": 1
+},
+"proteins": {
+"value": 7.9,
+"points": 3
+},
+"fiber": {
+"value": 3.4,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "80310891",
+"name": "Kinder Joy",
+"grade": "e",
+"score": 31,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2296,
+"points": 6
+},
+"sugars": {
+"value": 51,
+"points": 14
+},
+"saturated_fat": {
+"value": 15.4,
+"points": 10
+},
+"salt": {
+"value": 0.32,
+"points": 1
+},
+"fiber": {
+"value": null,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8410376050837",
+"name": "Bio organic 4 céréales",
+"grade": "c",
+"score": 10,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1941,
+"points": 5
+},
+"sugars": {
+"value": 19,
+"points": 5
+},
+"saturated_fat": {
+"value": 1.5,
+"points": 1
+},
+"salt": {
+"value": 0.7,
+"points": 3
+},
+"fiber": {
+"value": 6.8,
+"points": 4
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489216155",
+"name": "High Protein Pudding vaníliaízű",
+"grade": "a",
+"score": -3,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 315.5,
+"points": 0
+},
+"sugars": {
+"value": 4,
+"points": 1
+},
+"saturated_fat": {
+"value": 1,
+"points": 0
+},
+"salt": {
+"value": 0.12,
+"points": 0
+},
+"proteins": {
+"value": 10,
+"points": 4
+},
+"fiber": {
+"value": 0.2,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489801771",
+"name": "Crème dessert chocolat",
+"grade": "a",
+"score": -3,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 335,
+"points": 0
+},
+"sugars": {
+"value": 4,
+"points": 1
+},
+"saturated_fat": {
+"value": 1,
+"points": 0
+},
+"salt": {
+"value": 0.18,
+"points": 0
+},
+"proteins": {
+"value": 10,
+"points": 4
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4335619014404",
+"name": "Alesto pörkölt egészmogyoró",
+"grade": "a",
+"score": -8,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 251.6,
+"points": 2
+},
+"sugars": {
+"value": 3.5,
+"points": 1
+},
+"saturated_fat_ratio": {
+"value": 9.6,
+"points": 0
+},
+"salt": {
+"value": 0.03,
+"points": 0
+},
+"proteins": {
+"value": 14.3,
+"points": 6
+},
+"fiber": {
+"value": 8.2,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3560071084042",
+"name": "Cacahuètes grillées sans sel ajouté.",
+"grade": "a",
+"score": -9,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 225.7,
+"points": 1
+},
+"sugars": {
+"value": 5,
+"points": 1
+},
+"saturated_fat_ratio": {
+"value": 12,
+"points": 1
+},
+"salt": {
+"value": 0.04,
+"points": 0
+},
+"proteins": {
+"value": 27,
+"points": 7
+},
+"fiber": {
+"value": 8.6,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8076800195033",
+"name": "Spaghettini N°3",
+"grade": "a",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1521,
+"points": 4
+},
+"sugars": {
+"value": 3.5,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.5,
+"points": 0
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"proteins": {
+"value": 13,
+"points": 5
+},
+"fiber": {
+"value": 3,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3245412568749",
+"name": "Toetilla Chips Nature",
+"grade": "c",
+"score": 6,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1979,
+"points": 5
+},
+"sugars": {
+"value": 0.8,
+"points": 0
+},
+"saturated_fat": {
+"value": 2,
+"points": 1
+},
+"salt": {
+"value": 0.7,
+"points": 3
+},
+"proteins": {
+"value": 6.6,
+"points": 2
+},
+"fiber": {
+"value": 4,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8410376039979",
+"name": "Cuor di cereale cioccolato",
+"grade": "d",
+"score": 13,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1838.6,
+"points": 5
+},
+"sugars": {
+"value": 22,
+"points": 6
+},
+"saturated_fat": {
+"value": 4,
+"points": 3
+},
+"salt": {
+"value": 0.98,
+"points": 4
+},
+"fiber": {
+"value": 10,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489336136",
+"name": "Bio gyömbér shot",
+"grade": "c",
+"score": 5,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 161.3,
+"points": 3
+},
+"sugars": {
+"value": 7.6,
+"points": 6
+},
+"saturated_fat": {
+"value": 0.1,
+"points": 0
+},
+"salt": {
+"value": 0.03,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0.5,
+"points": 0
+},
+"fiber": {
+"value": 0.86,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 75,
+"points": 4
+}
+}
+},
+{
+"code": "4056489983507",
+"name": "High Protein Wraps",
+"grade": "a",
+"score": -1,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1242,
+"points": 3
+},
+"sugars": {
+"value": 1.5,
+"points": 0
+},
+"saturated_fat": {
+"value": 1.4,
+"points": 1
+},
+"salt": {
+"value": 1.08,
+"points": 5
+},
+"proteins": {
+"value": 18,
+"points": 7
+},
+"fiber": {
+"value": 6,
+"points": 3
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489472261",
+"name": "High Protein Pudding Haselnut Flavour",
+"grade": "a",
+"score": -3,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 325.7,
+"points": 0
+},
+"sugars": {
+"value": 4.8,
+"points": 1
+},
+"saturated_fat": {
+"value": 1,
+"points": 0
+},
+"salt": {
+"value": 0.19,
+"points": 0
+},
+"proteins": {
+"value": 10,
+"points": 4
+},
+"fiber": {
+"value": 0.2,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5060092030977",
+"name": "Lizis high protein granola nuts and seeds",
+"grade": "d",
+"score": 11,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1890,
+"points": 5
+},
+"sugars": {
+"value": 10.3,
+"points": 3
+},
+"saturated_fat": {
+"value": 3.1,
+"points": 3
+},
+"salt": {
+"value": 0.81,
+"points": 4
+},
+"fiber": {
+"value": 6.7,
+"points": 4
+},
+"fruits_vegetables_legumes": {
+"value": 3.9,
+"points": 0
+}
+}
+},
+{
+"code": "8076809572897",
+"name": "Macine mb 350g int. eu",
+"grade": "d",
+"score": 18,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2024,
+"points": 6
+},
+"sugars": {
+"value": 19,
+"points": 5
+},
+"saturated_fat": {
+"value": 3.9,
+"points": 3
+},
+"salt": {
+"value": 0.83,
+"points": 4
+},
+"fiber": {
+"value": 2.8,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3245411157944",
+"name": "SOJA à la VANILLE",
+"grade": "b",
+"score": -1,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 195,
+"points": 3
+},
+"sugars": {
+"value": 4,
+"points": 3
+},
+"saturated_fat": {
+"value": 0.3,
+"points": 0
+},
+"salt": {
+"value": 0.15,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 3.2,
+"points": 7
+},
+"fiber": {
+"value": 0.7,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8076809572873",
+"name": "Biscuits",
+"grade": "d",
+"score": 15,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2036,
+"points": 6
+},
+"sugars": {
+"value": 19,
+"points": 5
+},
+"saturated_fat": {
+"value": 2,
+"points": 1
+},
+"salt": {
+"value": 0.9,
+"points": 4
+},
+"fiber": {
+"value": 3.5,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8480000823656",
+"name": "REGAÑA",
+"grade": "d",
+"score": 14,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1885,
+"points": 5
+},
+"sugars": {
+"value": 2.6,
+"points": 0
+},
+"saturated_fat": {
+"value": 2.3,
+"points": 2
+},
+"salt": {
+"value": 1.8,
+"points": 8
+},
+"fiber": {
+"value": 3.7,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8019428000013",
+"name": "Boisson de Riz - The Bridge",
+"grade": "d",
+"score": 9,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 277.6,
+"points": 6
+},
+"sugars": {
+"value": 4.8,
+"points": 3
+},
+"saturated_fat": {
+"value": 0.2,
+"points": 0
+},
+"salt": {
+"value": 0.1,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0.5,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8076809571487",
+"name": "Buongrano",
+"grade": "c",
+"score": 9,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1889,
+"points": 5
+},
+"sugars": {
+"value": 21,
+"points": 6
+},
+"saturated_fat": {
+"value": 1.5,
+"points": 1
+},
+"salt": {
+"value": 0.56,
+"points": 2
+},
+"fiber": {
+"value": 8.7,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5411188120742",
+"name": "Mandel Vanille Geschmack",
+"grade": "b",
+"score": 2,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 241.9,
+"points": 5
+},
+"sugars": {
+"value": 3.8,
+"points": 3
+},
+"saturated_fat": {
+"value": 0.1,
+"points": 0
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 3,
+"points": 6
+},
+"fiber": {
+"value": 1.3,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 5.1,
+"points": 0
+}
+}
+},
+{
+"code": "4335619057487",
+"name": "Cookies",
+"grade": "e",
+"score": 26,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2076.5,
+"points": 6
+},
+"sugars": {
+"value": 32,
+"points": 9
+},
+"saturated_fat": {
+"value": 14,
+"points": 10
+},
+"salt": {
+"value": 0.75,
+"points": 3
+},
+"fiber": {
+"value": 4.8,
+"points": 2
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "40896250",
+"name": "",
+"grade": "e",
+"score": 33,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2361,
+"points": 7
+},
+"sugars": {
+"value": 51.5,
+"points": 15
+},
+"saturated_fat": {
+"value": 21.5,
+"points": 10
+},
+"salt": {
+"value": 0.23,
+"points": 1
+},
+"fiber": {
+"value": 1.7,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "40822938",
+"name": "Fanta 0,5",
+"grade": "c",
+"score": 4,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 75,
+"points": 1
+},
+"sugars": {
+"value": 4.1,
+"points": 3
+},
+"saturated_fat": {
+"value": 0,
+"points": 0
+},
+"salt": {
+"value": 0.02,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": null,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 5,
+"points": 0
+}
+}
+},
+{
+"code": "3560070682683",
+"name": "Galleta de mantequilla con tableta de chocolate con leche",
+"grade": "e",
+"score": 27,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2124,
+"points": 6
+},
+"sugars": {
+"value": 35,
+"points": 10
+},
+"saturated_fat": {
+"value": 15,
+"points": 10
+},
+"salt": {
+"value": 0.43,
+"points": 2
+},
+"fiber": {
+"value": 3.5,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4008400183022",
+"name": "RAFFAELLO T23",
+"grade": "e",
+"score": 27,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2600,
+"points": 7
+},
+"sugars": {
+"value": 33.6,
+"points": 9
+},
+"saturated_fat": {
+"value": 29.5,
+"points": 10
+},
+"salt": {
+"value": 0.27,
+"points": 1
+},
+"fiber": {
+"value": null,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 25.5,
+"points": 0
+}
+}
+},
+{
+"code": "4056489254157",
+"name": "Био овесени ядки",
+"grade": "a",
+"score": -10,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 37,
+"points": 0
+},
+"sugars": {
+"value": 1.2,
+"points": 0
+},
+"saturated_fat_ratio": {
+"value": 14.5,
+"points": 1
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"proteins": {
+"value": 14.2,
+"points": 6
+},
+"fiber": {
+"value": 12.3,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489357117",
+"name": "Protein Mix mit Nüssen & Sojabohnen",
+"grade": "d",
+"score": 14,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2427.9,
+"points": 7
+},
+"sugars": {
+"value": 3.8,
+"points": 1
+},
+"saturated_fat": {
+"value": 6.7,
+"points": 6
+},
+"salt": {
+"value": 1.03,
+"points": 5
+},
+"fiber": {
+"value": 11.3,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489973010",
+"name": "EXTRA VIRGIN OLIVE OIL",
+"grade": "b",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 518,
+"points": 4
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat_ratio": {
+"value": 15.2,
+"points": 1
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 100,
+"points": 5
+}
+}
+},
+{
+"code": "4056489041320",
+"name": "Bio napitak od zobi",
+"grade": "c",
+"score": 5,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 146.4,
+"points": 2
+},
+"sugars": {
+"value": 4.4,
+"points": 3
+},
+"saturated_fat": {
+"value": 0.1,
+"points": 0
+},
+"salt": {
+"value": 0.1,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0.4,
+"points": 0
+},
+"fiber": {
+"value": 1.01,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "7622210590473",
+"name": "Philadelphia 300g",
+"grade": "d",
+"score": 14,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 1,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 932,
+"points": 2
+},
+"sugars": {
+"value": 4.3,
+"points": 1
+},
+"saturated_fat": {
+"value": 14,
+"points": 10
+},
+"salt": {
+"value": 0.75,
+"points": 3
+},
+"proteins": {
+"value": 5.4,
+"points": 2
+},
+"fiber": {
+"value": 0.2,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3560071504090",
+"name": "Toast crock' céréales complètes",
+"grade": "c",
+"score": 6,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1515,
+"points": 4
+},
+"sugars": {
+"value": 3.6,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.7,
+"points": 0
+},
+"salt": {
+"value": 1.3,
+"points": 6
+},
+"fiber": {
+"value": 13,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3560070823291",
+"name": "Biscottes Blé complet",
+"grade": "c",
+"score": 7,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1543,
+"points": 4
+},
+"sugars": {
+"value": 5.5,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.5,
+"points": 0
+},
+"salt": {
+"value": 1.5,
+"points": 7
+},
+"fiber": {
+"value": 12,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3046920028370",
+"name": "Lindt Excellence Dark Orange Intense",
+"grade": "e",
+"score": 24,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2229,
+"points": 6
+},
+"sugars": {
+"value": 46,
+"points": 13
+},
+"saturated_fat": {
+"value": 17,
+"points": 10
+},
+"salt": {
+"value": 0.08,
+"points": 0
+},
+"fiber": {
+"value": 8,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 34,
+"points": 0
+}
+}
+},
+{
+"code": "5411188130031",
+"name": "High Protein Soja Drink",
+"grade": "b",
+"score": 0,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 242,
+"points": 5
+},
+"sugars": {
+"value": 2.5,
+"points": 2
+},
+"saturated_fat": {
+"value": 0.5,
+"points": 0
+},
+"salt": {
+"value": 0.1,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 5,
+"points": 7
+},
+"fiber": {
+"value": 0.9,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 13.1,
+"points": 0
+}
+}
+},
+{
+"code": "3560071469573",
+"name": "Galettes 4 Céréales",
+"grade": "a",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1625,
+"points": 4
+},
+"sugars": {
+"value": 0.7,
+"points": 0
+},
+"saturated_fat": {
+"value": 0.7,
+"points": 0
+},
+"salt": {
+"value": 0.23,
+"points": 1
+},
+"proteins": {
+"value": 8,
+"points": 3
+},
+"fiber": {
+"value": 4.2,
+"points": 2
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489989363",
+"name": "Barista Hafer",
+"grade": "c",
+"score": 6,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 248.8,
+"points": 5
+},
+"sugars": {
+"value": 2,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.2,
+"points": 0
+},
+"salt": {
+"value": 0.11,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0.9,
+"points": 0
+},
+"fiber": {
+"value": 1,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 2.5,
+"points": 0
+}
+}
+},
+{
+"code": "5400101201712",
+"name": "Biscottes sans sel ajouté",
+"grade": "b",
+"score": 2,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1694,
+"points": 5
+},
+"sugars": {
+"value": 7.3,
+"points": 2
+},
+"saturated_fat": {
+"value": 0.6,
+"points": 0
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"proteins": {
+"value": 12,
+"points": 4
+},
+"fiber": {
+"value": 3.9,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8000500359358",
+"name": "Biscuits Nutella x3 biscuits fourrés - 41,4g",
+"grade": "e",
+"score": 28,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2158,
+"points": 6
+},
+"sugars": {
+"value": 35.8,
+"points": 10
+},
+"saturated_fat": {
+"value": 11.5,
+"points": 10
+},
+"salt": {
+"value": 0.56,
+"points": 2
+},
+"fiber": {
+"value": null,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489021445",
+"name": "SKYR ICELANDIC STYLE NATURAL",
+"grade": "a",
+"score": -3,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 262.4,
+"points": 0
+},
+"sugars": {
+"value": 4,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.1,
+"points": 0
+},
+"salt": {
+"value": 0.13,
+"points": 0
+},
+"proteins": {
+"value": 11,
+"points": 4
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8480000138484",
+"name": "Bebida de arroz y avellana",
+"grade": "c",
+"score": 6,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 208,
+"points": 3
+},
+"sugars": {
+"value": 3.8,
+"points": 3
+},
+"saturated_fat": {
+"value": 0.2,
+"points": 0
+},
+"salt": {
+"value": 0.08,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0.6,
+"points": 0
+},
+"fiber": {
+"value": 0.4,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3560071469641",
+"name": "Galettes épeautre",
+"grade": "a",
+"score": -6,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1580,
+"points": 4
+},
+"sugars": {
+"value": 0.8,
+"points": 0
+},
+"saturated_fat": {
+"value": 0.4,
+"points": 0
+},
+"salt": {
+"value": 0.28,
+"points": 1
+},
+"proteins": {
+"value": 15,
+"points": 6
+},
+"fiber": {
+"value": 11,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "0612322000127",
+"name": "Super Seeded Oatcakes",
+"grade": "d",
+"score": 12,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1910,
+"points": 5
+},
+"sugars": {
+"value": 0.9,
+"points": 0
+},
+"saturated_fat": {
+"value": 4.1,
+"points": 4
+},
+"salt": {
+"value": 1.69,
+"points": 8
+},
+"fiber": {
+"value": 11,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "20006167",
+"name": "Fette croccanti con sesamo",
+"grade": "b",
+"score": 1,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1523,
+"points": 4
+},
+"sugars": {
+"value": 2.4,
+"points": 0
+},
+"saturated_fat": {
+"value": 1,
+"points": 0
+},
+"salt": {
+"value": 1.3,
+"points": 6
+},
+"proteins": {
+"value": 11,
+"points": 4
+},
+"fiber": {
+"value": 16,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489936176",
+"name": "High Protein Crunchy Muesli Roasted Peanuts",
+"grade": "a",
+"score": -2,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1902.7,
+"points": 5
+},
+"sugars": {
+"value": 1.3,
+"points": 0
+},
+"saturated_fat": {
+"value": 2.5,
+"points": 2
+},
+"salt": {
+"value": 0.16,
+"points": 0
+},
+"proteins": {
+"value": 25.1,
+"points": 7
+},
+"fiber": {
+"value": 5,
+"points": 2
+},
+"fruits_vegetables_legumes": {
+"value": 0.7,
+"points": 0
+}
+}
+},
+{
+"code": "4056489068198",
+"name": "Tofu natural",
+"grade": "a",
+"score": -4,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 533.7,
+"points": 1
+},
+"sugars": {
+"value": 0.5,
+"points": 0
+},
+"saturated_fat": {
+"value": 1,
+"points": 0
+},
+"salt": {
+"value": 0.2,
+"points": 0
+},
+"proteins": {
+"value": 13,
+"points": 5
+},
+"fiber": {
+"value": 1,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489849742",
+"name": "Irische Butter",
+"grade": "e",
+"score": 20,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy_from_saturated_fat": {
+"value": 2035,
+"points": 10
+},
+"sugars": {
+"value": 0.7,
+"points": 0
+},
+"saturated_fat_ratio": {
+"value": 66.8,
+"points": 10
+},
+"salt": {
+"value": 0.03,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489254676",
+"name": "Thunfisch Filets in Sonnenblumenöl",
+"grade": "a",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 690,
+"points": 2
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat": {
+"value": 1.5,
+"points": 1
+},
+"salt": {
+"value": 0.9,
+"points": 4
+},
+"proteins": {
+"value": 21,
+"points": 7
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4014400932959",
+"name": "Toffifee White Chocolate",
+"grade": "e",
+"score": 30,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2258,
+"points": 6
+},
+"sugars": {
+"value": 46.5,
+"points": 13
+},
+"saturated_fat": {
+"value": 15,
+"points": 10
+},
+"salt": {
+"value": 0.3,
+"points": 1
+},
+"fiber": {
+"value": null,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5942219115845",
+"name": "Apă minerală naturală, natural carbogazoasă",
+"grade": "a",
+"score": 0,
+"kind": {
+"is_beverage": 1,
+"is_water": 1,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 0,
+"points": 0
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat": {
+"value": 0,
+"points": 0
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4335619014459",
+"name": "Kalifornische Pistazien geröstet",
+"grade": "a",
+"score": -8,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 233.1,
+"points": 1
+},
+"sugars": {
+"value": 7.8,
+"points": 2
+},
+"saturated_fat_ratio": {
+"value": 11.9,
+"points": 1
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"proteins": {
+"value": 23,
+"points": 7
+},
+"fiber": {
+"value": 12,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5410041435702",
+"name": "098230 TUC Original",
+"grade": "e",
+"score": 23,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2002.3,
+"points": 5
+},
+"sugars": {
+"value": 7.1,
+"points": 2
+},
+"saturated_fat": {
+"value": 9,
+"points": 8
+},
+"salt": {
+"value": 1.7,
+"points": 8
+},
+"fiber": {
+"value": 2.4,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "7300400118101",
+"name": "Original",
+"grade": "a",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1415,
+"points": 4
+},
+"sugars": {
+"value": 1,
+"points": 0
+},
+"saturated_fat": {
+"value": 0.4,
+"points": 0
+},
+"salt": {
+"value": 1,
+"points": 4
+},
+"proteins": {
+"value": 9,
+"points": 3
+},
+"fiber": {
+"value": 19,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8000500359556",
+"name": "czekolada Rafael",
+"grade": "e",
+"score": 31,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2492,
+"points": 7
+},
+"sugars": {
+"value": 46.3,
+"points": 13
+},
+"saturated_fat": {
+"value": 27.9,
+"points": 10
+},
+"salt": {
+"value": 0.33,
+"points": 1
+},
+"fiber": {
+"value": 1.77,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 10.5,
+"points": 0
+}
+}
+},
+{
+"code": "4056489685937",
+"name": "Yogur High Protein Coco",
+"grade": "a",
+"score": -3,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 300.1,
+"points": 0
+},
+"sugars": {
+"value": 5.1,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.5,
+"points": 0
+},
+"salt": {
+"value": 0.2,
+"points": 0
+},
+"proteins": {
+"value": 10,
+"points": 4
+},
+"fiber": {
+"value": 0.1,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0.4,
+"points": 0
+}
+}
+},
+{
+"code": "4056489258346",
+"name": "High Protein Blueberry milk product",
+"grade": "a",
+"score": -2,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 306,
+"points": 0
+},
+"sugars": {
+"value": 5.6,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.2,
+"points": 0
+},
+"salt": {
+"value": 0.21,
+"points": 1
+},
+"proteins": {
+"value": 10,
+"points": 4
+},
+"fiber": {
+"value": 0.3,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8410376059366",
+"name": "gullon zero wafer vanilla",
+"grade": "d",
+"score": 11,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2016,
+"points": 6
+},
+"sugars": {
+"value": 0.4,
+"points": 0
+},
+"saturated_fat": {
+"value": 12,
+"points": 10
+},
+"salt": {
+"value": 0.15,
+"points": 0
+},
+"fiber": {
+"value": 10,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3560070419456",
+"name": "Tortilla chips classic",
+"grade": "c",
+"score": 7,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 2009,
+"points": 5
+},
+"sugars": {
+"value": 0.8,
+"points": 0
+},
+"saturated_fat": {
+"value": 2.2,
+"points": 2
+},
+"salt": {
+"value": 0.7,
+"points": 3
+},
+"proteins": {
+"value": 6.7,
+"points": 2
+},
+"fiber": {
+"value": 4,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489216216",
+"name": "",
+"grade": "a",
+"score": -4,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 346.6,
+"points": 1
+},
+"sugars": {
+"value": 2.4,
+"points": 0
+},
+"saturated_fat": {
+"value": 0.3,
+"points": 0
+},
+"salt": {
+"value": 0.14,
+"points": 0
+},
+"proteins": {
+"value": 12.5,
+"points": 5
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 3.5,
+"points": 0
+}
+}
+},
+{
+"code": "8713734033825",
+"name": "Queijo Gouda",
+"grade": "c",
+"score": 7,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 1,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1430.1,
+"points": 4
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat": {
+"value": 19.3,
+"points": 10
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 23.4,
+"points": 7
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3560070973743",
+"name": "Huile d'olive vierge extra",
+"grade": "b",
+"score": 1,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 555,
+"points": 4
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat_ratio": {
+"value": 16.5,
+"points": 2
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 100,
+"points": 5
+}
+}
+},
+{
+"code": "7300400117975",
+"name": "Wasa integrale",
+"grade": "a",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1423,
+"points": 4
+},
+"sugars": {
+"value": 2,
+"points": 0
+},
+"saturated_fat": {
+"value": 0.3,
+"points": 0
+},
+"salt": {
+"value": 1,
+"points": 4
+},
+"proteins": {
+"value": 9,
+"points": 3
+},
+"fiber": {
+"value": 20,
+"points": 5
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4335619022607",
+"name": "Bio Beurre de Cacahuète Crunchy",
+"grade": "c",
+"score": 7,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy_from_saturated_fat": {
+"value": 366.3,
+"points": 3
+},
+"sugars": {
+"value": 3.3,
+"points": 0
+},
+"saturated_fat_ratio": {
+"value": 18,
+"points": 2
+},
+"salt": {
+"value": 0.69,
+"points": 3
+},
+"fiber": {
+"value": 3.1,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5449000028921",
+"name": "Coca Cola",
+"grade": "e",
+"score": 12,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 180.2,
+"points": 3
+},
+"sugars": {
+"value": 10.6,
+"points": 9
+},
+"saturated_fat": {
+"value": 0,
+"points": 0
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": null,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5701977550554",
+"name": "Vegan Spreadable",
+"grade": "d",
+"score": 17,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy_from_saturated_fat": {
+"value": 962,
+"points": 8
+},
+"sugars": {
+"value": 0.5,
+"points": 0
+},
+"saturated_fat_ratio": {
+"value": 34.7,
+"points": 5
+},
+"salt": {
+"value": 0.9,
+"points": 4
+},
+"fiber": {
+"value": 0.2,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0.2,
+"points": 0
+}
+}
+},
+{
+"code": "20005726",
+"name": "Nut & Fruit Mix Classic",
+"grade": "d",
+"score": 15,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2205.5,
+"points": 6
+},
+"sugars": {
+"value": 31.4,
+"points": 9
+},
+"saturated_fat": {
+"value": 4.5,
+"points": 4
+},
+"salt": {
+"value": 0.02,
+"points": 0
+},
+"fiber": {
+"value": 7,
+"points": 4
+},
+"fruits_vegetables_legumes": {
+"value": 40,
+"points": 0
+}
+}
+},
+{
+"code": "8410109109832",
+"name": "85% Cacao 0% Azúcares Añadidos",
+"grade": "d",
+"score": 16,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2342,
+"points": 6
+},
+"sugars": {
+"value": 0.5,
+"points": 0
+},
+"saturated_fat": {
+"value": 31,
+"points": 10
+},
+"salt": {
+"value": 0.12,
+"points": 0
+},
+"fiber": {
+"value": null,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "80053835",
+"name": "Classico - olio extra vergine di oliva",
+"grade": "b",
+"score": 0,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 518,
+"points": 4
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat_ratio": {
+"value": 15.2,
+"points": 1
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 100,
+"points": 5
+}
+}
+},
+{
+"code": "3270190008279",
+"name": "Huile d'olive vierge extra",
+"grade": "b",
+"score": 1,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 1,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy_from_saturated_fat": {
+"value": 555,
+"points": 4
+},
+"sugars": {
+"value": 0,
+"points": 0
+},
+"saturated_fat_ratio": {
+"value": 16.5,
+"points": 2
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 100,
+"points": 5
+}
+}
+},
+{
+"code": "8000500385807",
+"name": "Kinder DUO",
+"grade": "e",
+"score": 27,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2178.7,
+"points": 6
+},
+"sugars": {
+"value": 35.3,
+"points": 10
+},
+"saturated_fat": {
+"value": 17,
+"points": 10
+},
+"salt": {
+"value": 0.33,
+"points": 1
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3245412589980",
+"name": "Biscuits Nature",
+"grade": "c",
+"score": 5,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 1662,
+"points": 4
+},
+"sugars": {
+"value": 6.5,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.7,
+"points": 0
+},
+"salt": {
+"value": 1.1,
+"points": 5
+},
+"proteins": {
+"value": 11,
+"points": 4
+},
+"fiber": {
+"value": 4,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "5449000004840",
+"name": "Fanta Naranja",
+"grade": "e",
+"score": 16,
+"kind": {
+"is_beverage": 1,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 185,
+"points": 3
+},
+"sugars": {
+"value": 10.7,
+"points": 9
+},
+"saturated_fat": {
+"value": 0,
+"points": 0
+},
+"salt": {
+"value": 0,
+"points": 0
+},
+"non_nutritive_sweeteners": {
+"value": 3,
+"points": 4
+},
+"proteins": {
+"value": 0,
+"points": 0
+},
+"fiber": {
+"value": null,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 8,
+"points": 0
+}
+}
+},
+{
+"code": "8410376057270",
+"name": "Choco Tablet Zero sin Azúcares",
+"grade": "d",
+"score": 14,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2070.6,
+"points": 6
+},
+"sugars": {
+"value": 1.3,
+"points": 0
+},
+"saturated_fat": {
+"value": 16,
+"points": 10
+},
+"salt": {
+"value": 0.35,
+"points": 1
+},
+"fiber": {
+"value": 6.3,
+"points": 3
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "4056489258353",
+"name": "Raspberry-Pomegranate Milk Product",
+"grade": "a",
+"score": -2,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 1,
+"components": {
+"energy": {
+"value": 275,
+"points": 0
+},
+"sugars": {
+"value": 4,
+"points": 1
+},
+"saturated_fat": {
+"value": 0.2,
+"points": 0
+},
+"salt": {
+"value": 0.22,
+"points": 1
+},
+"proteins": {
+"value": 10,
+"points": 4
+},
+"fiber": {
+"value": 0,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 6.6,
+"points": 0
+}
+}
+},
+{
+"code": "4000417702005",
+"name": "RITTER SPORT Nut sel. puur hazeln.",
+"grade": "e",
+"score": 25,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2322.8,
+"points": 6
+},
+"sugars": {
+"value": 37,
+"points": 10
+},
+"saturated_fat": {
+"value": 16,
+"points": 10
+},
+"salt": {
+"value": 0.01,
+"points": 0
+},
+"fiber": {
+"value": 3.65,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "3800205875109",
+"name": "137476 Bruschette Chips Tomato, Olives & Oregano",
+"grade": "d",
+"score": 15,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1906,
+"points": 5
+},
+"sugars": {
+"value": 5.5,
+"points": 1
+},
+"saturated_fat": {
+"value": 1.2,
+"points": 1
+},
+"salt": {
+"value": 2,
+"points": 9
+},
+"fiber": {
+"value": 3.3,
+"points": 1
+},
+"fruits_vegetables_legumes": {
+"value": 22,
+"points": 0
+}
+}
+},
+{
+"code": "3245390084422",
+"name": "Palets Bretons Spécialité de Pont-Aven au beurre",
+"grade": "e",
+"score": 26,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 2210,
+"points": 6
+},
+"sugars": {
+"value": 20,
+"points": 5
+},
+"saturated_fat": {
+"value": 19,
+"points": 10
+},
+"salt": {
+"value": 1.1,
+"points": 5
+},
+"fiber": {
+"value": 1.5,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+},
+{
+"code": "8410376016789",
+"name": "Digestive Classic",
+"grade": "d",
+"score": 17,
+"kind": {
+"is_beverage": 0,
+"is_water": 0,
+"is_cheese": 0,
+"is_fat_oil_nuts_seeds": 0,
+"is_red_meat_product": 0
+},
+"countProteins": 0,
+"components": {
+"energy": {
+"value": 1950,
+"points": 5
+},
+"sugars": {
+"value": 17,
+"points": 4
+},
+"saturated_fat": {
+"value": 2,
+"points": 1
+},
+"salt": {
+"value": 1.6,
+"points": 7
+},
+"fiber": {
+"value": 3,
+"points": 0
+},
+"fruits_vegetables_legumes": {
+"value": 0,
+"points": 0
+}
+}
+}
+]
+}

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState } from 'react';
 import PhotoButton from './PhotoButton.jsx';
 import HelpButton from './HelpButton.jsx';
+import NutritionCard from './NutritionCard.jsx';
 import { summaryParts } from '../lib/summary.js';
 
 const PhotoStrip = lazy(() => import('./PhotoStrip.jsx'));
@@ -149,7 +150,7 @@ export function NutriDetails({ lang, grade, nutrition }) {
 const NOVA_COLOR = { 1: 'nova-1', 2: 'nova-2', 3: 'nova-3', 4: 'nova-4' };
 
 /** Design A: NOVA and Nutri-Score as two tiles side by side, full explanations folded below. */
-export function ScoreTiles({ lang, processing, why, grade, nutrition }) {
+export function ScoreTiles({ lang, processing, why, grade, nutrition, computed = false }) {
   const n = processing?.nova;
   if (!n && !grade) return null;
   const basis = why?.rule === 'database' && why.support ? why.support : why;
@@ -179,6 +180,7 @@ export function ScoreTiles({ lang, processing, why, grade, nutrition }) {
           {grade ? (
             <>
               <p className="tile-value" aria-hidden="true"><span className={`tile-big ns-text-${grade}`}>{grade.toUpperCase()}</span> <span className="muted small">Nutri-Score</span></p>
+              {computed && <p className="tile-computed">{t(lang, 'nutriComputedShort')}</p>}
               <div className="tile-scale five" aria-hidden="true">
                 {['a', 'b', 'c', 'd', 'e'].map((g) => <span key={g} className={g === grade ? `on ns-${g}` : ''} />)}
               </div>
@@ -363,6 +365,7 @@ export default function Result({
   lang, result, text, typeAuto, product, barcode, fromPhoto, onBack, backLabel: backLabelProp, notify,
   saved, onRetake, onForget, watchedAllergens = [], profiles, onProfile,
   onEdit, onRevert, onReplacePhoto, onCompletePhoto, onAddPhotos, thumbVersion = 0,
+  nutritionInfo = null, onNutritionSave,
 }) {
   const food = isFood(result);
   const backLabel = backLabelProp || 'back';
@@ -391,7 +394,8 @@ export default function Result({
       <VerdictBanner lang={lang} result={result} />
       {food && <AllergenCard lang={lang} allergens={result.allergens} diet={result.diet} watched={watchedAllergens} fromPhoto={fromPhoto} />}
       <SafetyTips lang={lang} tips={result.safetyTips} />
-      {food && <ScoreTiles lang={lang} processing={result.processing} why={result.novaWhy} grade={result.nutriscore} nutrition={product?.nutrition} />}
+      {food && <ScoreTiles lang={lang} processing={result.processing} why={result.novaWhy} grade={result.nutriscore} nutrition={product?.nutrition} computed={!!nutritionInfo?.score?.computed} />}
+      {food && nutritionInfo && <NutritionCard lang={lang} info={nutritionInfo} onSave={onNutritionSave} onAddPhotos={onAddPhotos} />}
       <AvoidHits lang={lang} hits={result.avoidHits} />
       <AdditiveList lang={lang} additives={result.items} grouped={!food} />
       <IngredientsText lang={lang} text={text} result={result} />

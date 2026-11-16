@@ -11,7 +11,7 @@ export const BACKUP_VERSION = 2; // 2: family profiles (v2.8); version 1 files (
 export const KEY_PREFIX = 'ingrediscan:';
 
 /** The backup object (stringify it to save). */
-export function buildBackup({ history = [], saved = {}, profiles }, now = new Date()) {
+export function buildBackup({ history = [], saved = {}, profiles, nutrition = {} }, now = new Date()) {
   return {
     format: BACKUP_FORMAT,
     version: BACKUP_VERSION,
@@ -19,6 +19,7 @@ export function buildBackup({ history = [], saved = {}, profiles }, now = new Da
     history,
     saved,
     profiles: sanitizeProfiles(profiles),
+    nutrition, // the user's own nutrition values per barcode (v3.5)
   };
 }
 
@@ -48,7 +49,8 @@ export function parseBackup(text) {
   const saved = Object.fromEntries(
     Object.values(data.saved && typeof data.saved === 'object' ? data.saved : {}).filter(isSaved).map((s) => [s.barcode, s]),
   );
-  if (data.version >= 2 && data.profiles) return { history, saved, avoid: null, profiles: sanitizeProfiles(data.profiles) };
+  const nutrition = data.nutrition && typeof data.nutrition === 'object' && !Array.isArray(data.nutrition) ? data.nutrition : null;
+  if (data.version >= 2 && data.profiles) return { history, saved, avoid: null, profiles: sanitizeProfiles(data.profiles), ...(nutrition ? { nutrition } : {}) };
   return { history, saved, avoid: data.avoid ? sanitizeAvoidState(data.avoid) : null, profiles: null };
 }
 

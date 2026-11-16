@@ -9,6 +9,7 @@
  * All three share the API: GET {source}/api/v2/product/{code}.json?fields=…
  */
 import { PRODUCT_TYPE_BY_ID } from '../data/productCategories.js';
+import { fromNutriments } from './nutritionText.js';
 
 /** Fallback order when no type is chosen or the chosen database has no match. */
 export const LOOKUP_ORDER = ['food', 'cosmetic', 'household'];
@@ -19,6 +20,9 @@ export const SOURCE_NAMES = {
   household: 'Open Products Facts',
 };
 
+// Category tags that decide the Nutri-Score category (drinks, water, fats / oils / nuts, cheese, red meat).
+const NUTRI_CATEGORY_TAG = /^en:(beverages|waters?|.*-waters?|.*drinks?|.*juices?|.*sodas?|.*milks?|fats|.*oils?|vegetable-oils|nuts|.*-nuts|seeds|.*butters?|cheeses|.*cheeses|.*meats?|beef|pork|lamb)$/;
+
 export const DEFAULT_TIMEOUT_MS = 8000;
 
 const COMMON_FIELDS = [
@@ -27,7 +31,7 @@ const COMMON_FIELDS = [
   'brands', 'quantity', 'image_front_small_url',
   'ingredients_text_ro', 'ingredients_text', 'ingredients_text_en', 'lang',
 ];
-const FOOD_FIELDS = ['additives_tags', 'nova_group', 'nutriscore_grade', 'nutrient_levels', 'nutriments', 'allergens_tags', 'traces_tags', 'ingredients_analysis_tags'];
+const FOOD_FIELDS = ['additives_tags', 'nova_group', 'nutriscore_grade', 'nutrient_levels', 'nutriments', 'allergens_tags', 'traces_tags', 'ingredients_analysis_tags', 'categories_tags'];
 
 /** Open *Facts `product_type` values → app product types. */
 const OFF_PRODUCT_TYPES = { food: 'food', petfood: 'food', beauty: 'cosmetic', product: 'household' };
@@ -150,6 +154,8 @@ export function mapProduct(raw, type, code) {
   };
   if (type === 'food') {
     product.nutrition = mapNutrition(p);
+    product.nutriments = fromNutriments(p.nutriments); // per 100 g / 100 ml (v3.5)
+    product.categories = Array.isArray(p.categories_tags) ? p.categories_tags.filter((c) => NUTRI_CATEGORY_TAG.test(c)).slice(0, 12) : [];
     product.additiveTags = Array.isArray(p.additives_tags) ? p.additives_tags : [];
     product.allergenTags = Array.isArray(p.allergens_tags) ? p.allergens_tags : [];
     product.traceTags = Array.isArray(p.traces_tags) ? p.traces_tags : [];

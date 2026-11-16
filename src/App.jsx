@@ -17,6 +17,8 @@ import { createHistoryStore, makeEntry, entryRequest, entryTitle } from './lib/h
 import { createSavedStore, savedFromRequest, requestFromSaved, productSnapshot } from './lib/savedIngredients.js';
 import { chooseIngredients, editedRecord, revertRecord, completeText, migrateSaved } from './lib/ingredientText.js';
 import { mergeTexts } from './lib/photoSet.js';
+import { buildNutrition } from './lib/nutritionInfo.js';
+import { createNutritionStore } from './lib/nutritionStore.js';
 import { saveAutoBackup } from './lib/autoBackup.js';
 import TabBar from './components/TabBar.jsx';
 import { UpdateBanner, OfflineBanner, InstallCard, Toast, WhatsNew } from './components/Banners.jsx';
@@ -104,6 +106,10 @@ export default function App() {
   if (!savedStoreRef.current) savedStoreRef.current = createSavedStore();
   // Barcodes no database knew (24 h), so a second scan answers at once.
   const notFoundRef = useRef(null);
+  // The user's own nutrition values / category per barcode (v3.5).
+  const nutritionStoreRef = useRef(null);
+  if (!nutritionStoreRef.current) nutritionStoreRef.current = createNutritionStore();
+  const [nutritionVersion, setNutritionVersion] = useState(0);
   if (!notFoundRef.current) notFoundRef.current = createNotFoundCache();
   const mainRef = useRef(null);
 
@@ -206,13 +212,33 @@ export default function App() {
   const detectedType = useMemo(() => detectProductType(text), [text]);
   const type = chosenType ?? detectedType;
 
+  // Nutrition values and the Nutri-Score (the database's or computed on the phone), v3.5.
+  const nutrition = useMemo(() => {
+    if (!submitted) return null;
+    const code = submitted.barcode || submitted.product?.code || null;
+    const rec = code ? savedStoreRef.current.get(code) : null;
+    const own = code ? nutritionStoreRef.current.get(code) : submitted.ownNutrition || null;
+    const ingredients = submitted.text?.trim() ? submitted.text : submitted.product?.ingredientsText || '';
+    return buildNutrition({ product: submitted.product, saved: { texts: rec?.texts, nutrition: own }, ingredients });
+  }, [submitted, nutritionVersion]);
+
   const result = useMemo(() => {
     if (!submitted) return null;
     const input = submitted.product
       ? analyzeInput(submitted.product, submitted.text)
       : { text: submitted.text, productType: submitted.type };
+    if (input.productType === 'food' && !input.nutriscore && nutrition?.score?.computed) input.nutriscore = nutrition.score.grade;
     return analyze(input, avoid);
-  }, [submitted, avoid]);
+  }, [submitted, avoid, nutrition]);
+
+  /** Nutrition values typed / corrected, or another Nutri-Score category chosen. */
+  const saveNutrition = ({ values, category }) => {
+    const code = submitted?.barcode || submitted?.product?.code || null;
+    const entry = { ...(values ? { values } : {}), ...(category ? { category } : {}) };
+    if (code) nutritionStoreRef.current.save(code, entry);
+    else setSubmitted((s) => ({ ...s, ownNutrition: { ...(s.ownNutrition || {}), ...entry } }));
+    setNutritionVersion((v) => v + 1);
+  };
 
   // Save each new analysis (not re-runs caused by avoid-list changes).
   useEffect(() => {
@@ -247,7 +273,7 @@ export default function App() {
 
   // ───── Settings: backup, restore, delete everything ─────
   const exportData = useCallback(() => {
-    const data = buildBackup({ history, saved: savedStoreRef.current.all(), profiles });
+    const data = buildBackup({ history, saved: savedStoreRef.current.all(), profiles, nutrition: nutritionStoreRef.current.all() });
     const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
     const a = document.createElement('a');
     a.href = url;
@@ -268,6 +294,7 @@ export default function App() {
     const merged = mergeSaved(before, backup.saved);
     savedStoreRef.current.replaceAll(merged);
     const savedAdded = Object.keys(merged).filter((c) => merged[c] !== before[c]).length;
+    if (backup.nutrition) nutritionStoreRef.current.replaceAll({ ...nutritionStoreRef.current.all(), ...backup.nutrition });
     if (backup.profiles) changeProfiles(backup.profiles);
     else if (backup.avoid) changeProfiles(updateActive(profiles, backup.avoid));
     return { history: toWrite.length, saved: savedAdded, avoid: !!(backup.avoid || backup.profiles) };
@@ -695,6 +722,7 @@ export default function App() {
         product={submitted.product} barcode={submitted.barcode} fromPhoto={submitted.fromPhoto} onBack={leave} backLabel={leaveLabel}
         saved={submitted.saved} onRetake={retakeSaved} onForget={() => forgetSaved(submitted.barcode)}
         onEdit={editIngredients} onRevert={revertIngredients} onAddPhotos={addPhotosToResult} thumbVersion={thumbVersion}
+        nutritionInfo={nutrition} onNutritionSave={saveNutrition}
         onReplacePhoto={submitted.barcode && originOf(submitted) === 'database' ? photoForIngredients('replace') : undefined}
         onCompletePhoto={submitted.barcode && originOf(submitted) === 'database' ? photoForIngredients('complete') : undefined}
         watchedAllergens={avoid.allergens} profiles={profiles} onProfile={(id) => changeProfiles(setActive(profiles, id))}

@@ -1,5 +1,15 @@
 /** "Ce e nou" shown once after updating to a version (RO + EN). Keep each list short. */
 export const WHATS_NEW = {
+  '3.5.0': {
+    ro: [
+      'Valorile nutriționale apar sub rezultat (din bază sau din poza tabelului) și pot fi corectate; aplicația verifică dacă se potrivesc între ele.',
+      'Când baza de date nu are Nutri-Score, aplicația îl calculează din valori (algoritmul 2023) și scrie „calculat de aplicație”.',
+    ],
+    en: [
+      'Nutrition values appear under the result (from the database or your photo of the table) and can be corrected; the app checks that they add up.',
+      'When the database has no Nutri-Score, the app calculates it from the values (2023 algorithm) and says "calculated by the app".',
+    ],
+  },
   '3.4.0': {
     ro: [
       'Poți alege mai multe poze ale aceluiași produs deodată (ingrediente, tabel nutrițional, origine): sunt citite și sortate automat.',
