@@ -1,5 +1,15 @@
 /** "Ce e nou" shown once after updating to a version (RO + EN). Keep each list short. */
 export const WHATS_NEW = {
+  '3.7.0': {
+    ro: [
+      'Rezultatul arată de unde vine produsul: originea, unde a fost procesat și „Vândut în” (ales în Despre → Datele tale, implicit România).',
+      'Sub lanț: „De ce e bine / De ce nu e bine / De știut”, doar din fapte documentate, fiecare cu sursa (ex. DOP/IGP, pește sălbatic sau de crescătorie, decongelat).',
+    ],
+    en: [
+      'The result shows where the product comes from: origin, where it was processed and "Sold in" (set in About → Your data, România by default).',
+      'Below the chain: "Why it is good / not so good / Good to know", from documented facts only, each with its source (e.g. PDO/PGI, wild or farmed fish, defrosted).',
+    ],
+  },
   '3.6.0': {
     ro: [
       'Ingredientele scrise în altă limbă (germană, maghiară, bulgară, franceză…) sunt traduse automat în română, pe telefon; poți vedea oricând originalul.',

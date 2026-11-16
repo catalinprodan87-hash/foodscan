@@ -9,7 +9,12 @@ const mb = (n) => (n == null ? '–' : (n / 1048576).toFixed(1));
  * About → "Datele tale": storage status, OCR engine download, backup
  * (export / import) and "delete all data".
  */
-export default function SettingsCard({ lang, onExport, onImport, onDeleteAll, scanFirst = false, onScanFirst }) {
+export default function SettingsCard({ lang, onExport, onImport, onDeleteAll, scanFirst = false, onScanFirst, saleCountry = 'RO', onSaleCountry }) {
+  const [countries, setCountries] = useState(null);
+  useEffect(() => {
+    if (!onSaleCountry) return;
+    import('../data/countries.js').then((m) => setCountries(m.COUNTRIES)).catch(() => {});
+  }, [onSaleCountry]);
   const [status, setStatus] = useState(null);
   const [ocr, setOcr] = useState({ state: 'checking' }); // checking | missing | ready | downloading | error
   const [pending, setPending] = useState(null); // parsed backup waiting for confirmation
@@ -97,6 +102,18 @@ export default function SettingsCard({ lang, onExport, onImport, onDeleteAll, sc
             <input type="checkbox" checked={scanFirst} onChange={(e) => onScanFirst(e.target.checked)} />
             <span>{t(lang, 'scanFirst')}</span>
           </label>
+        </>
+      )}
+
+      {onSaleCountry && (
+        <>
+          <h3 className="settings-sub">{t(lang, 'saleCountryTitle')}</h3>
+          <label className="small" htmlFor="sale-country">{t(lang, 'saleCountryLabel')}</label>{' '}
+          <select id="sale-country" value={saleCountry} onChange={(e) => onSaleCountry(e.target.value)}>
+            {(countries || [{ iso: saleCountry, name: { ro: saleCountry, en: saleCountry } }])
+              .slice().sort((a, b) => a.name[lang === 'ro' ? 'ro' : 'en'].localeCompare(b.name[lang === 'ro' ? 'ro' : 'en'], lang))
+              .map((c) => <option key={c.iso} value={c.iso}>{c.name[lang === 'ro' ? 'ro' : 'en']}</option>)}
+          </select>
         </>
       )}
 

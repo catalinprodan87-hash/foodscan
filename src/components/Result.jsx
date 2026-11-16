@@ -6,6 +6,7 @@ import { summaryParts } from '../lib/summary.js';
 import { LANGUAGE_NAMES } from '../lib/langDetect.js';
 
 const PhotoStrip = lazy(() => import('./PhotoStrip.jsx'));
+const OriginCard = lazy(() => import('./OriginCard.jsx'));
 import { ALLERGENS_BY_ID } from '../data/allergens.js';
 import { t, pick } from '../lib/i18n.js';
 import { normalize } from '../lib/analyze.js';
@@ -412,7 +413,7 @@ export default function Result({
   lang, result, text, typeAuto, product, barcode, fromPhoto, onBack, backLabel: backLabelProp, notify,
   saved, onRetake, onForget, watchedAllergens = [], profiles, onProfile,
   onEdit, onRevert, onReplacePhoto, onCompletePhoto, onAddPhotos, thumbVersion = 0,
-  nutritionInfo = null, onNutritionSave, translation = null,
+  nutritionInfo = null, onNutritionSave, translation = null, originText = '', saleCountry = 'RO',
 }) {
   const [showOriginal, setShowOriginal] = useState(false);
   const shownText = translation && !showOriginal ? translation.text : text;
@@ -445,6 +446,7 @@ export default function Result({
       <SafetyTips lang={lang} tips={result.safetyTips} />
       {food && <ScoreTiles lang={lang} processing={result.processing} why={result.novaWhy} grade={result.nutriscore} nutrition={product?.nutrition} computed={!!nutritionInfo?.score?.computed} />}
       {food && nutritionInfo && <NutritionCard lang={lang} info={nutritionInfo} onSave={onNutritionSave} onAddPhotos={onAddPhotos} />}
+      {food && <Suspense fallback={null}><OriginCard lang={lang} text={text} originText={originText} product={product} saleCountry={saleCountry} /></Suspense>}
       <AvoidHits lang={lang} hits={result.avoidHits} />
       <AdditiveList lang={lang} additives={result.items} grouped={!food} />
       {translation && <TranslationNote lang={lang} translation={translation} showOriginal={showOriginal} onToggle={() => setShowOriginal((v) => !v)} />}

@@ -11,7 +11,7 @@ import { isStandalone } from '../lib/install.js';
 
 const fmt = (iso, lang) => new Date(iso + 'T12:00:00Z').toLocaleDateString(lang === 'ro' ? 'ro-RO' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
-export default function AboutView({ lang, onExport, onImport, onDeleteAll, scanFirst, onScanFirst }) {
+export default function AboutView({ lang, onExport, onImport, onDeleteAll, scanFirst, onScanFirst, saleCountry, onSaleCountry }) {
   /* global __APP_VERSION__, __BUILD_DATE__ */
   const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
   const built = typeof __BUILD_DATE__ !== 'undefined' ? __BUILD_DATE__ : null;
@@ -45,7 +45,7 @@ export default function AboutView({ lang, onExport, onImport, onDeleteAll, scanF
 
       <ShareHint lang={lang} />
 
-      <SettingsCard lang={lang} onExport={onExport} onImport={onImport} onDeleteAll={onDeleteAll} scanFirst={scanFirst} onScanFirst={onScanFirst} />
+      <SettingsCard lang={lang} onExport={onExport} onImport={onImport} onDeleteAll={onDeleteAll} scanFirst={scanFirst} onScanFirst={onScanFirst} saleCountry={saleCountry} onSaleCountry={onSaleCountry} />
 
       <section className="card" aria-labelledby="about-products">
         <h2 id="about-products" className="card-title">{t(lang, 'aboutProducts')}</h2>

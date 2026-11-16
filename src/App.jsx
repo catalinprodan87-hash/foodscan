@@ -9,7 +9,7 @@ import { summaryParts } from './lib/summary.js';
 import { buildBackup, backupFileName, historyToRestore, mergeSaved, clearLocalData, requestPersistence } from './lib/backup.js';
 import { buildRequest } from './lib/request.js';
 import { detectLang, t, pick } from './lib/i18n.js';
-import { getLang, setLang as saveLang, getProfiles, setProfiles as saveProfiles, getFlag, setFlag } from './lib/storage.js';
+import { getLang, setLang as saveLang, getProfiles, setProfiles as saveProfiles, getFlag, setFlag, getSaleCountry, setSaleCountry } from './lib/storage.js';
 import { activeAvoid, updateActive, addProfile, setActive } from './lib/profiles.js';
 import { decodeList } from './lib/shareList.js';
 import { isShareLaunch, takeShared } from './lib/shareTarget.js';
@@ -98,6 +98,7 @@ export default function App() {
   const [news, setNews] = useState(null); // version whose "what's new" is shown
   const [incoming, setIncoming] = useState(null); // { name, avoid } from an #import= link, or { error }
   const [scanFirst, setScanFirstState] = useState(() => getFlag('scanFirst'));
+  const [saleCountry, setSaleCountryState] = useState(getSaleCountry); // "Vândut în", v3.7
   const abortRef = useRef(null);
   const storeRef = useRef(null);
   const savedRef = useRef(null);
@@ -177,6 +178,7 @@ export default function App() {
     if (getFlag('scanFirst') && getFlag('onboarded') && !window.location.hash) setScanning(true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const changeScanFirst = (on) => { setFlag('scanFirst', on); setScanFirstState(on); };
+  const changeSaleCountry = (iso) => { setSaleCountry(iso); setSaleCountryState(iso); };
 
   // History store (IndexedDB, or localStorage as a fallback).
   useEffect(() => {
@@ -248,6 +250,14 @@ export default function App() {
     const ingredients = submitted.text?.trim() ? submitted.text : submitted.product?.ingredientsText || '';
     return buildNutrition({ product: submitted.product, saved: { texts: rec?.texts, nutrition: own }, ingredients });
   }, [submitted, nutritionVersion]);
+
+  // Origin, front and other texts read from photos of this product (v3.7).
+  const originText = useMemo(() => {
+    if (!submitted) return '';
+    const code = submitted.barcode || submitted.product?.code || null;
+    const texts = { ...(submitted.texts || {}), ...((code && savedStoreRef.current.get(code)?.texts) || {}) };
+    return ['origin', 'front', 'other'].map((k) => texts[k]).filter(Boolean).join('\n');
+  }, [submitted, thumbVersion]);
 
   const result = useMemo(() => {
     if (!submitted) return null;
@@ -589,7 +599,7 @@ export default function App() {
         saveThumbs(req.barcode, thumbs).then(() => setThumbVersion((v) => v + 1));
       }
     }
-    setSubmitted(req);
+    setSubmitted({ ...req, texts });
     scrollTop();
   };
 
@@ -696,7 +706,7 @@ export default function App() {
   } else if (tab === 'about') {
     screen = (
       <Suspense fallback={<Loading />}>
-        <AboutView lang={lang} onExport={exportData} onImport={importData} onDeleteAll={deleteAllData} scanFirst={scanFirst} onScanFirst={changeScanFirst} />
+        <AboutView lang={lang} onExport={exportData} onImport={importData} onDeleteAll={deleteAllData} scanFirst={scanFirst} onScanFirst={changeScanFirst} saleCountry={saleCountry} onSaleCountry={changeSaleCountry} />
       </Suspense>
     );
   } else if (photoSet) {
@@ -751,6 +761,7 @@ export default function App() {
         saved={submitted.saved} onRetake={retakeSaved} onForget={() => forgetSaved(submitted.barcode)}
         onEdit={editIngredients} onRevert={revertIngredients} onAddPhotos={addPhotosToResult} thumbVersion={thumbVersion}
         nutritionInfo={nutrition} onNutritionSave={saveNutrition} translation={activeTranslation}
+        originText={originText} saleCountry={saleCountry}
         onReplacePhoto={submitted.barcode && originOf(submitted) === 'database' ? photoForIngredients('replace') : undefined}
         onCompletePhoto={submitted.barcode && originOf(submitted) === 'database' ? photoForIngredients('complete') : undefined}
         watchedAllergens={avoid.allergens} profiles={profiles} onProfile={(id) => changeProfiles(setActive(profiles, id))}

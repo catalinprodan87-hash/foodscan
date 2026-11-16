@@ -58,6 +58,13 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
+### Where it comes from (v3.7)
+
+- **Sources:** Open Food Facts `origins`, `manufacturing_places`, labels (PDO / PGI / TSG / EU organic, "made in") and packer codes, plus the label text read from a photo ("Țara de origine", "Produs în", "Ambalat în", "zona FAO 27", "pescuit / crescut", "decongelat", "din UE / din afara UE"). The database's "countries" field is not used, because it says where the product is sold.
+- **The chain** ends in "Vândut în: {country}", set in About → Your data (România by default). The distance is a rough guide: straight lines between capitals.
+- **"De ce e bine / De ce nu e bine / De știut"** come only from documented factors: distance and number of countries, processing inside or outside the EU (imports must meet the same EU rules and pass border checks), wild-caught or farmed fish and the FAO area, defrosted food, protected designations, and local origin. Each statement links to its source (`src/data/origin.js`).
+- No country is rated, and there are no safety statistics.
+
 ### Ingredients in other languages, translated on the phone (v3.6)
 
 - **Language detection:** the language of an ingredients list is recognised from label words and language-specific letters (`src/lib/langDetect.js`). That covers RO, EN, FR, DE, IT, ES, PT, NL, PL, HU, CS, SK, HR, SL, BG, RU, UK and EL; at least 90 % of the corpus lists are recognised correctly.

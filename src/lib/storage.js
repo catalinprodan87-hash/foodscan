@@ -66,3 +66,13 @@ export function getFlag(name) {
 export function setFlag(name, value = true) {
   save('flag:' + name, !!value);
 }
+
+/** "Vândut în": the country where the user shops (v3.7), ISO code, default România. */
+export function getSaleCountry() {
+  const v = load('saleCountry', 'RO');
+  return typeof v === 'string' && /^[A-Z]{2}$/.test(v) ? v : 'RO';
+}
+
+export function setSaleCountry(iso) {
+  save('saleCountry', iso);
+}

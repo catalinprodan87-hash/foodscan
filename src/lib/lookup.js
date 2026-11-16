@@ -31,7 +31,7 @@ const COMMON_FIELDS = [
   'brands', 'quantity', 'image_front_small_url',
   'ingredients_text_ro', 'ingredients_text', 'ingredients_text_en', 'lang',
 ];
-const FOOD_FIELDS = ['additives_tags', 'nova_group', 'nutriscore_grade', 'nutrient_levels', 'nutriments', 'allergens_tags', 'traces_tags', 'ingredients_analysis_tags', 'categories_tags'];
+const FOOD_FIELDS = ['additives_tags', 'nova_group', 'nutriscore_grade', 'nutrient_levels', 'nutriments', 'allergens_tags', 'traces_tags', 'ingredients_analysis_tags', 'categories_tags', 'origins', 'manufacturing_places', 'labels_tags', 'emb_codes_tags'];
 
 /** Open *Facts `product_type` values → app product types. */
 const OFF_PRODUCT_TYPES = { food: 'food', petfood: 'food', beauty: 'cosmetic', product: 'household' };
@@ -160,6 +160,15 @@ export function mapProduct(raw, type, code) {
     product.allergenTags = Array.isArray(p.allergens_tags) ? p.allergens_tags : [];
     product.traceTags = Array.isArray(p.traces_tags) ? p.traces_tags : [];
     product.analysisTags = Array.isArray(p.ingredients_analysis_tags) ? p.ingredients_analysis_tags : [];
+    // where it comes from (v3.7); not countries_tags, which says where it is sold
+    const str = (v) => (typeof v === 'string' ? v.slice(0, 200) : '');
+    const tags = (v, n) => (Array.isArray(v) ? v.filter((x) => typeof x === 'string').slice(0, n) : []);
+    product.origin = {
+      origins: str(p.origins),
+      manufacturingPlaces: str(p.manufacturing_places),
+      labels: tags(p.labels_tags, 30),
+      embCodes: tags(p.emb_codes_tags, 5),
+    };
     const nova = Number(p.nova_group);
     product.nova = nova >= 1 && nova <= 4 ? nova : null;
     product.nutriscore = typeof p.nutriscore_grade === 'string' && /^[a-e]$/i.test(p.nutriscore_grade)
