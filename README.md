@@ -58,6 +58,17 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
+### Ingredients in other languages, translated on the phone (v3.6)
+
+- **Language detection:** the language of an ingredients list is recognised from label words and language-specific letters (`src/lib/langDetect.js`). That covers RO, EN, FR, DE, IT, ES, PT, NL, PL, HU, CS, SK, HR, SL, BG, RU, UK and EL; at least 90 % of the corpus lists are recognised correctly.
+- **Term-by-term translation into Romanian** (`src/lib/translate.js`):
+  - It uses dictionaries built from the Open Food Facts ingredient and additive taxonomies (ODbL, credited in NOTICE and About; `scripts/build-dictionary.mjs` → `public/dict/{lang}.json`, about 45 KB each). A dictionary is downloaded only the first time a label in that language is read, then cached for offline use.
+  - E-numbers, percentages and codes (CI 77891, PEG-40) are kept, and words in capitals stay in capitals.
+  - A long word misread by one letter is matched to the dictionary.
+  - Words not in the dictionary stay as they are, highlighted.
+- **On the result:** "Tradus automat din {limba}" with **Vezi originalul**. The analysis reads both the translation and the original. Cosmetic INCI lists are not translated.
+- **The browser's own translator** (where it exists) can show what the highlighted words mean, for reading only and never for the analysis.
+
 ### Nutrition values and the app's own Nutri-Score (v3.5)
 
 - **Values per 100 g / 100 ml:** energy, fat, saturated fat, carbohydrates, sugars, fibre, protein and salt. They come from Open Food Facts, or from your photo of the nutrition table (`src/lib/nutritionText.js` reads RO / EN / HU / BG / DE / FR / IT / PL / HR / CZ row names). The table layout with the portion column first, as on oil bottles, is handled, and the reference intake (8400 kJ / 2000 kcal) is ignored.

@@ -1,5 +1,15 @@
 /** "Ce e nou" shown once after updating to a version (RO + EN). Keep each list short. */
 export const WHATS_NEW = {
+  '3.6.0': {
+    ro: [
+      'Ingredientele scrise în altă limbă (germană, maghiară, bulgară, franceză…) sunt traduse automat în română, pe telefon; poți vedea oricând originalul.',
+      'Cuvintele pe care dicționarul nu le știe rămân netraduse și sunt marcate.',
+    ],
+    en: [
+      'Ingredients written in another language (German, Hungarian, Bulgarian, French…) are translated into Romanian on the phone; the original is always a tap away.',
+      'Words the dictionary does not know stay as they are and are marked.',
+    ],
+  },
   '3.5.0': {
     ro: [
       'Valorile nutriționale apar sub rezultat (din bază sau din poza tabelului) și pot fi corectate; aplicația verifică dacă se potrivesc între ele.',
