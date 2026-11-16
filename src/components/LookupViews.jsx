@@ -43,13 +43,14 @@ export function PastePrompt({ lang, onAnalyze, onPhoto, placeholderKey = 'inputP
   );
 }
 
-export function NotFound({ lang, code, type = 'food', cached = false, onAnalyze, onPhoto, onBack, onRetry, backLabel = 'back' }) {
+export function NotFound({ lang, code, type = 'food', cached = false, onAnalyze, onPhoto, onPhotoSet, onBack, onRetry, backLabel = 'back' }) {
   return (
     <div className="result">
       <section className="card notice">
         <h2 className="card-title">🔍 {t(lang, 'notFoundTitle')}</h2>
         <p>{t(lang, 'notFoundText', { code })}</p>
         <PhotoButton lang={lang} onPhoto={onPhoto} className="btn primary block" />
+        {onPhotoSet && <PhotoButton lang={lang} onPhoto={onPhotoSet} className="btn ghost block small-btn" labelKey="setPickPhotos" multiple />}
         <PastePrompt lang={lang} onAnalyze={onAnalyze} />
       </section>
       {onRetry && (
@@ -64,7 +65,7 @@ export function NotFound({ lang, code, type = 'food', cached = false, onAnalyze,
 }
 
 /** Product found but without ingredients: show what is available + paste prompt. */
-export function NoIngredients({ lang, product, partial, onAnalyze, onPhoto, onBack, backLabel = 'back' }) {
+export function NoIngredients({ lang, product, partial, onAnalyze, onPhoto, onPhotoSet, onBack, backLabel = 'back' }) {
   const food = product.productType === 'food';
   const placeholderKey = food ? 'inputPlaceholder' : 'inputPlaceholder_' + product.productType;
   return (
@@ -74,6 +75,7 @@ export function NoIngredients({ lang, product, partial, onAnalyze, onPhoto, onBa
         <h2 className="card-title">📝 {t(lang, 'noIngredientsTitle')}</h2>
         <p>{t(lang, 'noIngredientsText', { source: product.source })}</p>
         <PhotoButton lang={lang} onPhoto={onPhoto} className="btn primary block" />
+        {onPhotoSet && <PhotoButton lang={lang} onPhoto={onPhotoSet} className="btn ghost block small-btn" labelKey="setPickPhotos" multiple />}
         <PastePrompt lang={lang} onAnalyze={onAnalyze} placeholderKey={placeholderKey} />
       </section>
       {food && partial && (product.nova || partial.nutriscore) && (
@@ -88,13 +90,14 @@ export function NoIngredients({ lang, product, partial, onAnalyze, onPhoto, onBa
 }
 
 /** EAN-13 20–29: a code printed by the shop (weighed / packed in store). */
-export function InStore({ lang, code, onAnalyze, onPhoto, onBack, backLabel = 'back' }) {
+export function InStore({ lang, code, onAnalyze, onPhoto, onPhotoSet, onBack, backLabel = 'back' }) {
   return (
     <div className="result">
       <section className="card notice">
         <h2 className="card-title">🏷️ {t(lang, 'inStoreTitle')}</h2>
         <p>{t(lang, 'inStoreText', { code })}</p>
         <PhotoButton lang={lang} onPhoto={onPhoto} className="btn primary block" />
+        {onPhotoSet && <PhotoButton lang={lang} onPhoto={onPhotoSet} className="btn ghost block small-btn" labelKey="setPickPhotos" multiple />}
         <PastePrompt lang={lang} onAnalyze={onAnalyze} />
       </section>
       <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, backLabel)}</button>
@@ -102,7 +105,7 @@ export function InStore({ lang, code, onAnalyze, onPhoto, onBack, backLabel = 'b
   );
 }
 
-export function LookupFailed({ lang, code, kind, onRetry, onAnalyze, onPhoto, onBack, backLabel = 'back' }) {
+export function LookupFailed({ lang, code, kind, onRetry, onAnalyze, onPhoto, onPhotoSet, onBack, backLabel = 'back' }) {
   return (
     <div className="result">
       <section className="card notice notice-error" role="alert">
@@ -113,6 +116,7 @@ export function LookupFailed({ lang, code, kind, onRetry, onAnalyze, onPhoto, on
       </section>
       <section className="card">
         <PhotoButton lang={lang} onPhoto={onPhoto} className="btn ghost block" />
+        {onPhotoSet && <PhotoButton lang={lang} onPhoto={onPhotoSet} className="btn ghost block small-btn" labelKey="setPickPhotos" multiple />}
         <PastePrompt lang={lang} onAnalyze={onAnalyze} />
       </section>
       <button type="button" className="btn ghost block" onClick={onBack}>{t(lang, backLabel)}</button>

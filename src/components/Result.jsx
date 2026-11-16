@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import PhotoButton from './PhotoButton.jsx';
 import HelpButton from './HelpButton.jsx';
+import { summaryParts } from '../lib/summary.js';
+
+const PhotoStrip = lazy(() => import('./PhotoStrip.jsx'));
 import { ALLERGENS_BY_ID } from '../data/allergens.js';
 import { t, pick } from '../lib/i18n.js';
 import { normalize } from '../lib/analyze.js';
@@ -330,18 +333,7 @@ function DietChips({ lang, diet }) {
   );
 }
 
-/** One line at the top: "2 de evitat · alergeni: lapte · NOVA 4". */
-export function summaryParts(result, lang) {
-  const parts = [];
-  if (result.avoidHits?.length) parts.push(t(lang, 'sumAvoid', { n: result.avoidHits.length }));
-  if (result.counts?.high) parts.push(t(lang, 'sumHigh', { n: result.counts.high }));
-  if (result.allergens?.contains?.length) {
-    const ids = result.allergens.contains.map((a) => a.id);
-    parts.push(t(lang, 'sumAllergens', { list: ids.slice(0, 3).map((id) => allergenName(id, lang)).join(', ') + (ids.length > 3 ? '…' : '') }));
-  }
-  if (result.processing?.nova) parts.push(`NOVA ${result.processing.nova}`);
-  return parts;
-}
+export { summaryParts };
 
 /**
  * One short line under a result, with the full disclaimer a tap away. Shown in
@@ -370,7 +362,7 @@ export function DisclaimerNote({ lang, type = 'food', high = false }) {
 export default function Result({
   lang, result, text, typeAuto, product, barcode, fromPhoto, onBack, backLabel: backLabelProp, notify,
   saved, onRetake, onForget, watchedAllergens = [], profiles, onProfile,
-  onEdit, onRevert, onReplacePhoto, onCompletePhoto,
+  onEdit, onRevert, onReplacePhoto, onCompletePhoto, onAddPhotos, thumbVersion = 0,
 }) {
   const food = isFood(result);
   const backLabel = backLabelProp || 'back';
@@ -404,6 +396,13 @@ export default function Result({
       <AdditiveList lang={lang} additives={result.items} grouped={!food} />
       <IngredientsText lang={lang} text={text} result={result} />
       <EditIngredients key={text} lang={lang} text={text} onEdit={onEdit} onReplacePhoto={onReplacePhoto} onCompletePhoto={onCompletePhoto} />
+      {barcode && <Suspense fallback={null}><PhotoStrip lang={lang} barcode={barcode} version={thumbVersion} /></Suspense>}
+      {onAddPhotos && (
+        <div className="actions add-photos">
+          <PhotoButton lang={lang} onPhoto={onAddPhotos} className="btn ghost small-btn" labelKey="addPhotos" multiple />
+          <span className="muted small">{t(lang, 'addPhotosHint')}</span>
+        </div>
+      )}
       <div className="actions result-actions">
         <ShareButton lang={lang} result={result} product={product} barcode={barcode} text={text} notify={notify} />
       </div>

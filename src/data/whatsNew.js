@@ -1,5 +1,15 @@
 /** "Ce e nou" shown once after updating to a version (RO + EN). Keep each list short. */
 export const WHATS_NEW = {
+  '3.4.0': {
+    ro: [
+      'Poți alege mai multe poze ale aceluiași produs deodată (ingrediente, tabel nutrițional, origine): sunt citite și sortate automat.',
+      '„Adaugă poze” sub rezultat adaugă alte fețe ale produsului; pozele se văd ca miniaturi, doar pe acest telefon.',
+    ],
+    en: [
+      'You can pick several photos of one product at once (ingredients, nutrition table, origin): they are read and sorted automatically.',
+      '"Add photos" under a result adds other sides of the product; the photos show as small thumbnails, on this phone only.',
+    ],
+  },
   '3.3.0': {
     ro: [
       'Poți edita ingredientele sub orice rezultat și re-analiza pe loc; varianta ta se păstrează pentru acel cod de bare.',

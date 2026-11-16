@@ -980,3 +980,19 @@ main:focus { outline: none; }
 .edited-note { border-color: var(--teal); }
 .edit-ingredients textarea { width: 100%; font: inherit; font-size: 0.95rem; line-height: 1.45; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); margin-bottom: 8px; }
 .edit-ingredients .actions { flex-wrap: wrap; }
+/* v3.4 photo sets */
+.set-list { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 10px; }
+.set-item { display: flex; gap: 10px; align-items: flex-start; }
+.set-thumb { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; flex: none; background: var(--bg); border: 1px solid var(--border); }
+.set-body { min-width: 0; flex: 1; }
+.set-status { margin: 0 0 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.set-types { margin: 0; gap: 6px; }
+.chip-btn.small { font-size: 0.78rem; padding: 4px 8px; min-height: 30px; }
+.set-error .set-status { color: var(--high); }
+.set-other-text summary { cursor: pointer; }
+.set-pick { display: block; margin: 8px auto 0; }
+.photo-strip { margin: 4px 2px 12px; }
+.photo-strip ul { list-style: none; padding: 0; margin: 4px 0 0; display: flex; gap: 8px; overflow-x: auto; }
+.photo-strip li { flex: none; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.photo-strip img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+.add-photos { align-items: center; flex-wrap: wrap; margin: 4px 2px 14px; }

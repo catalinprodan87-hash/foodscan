@@ -31,15 +31,14 @@ async function shareInto(page, { file, text }) {
   await Promise.all([page.waitForURL(/\?share=1|\/$/), page.evaluate(() => document.getElementById('share-form').submit())]);
 }
 
-test('two photos shared at once: both are read and merged', async ({ page }) => {
+test('two photos shared at once open as a photo set of one product (v3.4)', async ({ page }) => {
+  test.setTimeout(180_000);
   await page.goto('./');
   await swReady(page);
   await shareInto(page, { file: ['bench/ocr/images/tomato-flat.png', 'bench/ocr/images/biscuits-flat.png'] });
-  test.setTimeout(120_000);
-  await expect(page.locator('.crop-box img')).toBeVisible();
-  await page.click('text=Sari peste, citește toată poza');
-  await expect(page.locator('#ocr-text')).toBeVisible({ timeout: 60_000 });
-  await expect(page.locator('.photo-parts li')).toHaveCount(2, { timeout: 60_000 });
+  await expect(page.locator('.set-item')).toHaveCount(2);
+  await expect(page.locator('.set-done')).toHaveCount(2, { timeout: 150_000 });
+  await expect(page.locator('#set-ingr-text')).not.toHaveValue('');
   expect(new URL(page.url()).search).toBe('');
 });
 

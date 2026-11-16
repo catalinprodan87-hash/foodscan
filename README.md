@@ -58,6 +58,15 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
+### Several photos per product (v3.4)
+
+- **Mai multe poze ale aceluiași produs** (home, not-found and no-ingredients screens) and **Adaugă poze** on a result open the gallery for several photos at once. Several shared photos open the same way.
+- Each photo is turned upright and read whole. Photos with an ingredients heading are read first, and **Oprește** stops after the current one.
+- **Sorted by content:** ingredients, nutrition table, origin, front or other (`src/lib/photoType.js`). A back label often holds several of these, so a photo can count for more than one. One tap on a chip corrects it.
+- **Merged per type:** photos of one label from several sides overlap, and the repeat is removed (`src/lib/photoSet.js`). The ingredients are analysed; the nutrition and origin texts are kept with the barcode for the next releases.
+- **Thumbnails:** ~160 px thumbnails are kept in IndexedDB on the phone (at most 300, oldest dropped). They are never in backups and are removed by "Șterge toate datele". They show under the result.
+- **Loading:** the result and lookup screens now load on demand, which keeps the first load at 444 KB.
+
 ### Your own ingredients text (v3.3)
 
 - **Editează ingredientele** under any result opens the text; **Re-analizează** updates the result in place. For a barcode, your version is remembered: the next scan uses it, marked "Ingrediente editate de tine", with **Revino la textul original**.

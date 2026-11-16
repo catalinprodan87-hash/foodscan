@@ -1,13 +1,11 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Header from './components/Header.jsx';
 import Home from './components/Home.jsx';
-import Result from './components/Result.jsx';
-import { LookupLoading, NotFound, NoIngredients, LookupFailed, InStore } from './components/LookupViews.jsx';
 import { analyze, detectProductType } from './lib/analyze.js';
 import { lookupProduct, analyzeInput, isInStoreCode, createNotFoundCache } from './lib/lookup.js';
 import { createRepeatFilter, addScan, updateScan } from './lib/shopping.js';
 import { vibrate } from './lib/camera.js';
-import { summaryParts } from './components/Result.jsx';
+import { summaryParts } from './lib/summary.js';
 import { buildBackup, backupFileName, historyToRestore, mergeSaved, clearLocalData, requestPersistence } from './lib/backup.js';
 import { buildRequest } from './lib/request.js';
 import { detectLang, t, pick } from './lib/i18n.js';
@@ -18,6 +16,7 @@ import { isShareLaunch, takeShared } from './lib/shareTarget.js';
 import { createHistoryStore, makeEntry, entryRequest, entryTitle } from './lib/history.js';
 import { createSavedStore, savedFromRequest, requestFromSaved, productSnapshot } from './lib/savedIngredients.js';
 import { chooseIngredients, editedRecord, revertRecord, completeText, migrateSaved } from './lib/ingredientText.js';
+import { mergeTexts } from './lib/photoSet.js';
 import { saveAutoBackup } from './lib/autoBackup.js';
 import TabBar from './components/TabBar.jsx';
 import { UpdateBanner, OfflineBanner, InstallCard, Toast, WhatsNew } from './components/Banners.jsx';
@@ -30,10 +29,21 @@ const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '
 /* global __BUILD_ID__ */
 const BUILD_ID = typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : 'dev';
 
+// Result and lookup screens load on demand (first-load budget); precached for offline use.
+const Result = lazy(() => import('./components/Result.jsx'));
+const lookupView = (name) => lazy(() => import('./components/LookupViews.jsx').then((m) => ({ default: m[name] })));
+const LookupLoading = lookupView('LookupLoading');
+const NotFound = lookupView('NotFound');
+const NoIngredients = lookupView('NoIngredients');
+const LookupFailed = lookupView('LookupFailed');
+const InStore = lookupView('InStore');
+
 // The scanner (and the zxing decoder) is only downloaded when it is opened.
 const ScannerOverlay = lazy(() => import('./components/ScannerOverlay.jsx'));
 // Photo → OCR flow (the OCR engine runs in a Web Worker, loaded on the first photo).
 const PhotoFlow = lazy(() => import('./components/PhotoFlow.jsx'));
+// Several photos of one product (v3.4), and their thumbnails on the result.
+const PhotoSetFlow = lazy(() => import('./components/PhotoSetFlow.jsx'));
 // Secondary tabs and the first-run slides are split out to keep the first load small.
 const HistoryView = lazy(() => import('./components/HistoryView.jsx'));
 const CompareView = lazy(() => import('./components/CompareView.jsx'));
@@ -72,6 +82,9 @@ export default function App() {
   const [submitted, setSubmitted] = useState(null);
   // Photo being read: { file, product, barcode }
   const [photo, setPhoto] = useState(null);
+  // Several photos of one product: { files, product, barcode, existing, dbText }
+  const [photoSet, setPhotoSet] = useState(null);
+  const [thumbVersion, setThumbVersion] = useState(0);
   const [tab, setTab] = useState('scan');
   const [history, setHistory] = useState([]);
   const [historyOpen, setHistoryOpen] = useState(null); // request rebuilt from an entry
@@ -143,7 +156,8 @@ export default function App() {
         if (shared?.files?.length) {
           setFlag('onboarded');
           setOnboarded(true);
-          setPhoto({ file: shared.files[0], queued: shared.files.slice(1), product: null, barcode: null });
+          if (shared.files.length > 1) setPhotoSet({ files: shared.files, product: null, barcode: null, existing: {} });
+          else setPhoto({ file: shared.files[0], product: null, barcode: null });
         } else if (shared?.text) {
           setText(shared.text);
           notify(t(getLang() || detectLang(), 'shareTextReady'));
@@ -262,6 +276,7 @@ export default function App() {
   const deleteAllData = useCallback(async () => {
     try { await (await storeRef.current).clear(); } catch { /* ignore */ }
     clearLocalData();
+    try { (await import('./lib/thumbStore.js')).clearThumbs(); } catch { /* ignore */ }
     // Cached product lookups also record what was scanned. The OCR engine is kept (no personal data).
     try { await globalThis.caches?.delete('openfacts-api'); } catch { /* ignore */ }
     setHistory([]);
@@ -287,6 +302,7 @@ export default function App() {
     setLookup(null);
     setSubmitted(null);
     setPhoto(null);
+    setPhotoSet(null);
   }, []);
 
   /** @param {{force?: boolean}} opts force: ignore the not-found cache ("Caută din nou"). */
@@ -474,6 +490,54 @@ export default function App() {
     scrollTop();
   };
 
+  // ───── v3.4: several photos of one product ─────
+  /** From home / a lookup screen: photos for the current barcode context (if any). */
+  const startPhotoSet = (files) => {
+    const ctx = lookupContext();
+    setPhotoSet({ files: [].concat(files), product: ctx.product, barcode: ctx.barcode, existing: ctx.barcode ? savedStoreRef.current.get(ctx.barcode)?.texts || {} : {} });
+    setLookup(null);
+    setSubmitted(null);
+    scrollTop();
+  };
+  /** "Adaugă poze" on a result: more photos of the same product; the texts read before are kept. */
+  const addPhotosToResult = (files) => {
+    const cur = submitted;
+    const barcode = cur.barcode || cur.product?.code || null;
+    const rec = barcode ? savedStoreRef.current.get(barcode) : null;
+    setPhotoSet({
+      files: [].concat(files), product: cur.product, barcode,
+      existing: { ...(rec?.texts || {}), ingredients: shownText(cur) },
+      origin: originOf(cur), baseText: shownText(cur),
+    });
+    setSubmitted(null);
+    scrollTop();
+  };
+  const analyzePhotoSet = async ({ ingredients, texts, thumbs, confidence }) => {
+    const { product, barcode, origin, baseText } = photoSet;
+    setPhotoSet(null);
+    let req = buildRequest({ text: ingredients, source: 'photo', chosenType, product, barcode, confidence });
+    if (req.barcode) {
+      const prev = savedStoreRef.current.get(req.barcode);
+      const replacesDb = (origin === 'database' || (!origin && product?.hasIngredients)) && ingredients.trim() !== (baseText || '').trim();
+      let rec = replacesDb
+        ? editedRecord(prev, { barcode: req.barcode, text: ingredients, currentText: baseText || product?.ingredientsText, currentOrigin: 'database', productType: req.type, product: productSnapshot(product), source: 'photo' })
+        : { ...(prev || {}), ...savedFromRequest(req), explicit: !!prev?.explicit && origin === 'edited', original: prev?.original || null, source: prev?.explicit && origin === 'edited' ? prev.source : 'photo' };
+      rec = { ...rec, texts: mergeTexts(prev?.texts, texts), photos: [...(prev?.photos || []), ...thumbs.map(({ id, types, date }) => ({ id, types, date }))].slice(-30) };
+      savedStoreRef.current.save(rec);
+      const sameText = ingredients.trim() === (baseText || '').trim();
+      // Only the nutrition table / origin were added: the result stays as it was (database text, no note).
+      if (sameText && origin === 'database') req = { ...req, text: '', fromPhoto: false };
+      else if (sameText && origin === 'edited') req = { ...req, saved: { date: rec.date, source: prev?.source || 'edit', edited: true, hasOriginal: !!rec.original } };
+      else req = { ...req, saved: { date: rec.date, source: 'photo', edited: !!rec.explicit, hasOriginal: !!rec.original, fresh: true } };
+      if (thumbs.length) {
+        const { saveThumbs } = await import('./lib/thumbStore.js');
+        saveThumbs(req.barcode, thumbs).then(() => setThumbVersion((v) => v + 1));
+      }
+    }
+    setSubmitted(req);
+    scrollTop();
+  };
+
   // ───── v3.3: the user's own ingredients text ─────
   const shownText = (req) => (req?.text?.trim() ? req.text : req?.product?.ingredientsText || '');
   const originOf = (req) => (req?.saved?.edited ? 'edited' : req?.saved ? 'user' : req?.product && !req?.text?.trim() ? 'database' : 'user');
@@ -580,6 +644,15 @@ export default function App() {
         <AboutView lang={lang} onExport={exportData} onImport={importData} onDeleteAll={deleteAllData} scanFirst={scanFirst} onScanFirst={changeScanFirst} />
       </Suspense>
     );
+  } else if (photoSet) {
+    screen = (
+      <Suspense fallback={<Loading />}>
+        <PhotoSetFlow
+          lang={lang} files={photoSet.files} product={photoSet.product} barcode={photoSet.barcode} existing={photoSet.existing}
+          onAnalyze={analyzePhotoSet} onCancel={goHome}
+        />
+      </Suspense>
+    );
   } else if (photo) {
     screen = (
       <Suspense fallback={<section className="card ocr-progress" aria-busy="true"><div className="spinner" aria-hidden="true" /></section>}>
@@ -595,23 +668,23 @@ export default function App() {
     screen = (
       <NotFound
         lang={lang} code={lookup.code} type={chosenType || 'food'} cached={lookup.cached}
-        onAnalyze={analyzeText} onPhoto={startPhoto} onBack={leave} backLabel={leaveLabel} onRetry={() => runLookup(lookup.code, { force: true })}
+        onAnalyze={analyzeText} onPhoto={startPhoto} onPhotoSet={startPhotoSet} onBack={leave} backLabel={leaveLabel} onRetry={() => runLookup(lookup.code, { force: true })}
       />
     );
   } else if (lookup?.status === 'in_store') {
-    screen = <InStore lang={lang} code={lookup.code} onAnalyze={analyzeText} onPhoto={startPhoto} onBack={leave} backLabel={leaveLabel} />;
+    screen = <InStore lang={lang} code={lookup.code} onAnalyze={analyzeText} onPhoto={startPhoto} onPhotoSet={startPhotoSet} onBack={leave} backLabel={leaveLabel} />;
   } else if (lookup?.status === 'no_ingredients') {
     screen = (
       <NoIngredients
         lang={lang} product={lookup.product} partial={partial}
-        onAnalyze={analyzeText} onPhoto={startPhoto} onBack={leave} backLabel={leaveLabel}
+        onAnalyze={analyzeText} onPhoto={startPhoto} onPhotoSet={startPhotoSet} onBack={leave} backLabel={leaveLabel}
       />
     );
   } else if (lookup?.status === 'error') {
     screen = (
       <LookupFailed
         lang={lang} code={lookup.code} kind={lookup.kind}
-        onRetry={() => runLookup(lookup.code, { force: true })} onAnalyze={analyzeText} onPhoto={startPhoto} onBack={leave} backLabel={leaveLabel}
+        onRetry={() => runLookup(lookup.code, { force: true })} onAnalyze={analyzeText} onPhoto={startPhoto} onPhotoSet={startPhotoSet} onBack={leave} backLabel={leaveLabel}
       />
     );
   } else if (result) {
@@ -621,7 +694,7 @@ export default function App() {
         text={submitted.text?.trim() ? submitted.text : submitted.product?.ingredientsText || ''}
         product={submitted.product} barcode={submitted.barcode} fromPhoto={submitted.fromPhoto} onBack={leave} backLabel={leaveLabel}
         saved={submitted.saved} onRetake={retakeSaved} onForget={() => forgetSaved(submitted.barcode)}
-        onEdit={editIngredients} onRevert={revertIngredients}
+        onEdit={editIngredients} onRevert={revertIngredients} onAddPhotos={addPhotosToResult} thumbVersion={thumbVersion}
         onReplacePhoto={submitted.barcode && originOf(submitted) === 'database' ? photoForIngredients('replace') : undefined}
         onCompletePhoto={submitted.barcode && originOf(submitted) === 'database' ? photoForIngredients('complete') : undefined}
         watchedAllergens={avoid.allergens} profiles={profiles} onProfile={(id) => changeProfiles(setActive(profiles, id))}
@@ -631,7 +704,7 @@ export default function App() {
     screen = (
       <Home
         lang={lang} type={type} typeAuto={chosenType == null} onType={setChosenType}
-        onScan={() => setScanning(true)} onCode={onCode} onPhoto={startPhoto}
+        onScan={() => setScanning(true)} onCode={onCode} onPhoto={startPhoto} onPhotoSet={startPhotoSet}
         text={text} onText={changeText} onAnalyze={analyzeText}
         avoid={avoid} onAvoid={changeAvoid} onEditList={() => setTab('list')}
       />
@@ -661,7 +734,7 @@ export default function App() {
       <main id="main" ref={mainRef} tabIndex={-1}>
         {news && <WhatsNew lang={lang} version={shortVersion(news)} items={pick(WHATS_NEW[news], lang)} onClose={() => setNews(null)} />}
         {incoming && <ImportCard lang={lang} incoming={incoming} full={profiles.profiles.length >= 8} onAdd={addIncoming} onClose={closeIncoming} />}
-        {screen}
+        <Suspense fallback={<Loading />}>{screen}</Suspense>
       </main>
       <TabBar lang={lang} tab={tab} onTab={changeTab} badge={0} />
       <Toast toast={toast} onClose={() => setToast(null)} />

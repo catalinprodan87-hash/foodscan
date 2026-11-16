@@ -2,7 +2,10 @@ import { useRef } from 'react';
 import { t } from '../lib/i18n.js';
 
 /** "Fotografiază ingredientele": opens the back camera (or the gallery). */
-export default function PhotoButton({ lang, onPhoto, className = 'btn ghost block', big = false, labelKey = 'photoButton' }) {
+/**
+ * With `multiple`, the gallery opens and several photos can be picked; onPhoto then gets File[].
+ */
+export default function PhotoButton({ lang, onPhoto, className = 'btn ghost block', big = false, labelKey = 'photoButton', multiple = false }) {
   const ref = useRef(null);
   return (
     <>
@@ -13,12 +16,13 @@ export default function PhotoButton({ lang, onPhoto, className = 'btn ghost bloc
         ref={ref}
         type="file"
         accept="image/*"
-        capture="environment"
+        {...(multiple ? { multiple: true } : { capture: 'environment' })}
         hidden
         onChange={(e) => {
-          const file = e.target.files?.[0];
+          const list = [...(e.target.files || [])];
           e.target.value = ''; // the same photo can be chosen again
-          if (file) onPhoto(file);
+          if (!list.length) return;
+          onPhoto(multiple ? list : list[0]);
         }}
       />
     </>

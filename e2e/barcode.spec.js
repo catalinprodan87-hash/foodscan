@@ -41,7 +41,7 @@ test('barcode not found anywhere → photo and paste options', async ({ page }) 
   await page.goto('./');
   await enterBarcode(page, '4006381333931');
   await expect(page.locator('.notice h2')).toContainText('Produs negăsit');
-  await expect(page.locator('.notice input[type=file]')).toHaveCount(1);
+  await expect(page.locator('.notice input[type=file]')).toHaveCount(2); // one photo (camera) or several (gallery)
   await expect(page.locator('#paste-ingredients')).toBeVisible();
 });
 

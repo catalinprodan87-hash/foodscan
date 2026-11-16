@@ -7,7 +7,7 @@ import PhotoButton from './PhotoButton.jsx';
 
 /** Home: scan (main action) → manual barcode / photo → paste ingredients. */
 export default function Home({
-  lang, type, typeAuto, onType, onScan, onCode, onPhoto, text, onText, onAnalyze, avoid, onAvoid, onEditList,
+  lang, type, typeAuto, onType, onScan, onCode, onPhoto, onPhotoSet, text, onText, onAnalyze, avoid, onAvoid, onEditList,
 }) {
   return (
     <>
@@ -25,6 +25,7 @@ export default function Home({
           {t(lang, 'scanButton')}
         </button>
         <PhotoButton lang={lang} onPhoto={onPhoto} className="btn photo-main-btn" />
+        {onPhotoSet && <PhotoButton lang={lang} onPhoto={onPhotoSet} className="link-btn set-pick" labelKey="setPickPhotos" multiple />}
         <p className="muted small privacy-note">🔒 {t(lang, 'photoPrivacy')}</p>
         <div className="divider"><span>{t(lang, 'or')}</span></div>
         <BarcodeEntry lang={lang} onCode={onCode} />
