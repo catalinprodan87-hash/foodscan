@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { t } from '../lib/i18n.js';
+import '../lib/strings/origin.js';
 import { assessOrigin } from '../lib/origin.js';
 import { COUNTRY_BY_ISO } from '../data/countries.js';
 import { RULES, SOURCES, FAO_AREAS } from '../data/origin.js';
@@ -29,8 +30,9 @@ function sentence(point, lang) {
  * database, the approximate distance, and what that means – only documented
  * facts, each with its source. Never a rating of a country.
  */
-export default function OriginCard({ lang, text = '', originText = '', product = null, saleCountry = 'RO' }) {
-  const o = useMemo(() => assessOrigin({ text: `${originText}\n${text}`, product: product?.origin || null, saleCountry }), [text, originText, product, saleCountry]);
+export default function OriginCard({ lang, text = '', originText = '', product = null, saleCountry = 'RO', assessment = null }) {
+  const own = useMemo(() => (assessment ? null : assessOrigin({ text: `${originText}\n${text}`, product: product?.origin || null, saleCountry })), [assessment, text, originText, product, saleCountry]);
+  const o = assessment || own;
   const groups = ['plus', 'minus', 'info'].map((kind) => [kind, o.points.filter((p) => p.kind === kind)]).filter(([, list]) => list.length);
   const L = lang === 'ro' ? 'ro' : 'en';
 

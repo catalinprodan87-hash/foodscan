@@ -7,8 +7,8 @@ const VERDICT_ICON = { bad: '✕', warn: '!', ok: '✓', unknown: '?' };
 const NLEVEL = { low: 'none', moderate: 'medium', high: 'high' };
 
 /** Two products from the history, row by row (stacked label, then two cells). */
-export default function CompareView({ lang, entries, avoid, onBack }) {
-  const { a, b, shared } = compareEntries(entries[0], entries[1], avoid);
+export default function CompareView({ lang, entries, avoid, saleCountry = 'RO', onBack }) {
+  const { a, b, shared } = compareEntries(entries[0], entries[1], avoid, saleCountry);
   const row = (key, label, render) => (
     <div className="cmp-row" key={key} role="row">
       <div className="cmp-label" role="rowheader">{label}</div>
@@ -35,6 +35,8 @@ export default function CompareView({ lang, entries, avoid, onBack }) {
           {row('verdict', t(lang, 'cmpVerdict'), (s) => (
             <span className="cmp-verdict"><span className={`history-verdict verdict-dot-${s.verdict}`} aria-hidden="true">{VERDICT_ICON[s.verdict]}</span> {t(lang, 'verdict_' + s.verdict)}</span>
           ))}
+          {row('score', t(lang, 'scoreCmp'), (s) => (s.score && !s.score.insufficient
+            ? <span className={`history-score band-${s.score.band}`}>{s.score.general}<span className="muted small">/100</span></span> : dash))}
           {food && row('nova', 'NOVA', (s) => (s.nova ? `NOVA ${s.nova}` : dash))}
           {food && row('nutri', 'Nutri-Score', (s) => (s.nutriscore ? <span className={`tile-big ns-text-${s.nutriscore} cmp-ns`}>{s.nutriscore.toUpperCase()}</span> : dash))}
           {food && NUTRIENTS.map((k) => row(k, t(lang, 'nutrient_' + k), (s) => (s.nutrients[k]

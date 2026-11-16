@@ -1,5 +1,15 @@
 /** "Ce e nou" shown once after updating to a version (RO + EN). Keep each list short. */
 export const WHATS_NEW = {
+  '3.8.0': {
+    ro: [
+      'Fiecare rezultat are un scor de la 1 la 100, cu „Cum s-a calculat” (ingrediente, Nutri-Score, NOVA, origine). La cosmetice și curățenie e „Scor ingrediente”.',
+      'Dacă produsul conține ceva din lista ta, numărul mare e scorul tău; distribuirea, compararea și istoricul folosesc scorul general.',
+    ],
+    en: [
+      'Every result has a score from 1 to 100, with "How it was calculated" (ingredients, Nutri-Score, NOVA, origin). Cosmetics and household products get an "Ingredient score".',
+      'If the product contains something on your list, the big number is your score; sharing, compare and the history use the general score.',
+    ],
+  },
   '3.7.0': {
     ro: [
       'Rezultatul arată de unde vine produsul: originea, unde a fost procesat și „Vândut în” (ales în Despre → Datele tale, implicit România).',

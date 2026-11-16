@@ -3,6 +3,7 @@
  * in the ingredients text. Pure, unit-tested.
  */
 import { t, pick } from './i18n.js';
+import { bandFor } from './score.js';
 import { REGIONS, regionShort } from '../data/restrictions.js';
 import { ALLERGENS_BY_ID } from '../data/allergens.js';
 
@@ -12,13 +13,15 @@ const FLAGGED = ['high', 'medium'];
  * Text summary for the Web Share API / clipboard.
  * @returns {{title: string, text: string, url: string}}
  */
-export function shareSummary(result, { lang = 'ro', product = null, barcode = null, appUrl = '', text = '' } = {}) {
+/** `score`: the general score (v3.8) – never the personal one. */
+export function shareSummary(result, { lang = 'ro', product = null, barcode = null, appUrl = '', text = '', score = null } = {}) {
   const food = result.productType === 'food';
   const snippet = text.replace(/\s+/g, ' ').trim();
   const fromText = snippet ? `„${snippet.length > 40 ? `${snippet.slice(0, 38)}…` : snippet}”` : '';
   const name = product?.name || (barcode ? `${t(lang, 'barcode')} ${barcode}` : fromText || t(lang, 'type_' + result.productType));
   const verdictKey = !food && result.verdict === 'warn' ? 'verdict_warn_nonfood' : 'verdict_' + result.verdict;
   const lines = [`${name}: ${t(lang, verdictKey)}`];
+  if (Number.isFinite(score)) lines.push(t(lang, 'scoreShare', { score, band: t(lang, 'scoreBand_' + bandFor(score)) }));
   const flagged = result.items.filter((x) => FLAGGED.includes(x.level));
   if (flagged.length) {
     const list = flagged.map((x) => `${food ? x.code + ' ' : ''}${pick(x.name, lang)} (${t(lang, 'level_' + x.level)}${x.levelSource && x.levelSource !== 'EU' ? ' · ' + regionShort(x.levelSource, lang) : ''})`);

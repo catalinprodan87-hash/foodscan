@@ -282,14 +282,14 @@ export default function App() {
   useEffect(() => {
     if (!submitted || !result || savedRef.current === submitted) return;
     savedRef.current = submitted;
-    const entry = makeEntry(submitted, result);
+    const entry = makeEntry(submitted, result, new Date(), { grade: nutrition?.score?.grade || null, originText });
     storeRef.current?.then((store) => store.save(entry, 200)).then(setHistory).catch(() => {});
     // Once there is something worth keeping, ask the browser not to evict it.
     if (!persistAskedRef.current) {
       persistAskedRef.current = true;
       requestPersistence();
     }
-  }, [submitted, result]);
+  }, [submitted, result]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const historyResult = useMemo(() => {
     if (!historyOpen) return null;
@@ -677,7 +677,7 @@ export default function App() {
   if (tab === 'history' && compare) {
     screen = (
       <Suspense fallback={<Loading />}>
-        <CompareView lang={lang} entries={compare} avoid={avoid} onBack={() => setCompare(null)} />
+        <CompareView lang={lang} entries={compare} avoid={avoid} saleCountry={saleCountry} onBack={() => setCompare(null)} />
       </Suspense>
     );
   } else if (tab === 'history') {
@@ -691,7 +691,7 @@ export default function App() {
     ) : (
       <Suspense fallback={<Loading />}>
         <HistoryView
-          lang={lang} entries={history} avoid={avoid}
+          lang={lang} entries={history} avoid={avoid} saleCountry={saleCountry}
           onOpen={(entry) => { setHistoryOpen(entryRequest(entry)); scrollTop(); }}
           onDelete={deleteEntry} onClear={clearHistory} onCompare={(pair) => { setCompare(pair); scrollTop(); }}
         />
@@ -761,7 +761,7 @@ export default function App() {
         saved={submitted.saved} onRetake={retakeSaved} onForget={() => forgetSaved(submitted.barcode)}
         onEdit={editIngredients} onRevert={revertIngredients} onAddPhotos={addPhotosToResult} thumbVersion={thumbVersion}
         nutritionInfo={nutrition} onNutritionSave={saveNutrition} translation={activeTranslation}
-        originText={originText} saleCountry={saleCountry}
+        originText={originText} saleCountry={saleCountry} ocrConfidence={submitted.confidence ?? null}
         onReplacePhoto={submitted.barcode && originOf(submitted) === 'database' ? photoForIngredients('replace') : undefined}
         onCompletePhoto={submitted.barcode && originOf(submitted) === 'database' ? photoForIngredients('complete') : undefined}
         watchedAllergens={avoid.allergens} profiles={profiles} onProfile={(id) => changeProfiles(setActive(profiles, id))}

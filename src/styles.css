@@ -1023,3 +1023,26 @@ mark.untranslated { background: transparent; border-bottom: 2px dotted var(--med
 .origin-plus h4::before { content: '👍 '; }
 .origin-minus h4::before { content: '👎 '; }
 .origin-info h4::before { content: 'ℹ️ '; }
+
+/* v3.8 – overall score (bands: 0–24 low, 25–49 below, 50–74 fair, 75–100 good) */
+.score-card { border-left: 6px solid var(--band, var(--border)); }
+.score-card.band-low, .history-score.band-low { --band: var(--high); --band-bg: var(--high-bg); }
+.score-card.band-below, .history-score.band-below { --band: var(--medium); --band-bg: var(--medium-bg); }
+.score-card.band-fair, .history-score.band-fair { --band: #3f6212; --band-bg: #ecfccb; }
+.score-card.band-good, .history-score.band-good { --band: var(--none); --band-bg: var(--none-bg); }
+.score-main { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; margin: 2px 0 6px; }
+.score-num { font-family: var(--heading); font-size: 3.2rem; font-weight: 700; line-height: 1; color: var(--band, var(--text)); }
+.score-of { font-size: 1.1rem; color: var(--muted); }
+.score-band { padding: 2px 10px; border-radius: 999px; background: var(--band-bg, var(--unknown-bg)); color: var(--band, var(--text)); font-weight: 600; }
+.score-personal, .score-cap { margin: 4px 0; }
+.score-estimated { margin: 4px 0; font-weight: 600; }
+.score-parts { list-style: none; padding: 0; margin: 8px 0; }
+.score-parts li { display: grid; grid-template-columns: 1fr; gap: 2px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+.score-part-name { font-weight: 600; }
+.score-bar { display: block; height: 6px; border-radius: 3px; background: var(--unknown-bg); overflow: hidden; }
+.score-bar > span { display: block; height: 100%; background: var(--band, var(--teal)); }
+.history-score { display: inline-flex; align-items: center; justify-content: center; min-width: 2.2em; padding: 2px 6px; border-radius: 999px; font-weight: 700; background: var(--band-bg, var(--unknown-bg)); color: var(--band, var(--text)); }
+@media (prefers-color-scheme: dark) {
+  .score-card.band-below, .history-score.band-below { --band: #fbbf24; --band-bg: #3b2a06; }
+  .score-card.band-fair, .history-score.band-fair { --band: #a3e635; --band-bg: #1f3305; }
+}

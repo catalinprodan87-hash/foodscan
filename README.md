@@ -58,6 +58,19 @@ Installable web app (PWA) that checks supermarket product ingredients and flags 
 - **Text clean-up** (`src/lib/ocrText.js`, `src/lib/lexicon.js`): section extraction from `Ingrediente:` / `Compoziție:` / `Ingredients:` / `INCI:` / `Conține:` – also badly read headings ("ngrec lente:", "…nte:", "Ingredientezahăr") – to before "Poate conține", "A se păstra" (also "ASE păstra"), nutrition tables, hazard codes or another language. A word list of ~1,200 ingredient words then fixes one-edit slips ("sore" → "sare", "posteurizat" → "pasteurizat"), splits glued words ("cacaolapte" → "cacao lapte") and restores diacritics; real words are never changed, so no additive can be invented.
 - **Entry points, review and labels** as before: home button, the barcode "not found" / "no ingredients" / error screens (text attached to the barcode), crop step, editable review, "citit din fotografie" label.
 
+### Overall score 1–100 (v3.8)
+
+- **One number per result**, explained in [`docs/SCORING.md`](docs/SCORING.md) (formula version 1):
+  - **Food:** ingredients and additives 40%, nutrition (Nutri-Score) 35%, processing (NOVA) 15%, origin 5%, completeness 5%.
+  - **Cosmetics and household products:** the "Scor ingrediente": ingredient risk 80%, avoid list 10%, completeness 10%.
+- **Caps:** at most 49 with any high-level ingredient, and at most 25 with anything banned or not allowed in the EU for that kind of product (`src/data/scoring.js`, with regulations).
+- **Bands:** 0–24 Slab, 25–49 Sub medie, 50–74 Acceptabil, 75–100 Bun, shown as a word as well as a colour.
+- **Breakdown and confidence:** a breakdown is a tap away. "Scor estimat – date incomplete" appears when Nutri-Score or NOVA is missing or the photo text was read with low confidence. Without an ingredients list there is no number: "Date insuficiente".
+- **General vs personal:**
+  - Your avoid list lowers your own score (big number, capped at 49) and the result says so.
+  - Sharing, compare, the history and other family profiles use the general score.
+- **Calibrated** on 32 Open Facts products and locked in a golden test (`tests/fixtures/score-golden.json`, `scripts/build-score-golden.mjs`).
+
 ### Where it comes from (v3.7)
 
 - **Sources:** Open Food Facts `origins`, `manufacturing_places`, labels (PDO / PGI / TSG / EU organic, "made in") and packer codes, plus the label text read from a photo ("Țara de origine", "Produs în", "Ambalat în", "zona FAO 27", "pescuit / crescut", "decongelat", "din UE / din afara UE"). The database's "countries" field is not used, because it says where the product is sold.

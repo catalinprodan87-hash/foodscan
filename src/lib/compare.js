@@ -4,12 +4,13 @@
  */
 import { analyze } from './analyze.js';
 import { entryAnalyzeInput } from './history.js';
+import { scoreForEntry } from './scoreEntry.js';
 
 const FLAGGED = ['high', 'medium'];
 const NUTRIENTS = ['fat', 'saturatedFat', 'sugars', 'salt'];
 
 /** @returns {{a: object, b: object, shared: {flagged: string[], allergens: string[], avoid: string[]}}} */
-export function compareEntries(entryA, entryB, avoid) {
+export function compareEntries(entryA, entryB, avoid, saleCountry = 'RO') {
   const side = (e) => {
     const r = analyze(entryAnalyzeInput(e), avoid);
     const levels = Object.fromEntries((e.db?.nutrition?.items || []).map((n) => [n.key, n.level]));
@@ -17,8 +18,9 @@ export function compareEntries(entryA, entryB, avoid) {
       entry: e,
       productType: r.productType,
       verdict: r.verdict,
+      score: scoreForEntry(e, saleCountry), // general score (v3.8)
       nova: r.processing?.nova ?? null,
-      nutriscore: r.nutriscore ?? null,
+      nutriscore: r.nutriscore ?? e.grade ?? null,
       nutrients: Object.fromEntries(NUTRIENTS.map((k) => [k, levels[k] || null])),
       flagged: r.items.filter((x) => FLAGGED.includes(x.level)).map((x) => ({ code: x.code, name: x.name, level: x.level })),
       avoid: r.avoidHits.map((h) => ({ id: h.id, label: h.label })),

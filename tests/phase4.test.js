@@ -52,7 +52,7 @@ describe('history entries', () => {
     assert.equal(e.productType, 'food');
     assert.equal(e.source, 'barcode');
     assert.ok(e.text.startsWith('Zahăr'));
-    assert.deepEqual(e.db, { source: 'Open Food Facts', url: 'https://world.openfoodfacts.org/product/3017620422003', hasIngredients: true, additiveTags: ['en:e322'], nova: 4, nutriscore: 'e', nutrition: null, allergenTags: [], traceTags: [], analysisTags: [] });
+    assert.deepEqual(e.db, { source: 'Open Food Facts', url: 'https://world.openfoodfacts.org/product/3017620422003', hasIngredients: true, additiveTags: ['en:e322'], nova: 4, nutriscore: 'e', nutrition: null, allergenTags: [], traceTags: [], analysisTags: [], origin: { origins: '', manufacturingPlaces: '', labels: [], embCodes: [] } });
     assert.equal(e.verdict, 'bad'); // palm oil is on by default
     assert.equal(e.date, '2026-11-01T12:00:01.000Z');
   });

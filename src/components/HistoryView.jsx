@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { t } from '../lib/i18n.js';
 import { analyze } from '../lib/analyze.js';
 import { entryAnalyzeInput, entryTitle, filterEntries } from '../lib/history.js';
+import { scoreForEntry } from '../lib/scoreEntry.js';
 
 const TYPES = ['all', 'food', 'cosmetic', 'household'];
 const VERDICTS = ['all', 'bad', 'warn', 'ok'];
@@ -17,7 +18,7 @@ function verdictLabel(lang, v, type) {
  * One history row: tap to open, swipe left or long-press to delete.
  * A delete button is also reachable by keyboard / screen reader.
  */
-function HistoryRow({ lang, entry, verdict, onOpen, onDelete, picked = null }) {
+function HistoryRow({ lang, entry, verdict, score = null, onOpen, onDelete, picked = null }) {
   const [dx, setDx] = useState(0);
   const g = useRef(null);
   const rowRef = useRef(null);
@@ -93,6 +94,11 @@ function HistoryRow({ lang, entry, verdict, onOpen, onDelete, picked = null }) {
               {' · '}{t(lang, 'source_' + entry.source)}
             </span>
           </span>
+          {score && !score.insufficient && (
+            <span className={`history-score band-${score.band}`} title={`${t(lang, score.kind === 'food' ? 'scoreTitle' : 'scoreIngredientsTitle')}: ${score.general}/100`}>
+              {score.general}<span className="sr-only">/100</span>
+            </span>
+          )}
           <span className={`history-verdict verdict-dot-${verdict}`} title={verdictLabel(lang, verdict, entry.productType)} aria-hidden="true">
             {VERDICT_ICON[verdict]}
           </span>
@@ -112,7 +118,7 @@ function HistoryRow({ lang, entry, verdict, onOpen, onDelete, picked = null }) {
   );
 }
 
-export default function HistoryView({ lang, entries, avoid, onOpen, onDelete, onClear, onCompare }) {
+export default function HistoryView({ lang, entries, avoid, saleCountry = 'RO', onOpen, onDelete, onClear, onCompare }) {
   const [query, setQuery] = useState('');
   const [type, setType] = useState('all');
   const [verdict, setVerdict] = useState('all');
@@ -128,6 +134,8 @@ export default function HistoryView({ lang, entries, avoid, onOpen, onDelete, on
     return map;
   }, [entries, avoid]);
   const verdictOf = (e) => verdicts.get(e.id) || e.verdict;
+  // General scores, computed again with the current formula (v3.8).
+  const scores = useMemo(() => new Map(entries.map((e) => [e.id, e.text || e.db ? scoreForEntry(e, saleCountry) : null])), [entries, saleCountry]);
   const shown = filterEntries(entries, { query, type, verdict }, verdictOf);
 
   return (
@@ -188,7 +196,7 @@ export default function HistoryView({ lang, entries, avoid, onOpen, onDelete, on
         <ul className="history-list">
           {shown.map((e) => (
             <HistoryRow
-              key={e.id} lang={lang} entry={e} verdict={verdictOf(e)} onDelete={onDelete}
+              key={e.id} lang={lang} entry={e} verdict={verdictOf(e)} score={scores.get(e.id)} onDelete={onDelete}
               onOpen={picking ? togglePick : onOpen} picked={picking ? picked.includes(e.id) : null}
             />
           ))}

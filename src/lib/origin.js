@@ -10,27 +10,20 @@ import { RULES, FAO_AREAS, LABEL_TAGS, NEAR_KM, FAR_KM, MANY_COUNTRIES } from '.
 
 const fold = (s) => normalize(String(s || '')).replace(/\s+/g, ' ').trim();
 
-// Name → ISO, all spellings, longest first (so "south africa" wins over "africa").
+// Name → ISO, all spellings, in one regex (longest names first, so "south africa" wins over "africa").
 const NAMES = COUNTRIES.flatMap((x) => [x.name.ro, x.name.en, ...x.aliases].map((n) => [fold(n), x.iso]))
   .filter(([n]) => n.length >= 2)
   .sort((a, b) => b[0].length - a[0].length);
+const ISO_BY_NAME = new Map(NAMES.map(([n, iso]) => [n, iso]));
+const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const NAME_RE = new RegExp(`(?<![\\p{L}])(?:${NAMES.map(([n]) => esc(n)).join('|')})(?![\\p{L}])`, 'gu');
 
 /** Countries named in a text, in order of appearance (ISO codes, no repeats). */
 export function findCountries(text) {
-  const t = ` ${fold(text)} `;
-  const hits = [];
-  for (const [name, iso] of NAMES) {
-    const re = new RegExp(`(?<![\\p{L}])${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}])`, 'gu');
-    let m;
-    while ((m = re.exec(t))) hits.push({ iso, at: m.index, len: name.length });
-  }
-  hits.sort((a, b) => a.at - b.at || b.len - a.len);
   const out = [];
-  let end = -1;
-  for (const h of hits) {
-    if (h.at < end) continue; // inside a longer name already taken
-    end = h.at + h.len;
-    if (!out.includes(h.iso)) out.push(h.iso);
+  for (const m of fold(text).matchAll(NAME_RE)) {
+    const iso = ISO_BY_NAME.get(m[0]);
+    if (iso && !out.includes(iso)) out.push(iso);
   }
   return out;
 }

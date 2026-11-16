@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { t } from '../lib/i18n.js';
+import '../lib/strings/origin.js';
 import { parseBackup, storageStatus, requestPersistence, backupFileName } from '../lib/backup.js';
 import { getAutoBackup, removeAutoBackup } from '../lib/autoBackup.js';
 

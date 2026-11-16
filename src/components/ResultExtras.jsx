@@ -49,11 +49,11 @@ export function IngredientsText({ lang, text, result, unknown = [] }) {
 }
 
 /** "Distribuie": Web Share API, or copy a text summary. */
-export function ShareButton({ lang, result, product, barcode, text, notify }) {
+export function ShareButton({ lang, result, product, barcode, text, notify, score = null }) {
   const [busy, setBusy] = useState(false);
   const share = async () => {
     const appUrl = new URL('./', document.baseURI).href;
-    const data = shareSummary(result, { lang, product, barcode, appUrl, text });
+    const data = shareSummary(result, { lang, product, barcode, appUrl, text, score: score?.insufficient ? null : score?.general ?? null });
     setBusy(true);
     try {
       if (navigator.share) {

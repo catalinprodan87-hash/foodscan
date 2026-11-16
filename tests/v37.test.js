@@ -5,6 +5,7 @@ import { RULES, SOURCES, FAO_AREAS } from '../src/data/origin.js';
 import { COUNTRIES, COUNTRY_BY_ISO } from '../src/data/countries.js';
 import { mapProduct, fieldsFor } from '../src/lib/lookup.js';
 import { STRINGS } from '../src/lib/i18n.js';
+import '../src/lib/strings/origin.js';
 
 const ids = (r) => r.points.map((p) => p.id);
 

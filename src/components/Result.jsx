@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import PhotoButton from './PhotoButton.jsx';
 import HelpButton from './HelpButton.jsx';
 import NutritionCard from './NutritionCard.jsx';
@@ -6,7 +6,10 @@ import { summaryParts } from '../lib/summary.js';
 import { LANGUAGE_NAMES } from '../lib/langDetect.js';
 
 const PhotoStrip = lazy(() => import('./PhotoStrip.jsx'));
-const OriginCard = lazy(() => import('./OriginCard.jsx'));
+import OriginCard from './OriginCard.jsx';
+import ScoreCard from './ScoreCard.jsx';
+import { assessOrigin } from '../lib/origin.js';
+import { computeScore } from '../lib/score.js';
 import { ALLERGENS_BY_ID } from '../data/allergens.js';
 import { t, pick } from '../lib/i18n.js';
 import { normalize } from '../lib/analyze.js';
@@ -413,12 +416,17 @@ export default function Result({
   lang, result, text, typeAuto, product, barcode, fromPhoto, onBack, backLabel: backLabelProp, notify,
   saved, onRetake, onForget, watchedAllergens = [], profiles, onProfile,
   onEdit, onRevert, onReplacePhoto, onCompletePhoto, onAddPhotos, thumbVersion = 0,
-  nutritionInfo = null, onNutritionSave, translation = null, originText = '', saleCountry = 'RO',
+  nutritionInfo = null, onNutritionSave, translation = null, originText = '', saleCountry = 'RO', ocrConfidence = null,
 }) {
   const [showOriginal, setShowOriginal] = useState(false);
   const shownText = translation && !showOriginal ? translation.text : text;
   const food = isFood(result);
   const backLabel = backLabelProp || 'back';
+  // Origin (v3.7) and the overall score (v3.8, docs/SCORING.md).
+  const origin = useMemo(() => (food ? assessOrigin({ text: `${originText}\n${text}`, product: product?.origin || null, saleCountry }) : null), [food, originText, text, product, saleCountry]);
+  const score = useMemo(() => computeScore({ result, text, grade: nutritionInfo?.score?.grade || product?.nutriscore || null, origin, ocrConfidence: fromPhoto ? ocrConfidence : null }), [result, text, nutritionInfo, product, origin, fromPhoto, ocrConfidence]);
+  const owner = profiles?.profiles?.[0];
+  const otherProfile = profiles && owner && profiles.active !== owner.id ? profiles.profiles.find((p) => p.id === profiles.active)?.name || null : null;
   return (
     <div className="result">
       <h1 className="sr-only page-title" tabIndex={-1}>{product?.name || t(lang, 'verdict_' + result.verdict)}</h1>
@@ -441,12 +449,13 @@ export default function Result({
           </select>
         </p>
       )}
+      <ScoreCard lang={lang} score={score} otherProfile={otherProfile} />
       <VerdictBanner lang={lang} result={result} />
       {food && <AllergenCard lang={lang} allergens={result.allergens} diet={result.diet} watched={watchedAllergens} fromPhoto={fromPhoto} />}
       <SafetyTips lang={lang} tips={result.safetyTips} />
       {food && <ScoreTiles lang={lang} processing={result.processing} why={result.novaWhy} grade={result.nutriscore} nutrition={product?.nutrition} computed={!!nutritionInfo?.score?.computed} />}
       {food && nutritionInfo && <NutritionCard lang={lang} info={nutritionInfo} onSave={onNutritionSave} onAddPhotos={onAddPhotos} />}
-      {food && <Suspense fallback={null}><OriginCard lang={lang} text={text} originText={originText} product={product} saleCountry={saleCountry} /></Suspense>}
+      {food && <OriginCard lang={lang} saleCountry={saleCountry} assessment={origin} />}
       <AvoidHits lang={lang} hits={result.avoidHits} />
       <AdditiveList lang={lang} additives={result.items} grouped={!food} />
       {translation && <TranslationNote lang={lang} translation={translation} showOriginal={showOriginal} onToggle={() => setShowOriginal((v) => !v)} />}
@@ -460,7 +469,7 @@ export default function Result({
         </div>
       )}
       <div className="actions result-actions">
-        <ShareButton lang={lang} result={result} product={product} barcode={barcode} text={text} notify={notify} />
+        <ShareButton lang={lang} result={result} product={product} barcode={barcode} text={text} notify={notify} score={score} />
       </div>
       <DisclaimerNote key={result.productType} lang={lang} type={result.productType} high={result.items.some((i) => i.level === 'high')} />
       <button type="button" className="btn primary block" onClick={onBack}>

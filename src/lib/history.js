@@ -28,7 +28,8 @@ export function entryId({ barcode, text, productType }) {
  * Builds a history entry from what was analysed (see buildRequest) and the result.
  * source: 'barcode' (ingredients from the database), 'photo' or 'paste'.
  */
-export function makeEntry(request, result, now = new Date()) {
+/** @param {{grade?: string|null, originText?: string}} [extra] Nutri-Score grade (also when computed by the app) and origin text from photos, for the score (v3.8). */
+export function makeEntry(request, result, now = new Date(), extra = {}) {
   const p = request.product || null;
   const text = request.text?.trim() ? request.text : p?.ingredientsText || '';
   let source = 'paste';
@@ -57,8 +58,11 @@ export function makeEntry(request, result, now = new Date()) {
         allergenTags: p.allergenTags || [],
         traceTags: p.traceTags || [],
         analysisTags: p.analysisTags || [],
+        origin: p.origin || null,
       }
       : null,
+    grade: typeof extra.grade === 'string' ? extra.grade : null,
+    originText: extra.originText ? String(extra.originText).slice(0, 600) : '',
     confidence: request.fromPhoto ? request.confidence ?? null : null,
     verdict: result.verdict,
     counts: result.counts,
@@ -87,6 +91,7 @@ export function entryRequest(entry) {
       allergenTags: entry.db.allergenTags || [],
       traceTags: entry.db.traceTags || [],
       analysisTags: entry.db.analysisTags || [],
+      origin: entry.db.origin || null,
     }
     : null;
   return {
