@@ -583,6 +583,16 @@ const STRINGS = {
     nutriFvlUnknown: 'The share of fruits, vegetables and legumes is not on the label: counted as 0.',
     nutriFvl: 'Fruits, vegetables and legumes: {n}% (from the ingredients).',
     nutriComputedShort: 'calculated by the app',
+    // v3.6: translation
+    translatedTitle: 'Translated ingredients',
+    translatedFrom: 'Translated automatically from {lang} on this phone.',
+    translatedUnknown: '{n} word(s) not in the dictionary are left as they are (highlighted).',
+    translatedOriginal: 'See the original',
+    translatedShow: 'See the translation',
+    translatedAskBrowser: 'Ask the browser what the highlighted words mean',
+    translatedBrowserNo: 'This browser has no built-in translator for this language.',
+    translatedBrowserNote: 'Shown for reading only; the analysis uses the dictionary translation and the original.',
+    dictCredit: 'Translations of ingredient names: Open Food Facts ingredient and additive taxonomies (ODbL 1.0), downloaded on the phone only for the languages you read.',
   },
   ro: {
     appName: 'IngrediScan',
@@ -1164,6 +1174,16 @@ const STRINGS = {
     nutriFvlUnknown: 'Procentul de fructe, legume și leguminoase nu e pe etichetă: socotit 0.',
     nutriFvl: 'Fructe, legume și leguminoase: {n}% (din ingrediente).',
     nutriComputedShort: 'calculat de aplicație',
+    // v3.6: traducere
+    translatedTitle: 'Ingrediente traduse',
+    translatedFrom: 'Tradus automat din {lang}, pe acest telefon.',
+    translatedUnknown: '{n} cuvânt(e) care nu sunt în dicționar au rămas netraduse (marcate).',
+    translatedOriginal: 'Vezi originalul',
+    translatedShow: 'Vezi traducerea',
+    translatedAskBrowser: 'Întreabă browserul ce înseamnă cuvintele marcate',
+    translatedBrowserNo: 'Acest browser nu are traducător încorporat pentru această limbă.',
+    translatedBrowserNote: 'Doar pentru citit; analiza folosește traducerea din dicționar și originalul.',
+    dictCredit: 'Traducerile denumirilor de ingrediente: taxonomiile de ingrediente și aditivi Open Food Facts (ODbL 1.0), descărcate pe telefon doar pentru limbile pe care le citești.',
   },
 };
 

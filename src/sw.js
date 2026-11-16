@@ -37,6 +37,12 @@ registerRoute(
   }),
 );
 
+// Translation dictionaries (v3.6): downloaded the first time a label in that language is read.
+registerRoute(
+  ({ url, sameOrigin }) => sameOrigin && url.pathname.includes('/dict/') && url.pathname.endsWith('.json'),
+  new CacheFirst({ cacheName: 'dictionaries', plugins: [new ExpirationPlugin({ maxEntries: 20, maxAgeSeconds: 180 * 24 * 60 * 60 }), new CacheableResponsePlugin({ statuses: [200] })] }),
+);
+
 // Product lookups: fresh data when online, last known answer when offline.
 registerRoute(
   /^https:\/\/world\.open(food|beauty|products)facts\.org\/api\/v2\/product\//,

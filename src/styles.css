@@ -1009,3 +1009,6 @@ main:focus { outline: none; }
 .nutri-category { margin-top: 10px; }
 .nutri-computed { margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: var(--bg); }
 .tile-computed { font-size: 0.72rem; color: var(--muted); }
+/* v3.6 translation */
+mark.untranslated { background: transparent; border-bottom: 2px dotted var(--medium); color: inherit; padding: 0 1px; }
+.translation-pairs { list-style: none; padding: 0; margin: 6px 0 2px; }

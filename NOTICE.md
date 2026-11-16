@@ -12,6 +12,8 @@ IngrediScan uses the following data and software. Thank you to everyone who buil
 
 The benchmark corpus that later releases build from Open Food Facts data stays under the ODbL, with attribution in its file header.
 
+**Translation dictionaries** (`public/dict/{lang}.json`, built by `scripts/build-dictionary.mjs`): derived from the Open Food Facts ingredient and additive taxonomies, © Open Food Facts contributors, [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). They are downloaded on the phone only for the languages actually read. The credit also appears in the app (About).
+
 The real-photo benchmark (`tests/corpus/off/`, never deployed) includes ingredient photos from Open Food Facts by Open Food Facts contributors, under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/); `tests/corpus/off/truth.json` links each photo to its source. The photos in `tests/corpus/own/` were taken by the app's owner. `tests/fixtures/nutriscore-off.json` holds Nutri-Score inputs and results computed by Open Food Facts for 175 products (ODbL), used only to check the app's Nutri-Score.
 
 ## Software bundled with or downloaded by the app

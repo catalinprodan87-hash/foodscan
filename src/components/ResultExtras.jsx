@@ -3,7 +3,16 @@ import { t } from '../lib/i18n.js';
 import { collectSpans, highlightSegments, shareSummary } from '../lib/share.js';
 
 /** Ingredients text with flagged words highlighted; tap jumps to the explanation. */
-export function IngredientsText({ lang, text, result }) {
+/** Splits plain text around words that were left untranslated (highlighted). */
+function markUnknown(str, unknown, keyBase) {
+  if (!unknown?.length) return str;
+  const esc = unknown.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).sort((a, b) => b.length - a.length);
+  const re = new RegExp(`(?<!\\p{L})(${esc.join('|')})(?!\\p{L})`, 'gu');
+  const parts = str.split(re);
+  return parts.map((p, i) => (i % 2 === 1 ? <mark key={`${keyBase}-${i}`} className="untranslated" title="?">{p}</mark> : p));
+}
+
+export function IngredientsText({ lang, text, result, unknown = [] }) {
   const segments = useMemo(() => highlightSegments(text, collectSpans(text, result)), [text, result]);
   if (!text?.trim()) return null;
   const levels = new Set(segments.filter((s) => s.level).map((s) => s.level));
@@ -25,7 +34,7 @@ export function IngredientsText({ lang, text, result }) {
         {segments.map((s, i) => (s.level ? (
           <button key={i} type="button" className={`hl hl-${s.level}`} onClick={() => jump(s.target)}>{s.text}</button>
         ) : (
-          <span key={i}>{s.text}</span>
+          <span key={i}>{markUnknown(s.text, unknown, i)}</span>
         )))}
       </p>
       {levels.size > 0 && (

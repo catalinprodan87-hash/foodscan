@@ -3,6 +3,7 @@ import PhotoButton from './PhotoButton.jsx';
 import HelpButton from './HelpButton.jsx';
 import NutritionCard from './NutritionCard.jsx';
 import { summaryParts } from '../lib/summary.js';
+import { LANGUAGE_NAMES } from '../lib/langDetect.js';
 
 const PhotoStrip = lazy(() => import('./PhotoStrip.jsx'));
 import { ALLERGENS_BY_ID } from '../data/allergens.js';
@@ -226,6 +227,52 @@ export function AvoidHits({ lang, hits }) {
 }
 
 /** Ingredients remembered for this barcode (from the user's photo or text). */
+/**
+ * "Tradus automat din {limba}": the ingredients were in another language and
+ * were translated on the phone (Open Food Facts dictionary). Words it does
+ * not know stay as they are, highlighted; the browser's own translator (where
+ * it exists) can show what they mean – for reading only, never for the analysis.
+ */
+function TranslationNote({ lang, translation, showOriginal, onToggle }) {
+  const [browser, setBrowser] = useState(null); // { state, pairs }
+  const canAsk = typeof self !== 'undefined' && 'Translator' in self && translation.unknown.length > 0;
+  const ask = async () => {
+    setBrowser({ state: 'working' });
+    try {
+      const T = self.Translator;
+      const opts = { sourceLanguage: translation.lang, targetLanguage: lang === 'ro' ? 'ro' : 'en' };
+      if ((await T.availability(opts)) === 'unavailable') { setBrowser({ state: 'unavailable' }); return; }
+      const tr = await T.create(opts);
+      const pairs = [];
+      for (const w of translation.unknown.slice(0, 20)) pairs.push([w, await tr.translate(w)]);
+      setBrowser({ state: 'done', pairs });
+    } catch {
+      setBrowser({ state: 'unavailable' });
+    }
+  };
+  const name = pick(LANGUAGE_NAMES[translation.lang] || { ro: translation.lang, en: translation.lang }, lang);
+  return (
+    <section className="saved-note translation-note" aria-label={t(lang, 'translatedTitle')}>
+      <p>
+        <span aria-hidden="true">🌐 </span>{t(lang, 'translatedFrom', { lang: name })}
+        {translation.unknown.length > 0 && ` ${t(lang, 'translatedUnknown', { n: translation.unknown.length })}`}
+      </p>
+      <div className="saved-actions">
+        <button type="button" className="link-btn" aria-pressed={showOriginal} onClick={onToggle}>{t(lang, showOriginal ? 'translatedShow' : 'translatedOriginal')}</button>
+        {canAsk && !browser && <button type="button" className="link-btn" onClick={ask}>{t(lang, 'translatedAskBrowser')}</button>}
+      </div>
+      {browser?.state === 'working' && <p className="small muted">…</p>}
+      {browser?.state === 'unavailable' && <p className="small muted">{t(lang, 'translatedBrowserNo')}</p>}
+      {browser?.state === 'done' && (
+        <>
+          <ul className="small translation-pairs">{browser.pairs.map(([a, b]) => <li key={a}><mark className="untranslated">{a}</mark> → {b}</li>)}</ul>
+          <p className="small muted">{t(lang, 'translatedBrowserNote')}</p>
+        </>
+      )}
+    </section>
+  );
+}
+
 /** The ingredients are the user's own version: say so, with the way back. */
 function EditedNote({ lang, saved, onRevert }) {
   return (
@@ -365,8 +412,10 @@ export default function Result({
   lang, result, text, typeAuto, product, barcode, fromPhoto, onBack, backLabel: backLabelProp, notify,
   saved, onRetake, onForget, watchedAllergens = [], profiles, onProfile,
   onEdit, onRevert, onReplacePhoto, onCompletePhoto, onAddPhotos, thumbVersion = 0,
-  nutritionInfo = null, onNutritionSave,
+  nutritionInfo = null, onNutritionSave, translation = null,
 }) {
+  const [showOriginal, setShowOriginal] = useState(false);
+  const shownText = translation && !showOriginal ? translation.text : text;
   const food = isFood(result);
   const backLabel = backLabelProp || 'back';
   return (
@@ -398,7 +447,8 @@ export default function Result({
       {food && nutritionInfo && <NutritionCard lang={lang} info={nutritionInfo} onSave={onNutritionSave} onAddPhotos={onAddPhotos} />}
       <AvoidHits lang={lang} hits={result.avoidHits} />
       <AdditiveList lang={lang} additives={result.items} grouped={!food} />
-      <IngredientsText lang={lang} text={text} result={result} />
+      {translation && <TranslationNote lang={lang} translation={translation} showOriginal={showOriginal} onToggle={() => setShowOriginal((v) => !v)} />}
+      <IngredientsText lang={lang} text={shownText} result={result} unknown={translation && !showOriginal ? translation.unknown : []} />
       <EditIngredients key={text} lang={lang} text={text} onEdit={onEdit} onReplacePhoto={onReplacePhoto} onCompletePhoto={onCompletePhoto} />
       {barcode && <Suspense fallback={null}><PhotoStrip lang={lang} barcode={barcode} version={thumbVersion} /></Suspense>}
       {onAddPhotos && (

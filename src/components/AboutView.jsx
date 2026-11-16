@@ -50,6 +50,7 @@ export default function AboutView({ lang, onExport, onImport, onDeleteAll, scanF
       <section className="card" aria-labelledby="about-products">
         <h2 id="about-products" className="card-title">{t(lang, 'aboutProducts')}</h2>
         <p className="small">{t(lang, 'aboutProductsText')}</p>
+        <p className="small">{t(lang, 'dictCredit')}</p>
         <ul className="link-list">
           {PRODUCT_SOURCES.map((s) => (
             <li key={s.name}><a href={s.url} target="_blank" rel="noopener noreferrer">{s.name} ↗</a> <span className="muted small">({s.licence})</span></li>

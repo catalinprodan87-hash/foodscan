@@ -19,6 +19,7 @@ import { chooseIngredients, editedRecord, revertRecord, completeText, migrateSav
 import { mergeTexts } from './lib/photoSet.js';
 import { buildNutrition } from './lib/nutritionInfo.js';
 import { createNutritionStore } from './lib/nutritionStore.js';
+
 import { saveAutoBackup } from './lib/autoBackup.js';
 import TabBar from './components/TabBar.jsx';
 import { UpdateBanner, OfflineBanner, InstallCard, Toast, WhatsNew } from './components/Banners.jsx';
@@ -212,6 +213,32 @@ export default function App() {
   const detectedType = useMemo(() => detectProductType(text), [text]);
   const type = chosenType ?? detectedType;
 
+  // Ingredients in another language: translated on the phone (v3.6). The analysis reads both.
+  const [translation, setTranslation] = useState(null); // { source, lang, text, unknown, coverage }
+  const displayed = submitted ? (submitted.text?.trim() ? submitted.text : submitted.product?.ingredientsText || '') : '';
+  useEffect(() => {
+    if (!submitted || !displayed.trim()) return undefined;
+    const type = submitted.product?.productType || submitted.type;
+    if (type !== 'food') return undefined; // cosmetics: INCI names are the same in every language
+    let alive = true;
+    (async () => {
+      // Loaded on demand (first-load budget): language detection, translator, dictionary.
+      const [{ detectLanguage }, { translateIngredients }, { loadDictionary }] = await Promise.all([
+        import('./lib/langDetect.js'), import('./lib/translate.js'), import('./lib/dictionary.js'),
+      ]);
+      const detected = detectLanguage(displayed).lang;
+      const hint = !submitted.text?.trim() ? submitted.product?.ingredientsLang : null;
+      const lang = detected || (hint && hint !== 'ro' ? hint : null);
+      if (!lang || lang === 'ro' || !alive) return;
+      const dict = await loadDictionary(lang);
+      if (!alive || !dict) return;
+      const r = translateIngredients(displayed, dict);
+      if (r.coverage >= 0.3) setTranslation({ source: displayed, lang, ...r });
+    })();
+    return () => { alive = false; };
+  }, [submitted, displayed]);
+  const activeTranslation = translation && translation.source === displayed ? translation : null;
+
   // Nutrition values and the Nutri-Score (the database's or computed on the phone), v3.5.
   const nutrition = useMemo(() => {
     if (!submitted) return null;
@@ -228,8 +255,9 @@ export default function App() {
       ? analyzeInput(submitted.product, submitted.text)
       : { text: submitted.text, productType: submitted.type };
     if (input.productType === 'food' && !input.nutriscore && nutrition?.score?.computed) input.nutriscore = nutrition.score.grade;
+    if (activeTranslation) input.text = `${activeTranslation.text}\n${input.text}`; // the translation and the original
     return analyze(input, avoid);
-  }, [submitted, avoid, nutrition]);
+  }, [submitted, avoid, nutrition, activeTranslation]);
 
   /** Nutrition values typed / corrected, or another Nutri-Score category chosen. */
   const saveNutrition = ({ values, category }) => {
@@ -722,7 +750,7 @@ export default function App() {
         product={submitted.product} barcode={submitted.barcode} fromPhoto={submitted.fromPhoto} onBack={leave} backLabel={leaveLabel}
         saved={submitted.saved} onRetake={retakeSaved} onForget={() => forgetSaved(submitted.barcode)}
         onEdit={editIngredients} onRevert={revertIngredients} onAddPhotos={addPhotosToResult} thumbVersion={thumbVersion}
-        nutritionInfo={nutrition} onNutritionSave={saveNutrition}
+        nutritionInfo={nutrition} onNutritionSave={saveNutrition} translation={activeTranslation}
         onReplacePhoto={submitted.barcode && originOf(submitted) === 'database' ? photoForIngredients('replace') : undefined}
         onCompletePhoto={submitted.barcode && originOf(submitted) === 'database' ? photoForIngredients('complete') : undefined}
         watchedAllergens={avoid.allergens} profiles={profiles} onProfile={(id) => changeProfiles(setActive(profiles, id))}
